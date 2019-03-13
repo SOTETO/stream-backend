@@ -15,4 +15,6 @@ POST       /authenticate/:provider  controllers.DropsController.authenticate(pro
 # WebApp route
 GET        /identity                controllers.DropsController.frontendLogin
 
-GET        /test                    controllers.HomeController.userTest
+# Donations
+GET        /donations               controllers.DonationsController.get
+POST       /donations/create        controllers.DonationsController.create
