@@ -11,11 +11,11 @@ case class Context(description: String, category: String)
 
 case class Source(category: String, amount: Double, formatted: String, typeOfSource: String)
 
-case class Amount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
+case class DonationAmount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
 
 case class Donation(
                    id: UUID,
-                   amount: Amount,
+                   amount: DonationAmount,
                    context: Context,
                    comment: Option[String],
                    details: Option[Details],
@@ -48,8 +48,8 @@ object Source {
     )(Source.apply _)
 }
 
-object Amount {
-  implicit val amountFormat = Json.format[Amount]
+object DonationAmount {
+  implicit val donationAmountFormat = Json.format[DonationAmount]
 }
 
 object Donation {
