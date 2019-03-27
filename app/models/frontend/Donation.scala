@@ -9,7 +9,7 @@ case class Details(reasonForPayment: String, receipt: Boolean) // Todo: Optional
 
 case class Context(description: String, category: String)
 
-case class Source(category: String, amount: Double, formatted: String, typeOfSource: String)
+case class Source(category: String, amount: Double, currency: String, typeOfSource: String)
 
 case class DonationAmount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
 
@@ -36,14 +36,14 @@ object Source {
   implicit val sourceWrites: Writes[Source] = (
     (JsPath \ "category").write[String] and
       (JsPath \ "amount").write[Double] and
-      (JsPath \ "formatted").write[String] and
+      (JsPath \ "currency").write[String] and
       (JsPath \ "type").write[String]
     )(unlift(Source.unapply))
 
   implicit val sourceReads: Reads[Source] = (
     (JsPath \ "category").read[String] and
       (JsPath \ "amount").read[Double] and
-      (JsPath \ "formatted").read[String] and
+      (JsPath \ "currency").read[String] and
       (JsPath \ "type").read[String]
     )(Source.apply _)
 }

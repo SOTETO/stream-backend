@@ -13,7 +13,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.ws.WSClient
 
-case class HouseholdAmount(amount: Double, formatted: String)
+case class HouseholdAmount(amount: Double, currency: String)
 
 case class Reason(what: Option[String], wherefor: Option[String])
 
@@ -44,13 +44,14 @@ object HouseholdAmount extends TestData[HouseholdAmount] {
 
   override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[HouseholdAmount]] = {
     val r = scala.util.Random
+    val currencies = config.get[Seq[String]]("testData.currency")
 
     Future.successful((0 to count).foldLeft[List[HouseholdAmount]](Nil)((testData, _) => {
       val lowerBound = 5
       val upperBound = 200
       val euro = lowerBound + r.nextInt((upperBound - lowerBound) + 1)
       val cent = BigDecimal(r.nextDouble()).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-      testData ++ List(HouseholdAmount(euro + cent, euro + cent + " €"))
+      testData ++ List(HouseholdAmount(euro + cent, currencies(r.nextInt(currencies.size))))
     }))
   }
 }
