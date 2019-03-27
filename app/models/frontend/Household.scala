@@ -2,9 +2,16 @@ package models.frontend
 
 import java.util.UUID
 
+import com.typesafe.config.Config
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import models.TestData
+import play.api.{ConfigLoader, Configuration}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
+import play.api.libs.ws.WSClient
 
 case class HouseholdAmount(amount: Double, formatted: String)
 
@@ -32,22 +39,124 @@ case class Household(
                     versions: List[HouseholdVersion]
                     )
 
-object HouseholdAmount {
+object HouseholdAmount extends TestData[HouseholdAmount] {
   implicit val householdAmountFormat = Json.format[HouseholdAmount]
+
+  override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[HouseholdAmount]] = {
+    val r = scala.util.Random
+
+    Future.successful((0 to count).foldLeft[List[HouseholdAmount]](Nil)((testData, _) => {
+      val lowerBound = 5
+      val upperBound = 200
+      val euro = lowerBound + r.nextInt((upperBound - lowerBound) + 1)
+      val cent = BigDecimal(r.nextDouble()).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+      testData ++ List(HouseholdAmount(euro + cent, euro + cent + " €"))
+    }))
+  }
 }
 
-object Reason {
+object Reason extends TestData[Reason] {
   implicit val reasonFormat = Json.format[Reason]
+
+  override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[Reason]] = {
+    val r = scala.util.Random
+    val what = config.get[Seq[String]]("testData.household.reason.what")
+    val wherefor = config.get[Seq[String]]("testData.household.reason.wherefor")
+    Future.successful((0 to count).foldLeft[List[Reason]](Nil)((reasons, i) => reasons ++ List(
+      Reason(
+        what = r.nextBoolean() || (i > 0 && count % i == 0) match {
+          case true => Some(what(r.nextInt(what.size)))
+          case _ => None
+        },
+        wherefor = r.nextBoolean() || (i > 0 && count % i == 0) match {
+          case true => Some(wherefor(r.nextInt(wherefor.size)))
+          case _ => None
+        }
+      )
+    )))
+  }
 }
 
-object HouseholdVersion {
+object HouseholdVersion extends TestData[HouseholdVersion] {
   implicit val householdVersionFormat = Json.format[HouseholdVersion]
+
+  override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[HouseholdVersion]] = {
+    val r = scala.util.Random
+    val iban = config.get[Seq[String]]("testData.household.iban")
+    val bic = config.get[Seq[String]]("testData.household.bic")
+    val created = System.currentTimeMillis()
+
+    implicit val ec = ExecutionContext.global
+
+    val users = ws.url("http://localhost/drops/rest/user")
+      .addHttpHeaders("Accept" -> "application/json", "Content-Type" -> "application/json")
+      .addQueryStringParameters("client_id" -> "stream", "client_secret" -> "stream")
+      .withRequestTimeout(10000.millis)
+      .post(Json.obj("limit" -> 20))
+      .map {
+        response => (response.json \\ "id").map(_.as[UUID])
+      }
+
+    users.flatMap(ul =>
+      HouseholdAmount.initTestData(1, config).flatMap(amount =>
+        Reason.initTestData(1, config).map(reason =>
+          (0 to count).foldLeft[List[HouseholdVersion]](Nil)((versions, i) => versions ++ List(
+            HouseholdVersion(
+              iban = r.nextBoolean() match {
+                case true => Some(iban(r.nextInt(iban.size)))
+                case _ => None
+              },
+              bic = r.nextBoolean() match {
+                case true => Some(bic(r.nextInt(bic.size)))
+                case _ => None
+              },
+              created = created,
+              updated = i == 0 match {
+                case true => created
+                case _ => System.currentTimeMillis()
+              },
+              amount = amount.head,
+              reason = reason.head,
+              request = r.nextBoolean(),
+              author = i == 0 match {
+                case true => Some(ul(r.nextInt(ul.size)))
+                case _ => None
+              },
+              editor = i == 0 match {
+                case true => None
+                case _ => Some(ul(r.nextInt(ul.size)))
+              },
+              volunteerManager = None,
+              employee = None
+            )
+          ))
+        )
+      )
+    )
+  }
 }
 
-object PetriNetPlace {
+object PetriNetPlace extends TestData[List[PetriNetPlace]] {
   implicit val petriNetPlaceFormat = Json.format[PetriNetPlace]
+
+  override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[List[PetriNetPlace]]] = {
+    Future.successful((0 to count).map(_ => List(PetriNetPlace("ProcessState.AppliedFor", 1), PetriNetPlace("VolunteerManager.Idle", 1))).toList)
+  }
 }
 
-object Household {
+object Household extends TestData[Household] {
   implicit val householdFormat = Json.format[Household]
+
+  implicit val ec = ExecutionContext.global
+
+  override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[Household]] = {
+    val r = scala.util.Random
+    (0 to count).foldLeft[Future[List[Household]]](Future.successful(Nil))((testData, i) =>
+      PetriNetPlace.initTestData(1, config).flatMap(petriNet =>
+        HouseholdVersion.initTestData(r.nextInt(3), config).flatMap(versions =>
+          testData.map(_ :+ Household(UUID.randomUUID(), petriNet.head, versions))
+        )
+      )
+    )
+  }
 }
