@@ -12,6 +12,7 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 
 libraryDependencies += ehcache
 libraryDependencies += guice
+libraryDependencies += ws
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
 libraryDependencies += "org.vivaconagua" %% "play2-oauth-client" % "0.4.3-play27"
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8.1"
