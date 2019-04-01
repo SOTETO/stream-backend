@@ -23,3 +23,5 @@ POST       /donations/create        controllers.DonationsController.create
 GET        /household               controllers.HouseholdController.get
 POST       /household/create        controllers.HouseholdController.create
 POST       /household/update        controllers.HouseholdController.update
+
+POST       /household/search        controllers.HouseholdController.restService

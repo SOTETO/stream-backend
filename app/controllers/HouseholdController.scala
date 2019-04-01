@@ -1,6 +1,7 @@
 package controllers
 
 import com.mohiva.play.silhouette.api.Silhouette
+import controllers.restQuery.values.RESTFilter
 import javax.inject._
 import org.vivaconagua.play2OauthClient.silhouette.{CookieEnv, UserService}
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -11,6 +12,7 @@ import responses.WebAppResult
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
+import services.HouseholdService
 
 @Singleton
 class HouseholdController @Inject()(
@@ -18,9 +20,10 @@ class HouseholdController @Inject()(
                                      config: Configuration,
                                      cc: ControllerComponents,
                                      silhouette: Silhouette[CookieEnv],
-                                     userService: UserService
+                                     userService: UserService,
+                                     service: HouseholdService
                                    ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
-  var household : Future[List[Household]] = Household.initTestData(20, config)
+//  var household : Future[List[Household]] = Household.initTestData(20, config)
 
   /**
     * Reads all currently saved donations and returns them.
@@ -30,7 +33,7 @@ class HouseholdController @Inject()(
     */
   def get = silhouette.SecuredAction.async { implicit request =>
     implicit val ec = ExecutionContext.global
-    this.household.map(household => WebAppResult.Ok(Json.toJson(household)).toResult(request))
+    service.all.map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
   }
 
   /**
@@ -41,13 +44,14 @@ class HouseholdController @Inject()(
     */
   def create = silhouette.SecuredAction(parse.json).async { implicit request => {
     implicit val ec = ExecutionContext.global
-    Future.successful(request.body.validate[Household].fold(
-      errors => WebAppResult.BadRequest(errors).toResult(request),
+    request.body.validate[Household].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       household => {
-        this.household = this.household.map(_ :+ household)
-        WebAppResult.Ok(Json.toJson(List(household))).toResult(request)
+        service.save(household).map(_.toList).map(list =>
+          WebAppResult.Ok(Json.toJson( list )).toResult(request)
+        )
       }
-    ))
+    )
   }}
 
   def update = silhouette.SecuredAction(parse.json).async { implicit request =>
@@ -55,14 +59,17 @@ class HouseholdController @Inject()(
     request.body.validate[Household].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       household => {
-        this.household = this.household.map(_.map(entry => entry.id match {
-          case household.id => household
-          case _ => entry
-        }))
-        this.household.map(_ =>
-          WebAppResult.Ok(Json.toJson(List(household))).toResult(request)
+        service.update(household).map(h =>
+          WebAppResult.Ok(Json.toJson(h.toList)).toResult(request)
         )
       }
+    )
+  }
+
+  def restService = Action.async(parse.json) { request =>
+    request.body.validate[RESTFilter](Household.filterJson).fold(
+      errors => Future.successful(BadRequest(errors.map(e => e._1 + " :: " + e._2).mkString("\n"))),
+      filter => Future.successful(Ok(Json.toJson(filter)))
     )
   }
 }

@@ -3,6 +3,7 @@ package models.frontend
 import java.util.UUID
 
 import com.typesafe.config.Config
+import controllers.restQuery.values.{FilterField, Filterable, RESTFilter}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -37,10 +38,17 @@ case class Household(
                     id: UUID,
                     state: List[PetriNetPlace],
                     versions: List[HouseholdVersion]
-                    )
+                    ) {
+  def addVersion(version: HouseholdVersion) : Household =
+    Household(this.id, this.state, this.versions :+ version)
+}
 
-object HouseholdAmount extends TestData[HouseholdAmount] {
+object HouseholdAmount extends Filterable with TestData[HouseholdAmount] {
   implicit val householdAmountFormat = Json.format[HouseholdAmount]
+
+  override val filterFields: List[FilterField] = List(
+    FilterField("household", "amount"), FilterField("household", "currency")
+  )
 
   override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[HouseholdAmount]] = {
     val r = scala.util.Random
@@ -56,8 +64,12 @@ object HouseholdAmount extends TestData[HouseholdAmount] {
   }
 }
 
-object Reason extends TestData[Reason] {
+object Reason extends Filterable with TestData[Reason] {
   implicit val reasonFormat = Json.format[Reason]
+
+  override val filterFields: List[FilterField] = List(
+    FilterField("household", "what"), FilterField("household", "wherefor")
+  )
 
   override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[Reason]] = {
     val r = scala.util.Random
@@ -78,8 +90,14 @@ object Reason extends TestData[Reason] {
   }
 }
 
-object HouseholdVersion extends TestData[HouseholdVersion] {
+object HouseholdVersion extends Filterable with TestData[HouseholdVersion] {
   implicit val householdVersionFormat = Json.format[HouseholdVersion]
+
+  override val filterFields: List[FilterField] = List(
+    FilterField("household", "iban"), FilterField("household", "bic"), FilterField("household", "created"),
+    FilterField("household", "updated"), FilterField("household", "author"), FilterField("household", "editor"),
+    FilterField("household", "request"), FilterField("household", "volunteerManager"), FilterField("household", "employee")
+  )
 
   override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[HouseholdVersion]] = {
     val r = scala.util.Random
@@ -137,16 +155,28 @@ object HouseholdVersion extends TestData[HouseholdVersion] {
   }
 }
 
-object PetriNetPlace extends TestData[List[PetriNetPlace]] {
+object PetriNetPlace extends Filterable with TestData[List[PetriNetPlace]] {
   implicit val petriNetPlaceFormat = Json.format[PetriNetPlace]
+
+  override val filterFields: List[FilterField] = List(
+    FilterField("state", "place"), FilterField("state", "tokens")
+  )
 
   override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[List[PetriNetPlace]]] = {
     Future.successful((0 to count).map(_ => List(PetriNetPlace("ProcessState.AppliedFor", 1), PetriNetPlace("VolunteerManager.Idle", 1))).toList)
   }
 }
 
-object Household extends TestData[Household] {
+object Household extends Filterable with TestData[Household] {
   implicit val householdFormat = Json.format[Household]
+
+  override val filterFields: List[FilterField] = List(
+    FilterField("household", "id")
+  )
+
+  override val dependentFilter: List[Reads[RESTFilter]] = List(
+    PetriNetPlace.filterJson, HouseholdVersion.filterJson, Reason.filterJson, HouseholdAmount.filterJson
+  )
 
   implicit val ec = ExecutionContext.global
 
