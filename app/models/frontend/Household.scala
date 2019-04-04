@@ -37,7 +37,10 @@ case class Household(
                     id: UUID,
                     state: List[PetriNetPlace],
                     versions: List[HouseholdVersion]
-                    )
+                    ) {
+  def addVersion(version: HouseholdVersion) : Household =
+    Household(this.id, this.state, this.versions :+ version)
+}
 
 object HouseholdAmount extends TestData[HouseholdAmount] {
   implicit val householdAmountFormat = Json.format[HouseholdAmount]
