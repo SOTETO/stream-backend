@@ -12,7 +12,7 @@ import responses.WebAppResult
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.HouseholdService
-import utils.Page
+import utils.{Page, Sort}
 
 @Singleton
 class HouseholdController @Inject()(
@@ -66,7 +66,7 @@ class HouseholdController @Inject()(
     )
   }
 
-  case class QueryBody(page: Page)
+  case class QueryBody(page: Page, sort: Sort)
   object QueryBody {
     implicit val queryBodyFormat = Json.format[QueryBody]
   }
