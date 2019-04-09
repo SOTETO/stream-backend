@@ -6,13 +6,13 @@ import javax.inject.Inject
 import models.frontend.{Household, HouseholdVersion}
 import play.api.Configuration
 import play.api.libs.ws.WSClient
-import utils.Page
+import utils._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HouseholdDAO {
   def count : Future[Int]
-  def all(page: Page) : Future[List[Household]]
+  def all(page: Page, sort: Sort) : Future[List[Household]]
   def find(uuid: UUID) : Future[Option[Household]]
   def save(household: Household): Future[Option[Household]]
   def update(household: Household): Future[Option[Household]]
@@ -20,16 +20,115 @@ trait HouseholdDAO {
   def delete(uuid: UUID): Future[Boolean]
 }
 
-class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration) extends HouseholdDAO {
+class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration) extends HouseholdDAO with Filter[Household, SortDir] {
   implicit val ec = ExecutionContext.global
 
   var householdEntries : Future[List[Household]] = Household.initTestData(20, config)
 
+  override val operations: List[FilteringOperation[Household, SortDir]] = List(
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.what"),
+      (dir: SortDir) => (h1: Household, h2: Household) => {
+        def compare(w1: Option[String], w2: Option[String]) : Boolean = dir match {
+          case Ascending => w1 match {
+            case Some(what1) => w2 match {
+              case Some(what2) => what1 <= what2
+              case None => false
+            }
+            case None => true
+          }
+          case Descending => w1 match {
+            case Some(what1) => w2 match {
+              case Some(what2) => what1 > what2
+              case None => true
+            }
+            case None => false
+          }
+        }
+
+        h1.versions.lastOption match {
+          case Some(v1) => h2.versions.lastOption match {
+            case Some(v2) => compare(v1.reason.what, v2.reason.what)
+            case None => compare(v1.reason.what, None)
+          }
+          case None => h2.versions.lastOption match {
+            case Some(v2) => compare(None, v2.reason.what)
+            case None => true
+          }
+        }
+      }
+    ),
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.wherefor"),
+      (dir: SortDir) => (h1: Household, h2: Household) => {
+        def compare(w1: Option[String], w2: Option[String]) : Boolean = dir match {
+          case Ascending => w1 match {
+            case Some(wherefor1) => w2 match {
+              case Some(wherefor2) => wherefor1 <= wherefor2
+              case None => false
+            }
+            case None => true
+          }
+          case Descending => w1 match {
+            case Some(wherefor1) => w2 match {
+              case Some(wherefor2) => wherefor1 > wherefor2
+              case None => true
+            }
+            case None => false
+          }
+        }
+
+        h1.versions.lastOption match {
+          case Some(v1) => h2.versions.lastOption match {
+            case Some(v2) => compare(v1.reason.wherefor, v2.reason.wherefor)
+            case None => compare(v1.reason.wherefor, None)
+          }
+          case None => h2.versions.lastOption match {
+            case Some(v2) => compare(None, v2.reason.wherefor)
+            case None => true
+          }
+        }
+      }
+    ),
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.crew"),
+      (dir: SortDir) => (h1: Household, h2: Household) => true // Todo: Call from Drops and sort based on them
+    ),
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.amount"),
+      (dir: SortDir) => (h1: Household, h2: Household) =>
+        (dir == Ascending && h1.versions.last.amount.amount <= h2.versions.last.amount.amount) ||
+          (dir == Descending && h1.versions.last.amount.amount > h2.versions.last.amount.amount)
+    ),
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.supporter"),
+      (dir: SortDir) => (h1: Household, h2: Household) => true // Todo: Call from Drops and sort based on them
+    ),
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.created"),
+      (dir: SortDir) => (h1: Household, h2: Household) =>
+        (dir == Ascending && h1.versions.head.created <= h2.versions.head.created) ||
+          (dir == Descending && h1.versions.head.created > h2.versions.head.created)
+    ),
+    FilteringOperation[Household, SortDir](
+      FilterableField("household.updated"),
+      (dir: SortDir) => (h1: Household, h2: Household) =>
+        (dir == Ascending && h1.versions.last.updated <= h2.versions.last.updated) ||
+          (dir == Descending && h1.versions.last.updated > h2.versions.last.updated)
+    )
+  )
+
   override def count: Future[Int] = householdEntries.map(_.size)
 
-  override def all(page: Page): Future[List[Household]] = this.householdEntries.map(
-    _.slice(page.offset, page.offset + page.size)
-  )
+  override def all(page: Page, sort: Sort): Future[List[Household]] = {
+    this.householdEntries.map(
+      _.sortWith(
+        this.operations
+          .find(_.field == FilterableField(sort.field)).map(_.toSortOperation(sort.dir))
+          .getOrElse(this.operations.head.toSortOperation(sort.dir))
+      ).slice(page.offset, page.offset + page.size)
+    )
+  }
 
   override def find(uuid: UUID): Future[Option[Household]] = householdEntries.map(_.find(_.id == uuid))
 

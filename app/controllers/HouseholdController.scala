@@ -74,7 +74,8 @@ class HouseholdController @Inject()(
     implicit val ec = ExecutionContext.global
     request.body.validate[QueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.all(query.page).map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
+      // Todo: Use "sort"!
+      query => service.all(query.page, query.sort).map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
     )
   }
 

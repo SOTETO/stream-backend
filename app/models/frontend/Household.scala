@@ -12,6 +12,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.ws.WSClient
+import utils.{Filterable, FilterableField}
 
 case class HouseholdAmount(amount: Double, currency: String)
 
@@ -148,7 +149,7 @@ object PetriNetPlace extends TestData[List[PetriNetPlace]] {
   }
 }
 
-object Household extends TestData[Household] {
+object Household extends TestData[Household] with Filterable {
   implicit val householdFormat = Json.format[Household]
 
   implicit val ec = ExecutionContext.global
@@ -163,4 +164,10 @@ object Household extends TestData[Household] {
       )
     )
   }
+
+  override val filterable: List[FilterableField] = List(
+    FilterableField("household.what"), FilterableField("household.wherefor"), FilterableField("household.crew"),
+    FilterableField("household.amount"), FilterableField("household.supporter"), FilterableField("household.created"),
+    FilterableField("household.updated")
+  )
 }
