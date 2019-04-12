@@ -8,7 +8,8 @@ import play.api.Configuration
 import play.api.libs.ws.WSClient
 import utils._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 trait HouseholdDAO {
   def count : Future[Int]
@@ -20,7 +21,7 @@ trait HouseholdDAO {
   def delete(uuid: UUID): Future[Boolean]
 }
 
-class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration) extends HouseholdDAO with Filter[Household, SortDir] {
+class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration, userDAO: UserDAO) extends HouseholdDAO with Filter[Household, SortDir] {
   implicit val ec = ExecutionContext.global
 
   var householdEntries : Future[List[Household]] = Household.initTestData(20, config)
@@ -92,7 +93,37 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
     ),
     FilteringOperation[Household, SortDir](
       FilterableField("household.crew"),
-      (dir: SortDir) => (h1: Household, h2: Household) => true // Todo: Call from Drops and sort based on them
+      (dir: SortDir) => {
+        // Todo: Implement this non-blocking!
+        def usersSortedByCrews = Await.result(this.householdEntries.flatMap(households =>
+          userDAO.sortByCrew(households.filter(_.versions.head.author.isDefined).map(_.versions.head.author.get).distinct, dir)
+        ), 3000 millis)
+
+        def getIndex(h: Household): Option[Int] =
+          h.versions.headOption.flatMap(_.author.map(usersSortedByCrews.indexOf(_)).flatMap(_ match {
+            case i: Int if i >= 0 => Some(i)
+            case _ => None
+          }))
+
+        def compare(i1: Option[Int], i2: Option[Int]): Boolean = i1 match {
+          case Some(i) => i2 match {
+            case Some(j) => dir match {
+              case Ascending => i <= j
+              case Descending => i > j
+            }
+            case None => dir match {
+              case Ascending => true
+              case Descending => false
+            }
+          }
+          case None => dir match {
+            case Ascending => false
+            case Descending => true
+          }
+        }
+
+        (h1: Household, h2: Household) => compare(getIndex(h1), getIndex(h2))
+      }
     ),
     FilteringOperation[Household, SortDir](
       FilterableField("household.amount"),
