@@ -26,6 +26,9 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
 
   var householdEntries : Future[List[Household]] = Household.initTestData(20, config)
 
+  /**
+    * Implements list of {{{FilteringOperation}}} for {{{HouseholdDAO}}}
+    */
   override val operations: List[FilteringOperation[Household, SortDir]] = List(
     FilteringOperation[Household, SortDir](
       FilterableField("household.what"),
