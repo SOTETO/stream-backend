@@ -132,10 +132,6 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
           (dir == Descending && h1.versions.last.amount.amount > h2.versions.last.amount.amount)
     ),
     FilteringOperation[Household, SortDir](
-      FilterableField("household.supporter"),
-      (dir: SortDir) => (h1: Household, h2: Household) => true // Todo: Call from Drops and sort based on them
-    ),
-    FilteringOperation[Household, SortDir](
       FilterableField("household.created"),
       (dir: SortDir) => (h1: Household, h2: Household) =>
         (dir == Ascending && h1.versions.head.created <= h2.versions.head.created) ||

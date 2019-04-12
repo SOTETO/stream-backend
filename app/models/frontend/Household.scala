@@ -167,7 +167,6 @@ object Household extends TestData[Household] with Filterable {
 
   override val filterable: List[FilterableField] = List(
     FilterableField("household.what"), FilterableField("household.wherefor"), FilterableField("household.crew"),
-    FilterableField("household.amount"), FilterableField("household.supporter"), FilterableField("household.created"),
-    FilterableField("household.updated")
+    FilterableField("household.amount"), FilterableField("household.created"), FilterableField("household.updated")
   )
 }
