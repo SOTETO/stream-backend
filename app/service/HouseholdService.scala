@@ -3,7 +3,7 @@ package services
 import daos.{HouseholdDAO, UserDAO}
 import javax.inject.Inject
 import models.frontend.Household
-import utils.{Page, Sort}
+import utils.{HouseholdFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,8 +11,8 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
 
   implicit val ec = ExecutionContext.global
 
-  def count : Future[Int] = dao.count
-  def all(page: Page, sort: Sort) : Future[List[Household]] = dao.all(page, sort)
+  def count(filter: Option[HouseholdFilter]) : Future[Int] = dao.count(filter)
+  def all(page: Page, sort: Sort, filter: Option[HouseholdFilter]) : Future[List[Household]] = dao.all(page, sort, filter)
   def save(household: Household): Future[Option[Household]] = {
     dao.save(household).flatMap(option => option match {
       case Some(household) => household.versions.headOption match {

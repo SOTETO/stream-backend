@@ -32,7 +32,12 @@ case class HouseholdVersion(
                              employee: Option[UUID]
                            )
 
-case class PetriNetPlace(name: String, tokens: Int)
+case class PetriNetPlace(name: String, tokens: Int) {
+  def >= (o: scala.Any): Boolean = o match {
+    case other: PetriNetPlace => this.name == other.name && this.tokens >= other.tokens
+    case _ => false
+  }
+}
 
 case class Household(
                     id: UUID,

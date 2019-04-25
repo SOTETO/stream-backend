@@ -12,7 +12,7 @@ import responses.WebAppResult
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.HouseholdService
-import utils.{Page, Sort}
+import utils.{HouseholdFilter, Page, Sort}
 
 @Singleton
 class HouseholdController @Inject()(
@@ -66,7 +66,7 @@ class HouseholdController @Inject()(
     )
   }
 
-  case class QueryBody(page: Page, sort: Sort)
+  case class QueryBody(page: Page, sort: Sort, filter: Option[HouseholdFilter])
   object QueryBody {
     implicit val queryBodyFormat = Json.format[QueryBody]
   }
@@ -74,13 +74,15 @@ class HouseholdController @Inject()(
     implicit val ec = ExecutionContext.global
     request.body.validate[QueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      // Todo: Use "sort"!
-      query => service.all(query.page, query.sort).map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
+      query => service.all(query.page, query.sort, query.filter).map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
     )
   }
 
-  def count = silhouette.SecuredAction.async { implicit request =>
+  def count = silhouette.SecuredAction(parse.json).async { implicit request =>
     implicit val ec = ExecutionContext.global
-    service.count.map(i => WebAppResult.Ok(Json.obj("count" -> i )).toResult(request))
+    request.body.validate[QueryBody].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      query => service.count(query.filter).map(i => WebAppResult.Ok(Json.obj("count" -> i )).toResult(request))
+    )
   }
 }

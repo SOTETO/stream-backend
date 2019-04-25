@@ -12,8 +12,8 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
 trait HouseholdDAO {
-  def count : Future[Int]
-  def all(page: Page, sort: Sort) : Future[List[Household]]
+  def count(filter: Option[HouseholdFilter]) : Future[Int]
+  def all(page: Page, sort: Sort, filter: Option[HouseholdFilter]) : Future[List[Household]]
   def find(uuid: UUID) : Future[Option[Household]]
   def save(household: Household): Future[Option[Household]]
   def update(household: Household): Future[Option[Household]]
@@ -148,11 +148,14 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
     )
   )
 
-  override def count: Future[Int] = householdEntries.map(_.size)
+  override def count(filter: Option[HouseholdFilter]): Future[Int] = householdEntries.map(
+    _.filter(h => filter.map(_ ? h).getOrElse(true)).size
+  )
 
-  override def all(page: Page, sort: Sort): Future[List[Household]] = {
+  override def all(page: Page, sort: Sort, filter: Option[HouseholdFilter]): Future[List[Household]] = {
     this.householdEntries.map(
-      _.sortWith(
+      _.filter(h => filter.map(_ ? h).getOrElse(true))
+        .sortWith(
         this.operations
           .find(_.field == FilterableField(sort.field)).map(_.toSortOperation(sort.dir))
           .getOrElse(this.operations.head.toSortOperation(sort.dir))
