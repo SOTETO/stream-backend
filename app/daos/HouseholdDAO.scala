@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 
 trait HouseholdDAO {
   def count(filter: Option[HouseholdFilter]) : Future[Int]
-  def all(page: Page, sort: Sort, filter: Option[HouseholdFilter]) : Future[List[Household]]
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]]
   def find(uuid: UUID) : Future[Option[Household]]
   def save(household: Household): Future[Option[Household]]
   def update(household: Household): Future[Option[Household]]
@@ -152,15 +152,16 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
     _.filter(h => filter.map(_ ? h).getOrElse(true)).size
   )
 
-  override def all(page: Page, sort: Sort, filter: Option[HouseholdFilter]): Future[List[Household]] = {
-    this.householdEntries.map(
-      _.filter(h => filter.map(_ ? h).getOrElse(true))
-        .sortWith(
-        this.operations
-          .find(_.field == FilterableField(sort.field)).map(_.toSortOperation(sort.dir))
-          .getOrElse(this.operations.head.toSortOperation(sort.dir))
-      ).slice(page.offset, page.offset + page.size)
-    )
+  override def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]): Future[List[Household]] = {
+    this.householdEntries.map(entries => {
+      val pagination = page.map(p => (p.offset, p.offset + p.size)).getOrElse((0, entries.length))
+      entries.filter(h => filter.map(_ ? h).getOrElse(true))
+        .sortWith(sort.map(s =>
+          this.operations
+            .find(_.field == FilterableField(s.field)).map(_.toSortOperation(s.dir))
+            .getOrElse(this.operations.head.toSortOperation(s.dir))
+        ).getOrElse((_, _) => true)).slice(pagination._1, pagination._2)
+    })
   }
 
   override def find(uuid: UUID): Future[Option[Household]] = householdEntries.map(_.find(_.id == uuid))

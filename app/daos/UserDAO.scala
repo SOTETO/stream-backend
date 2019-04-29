@@ -28,6 +28,8 @@ trait UserDAO {
     */
   def sortByCrew(userIds: List[UUID], dir: SortDir = Ascending) : Future[List[UUID]]
 
+  def crewSupporter(userIds: List[UUID], crewId: UUID) : Future[List[UUID]]
+
   /**
     * Updates the set of considered users UUIDs. Since the users are obtained from Drops, this function is used to update
     * the temporary memory.
@@ -128,8 +130,9 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
     *
     * @author Johann Sell
     * @param id
+    * @param crew
     */
-  case class UserResponse(id: UUID)
+  case class UserResponse(id: UUID, crew: Option[UUID])
 
   /**
     * Companion object for a Drops REST repsonse.
@@ -137,7 +140,11 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
     * @author Johann Sell
     */
   object UserResponse {
-    implicit val userResponseFormat = Json.format[UserResponse]
+//    implicit val userResponseFormat = Json.format[UserResponse]
+    implicit val userResponseReads : Reads[UserResponse] = (
+      (JsPath \ "id").read[UUID] and
+        (JsPath \ "profiles" \\ "supporter" \ "crew" \ "id").readNullable[UUID]
+    )((userId, crewIds) => UserResponse(userId, crewIds))
   }
 
   /**
@@ -147,8 +154,8 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
     * @param userIds list of users UUIDs that have to be sorted
     */
   case class DropsDatasource(userIds: List[UUID]) {
-    private val sortedByClassAscending : Future[List[UUID]] = init(Ascending)
-    private val sortedByClassDescending : Future[List[UUID]] = init(Descending)
+    private val sortedByClassAscending : Future[List[UserResponse]] = init(Ascending)
+    private val sortedByClassDescending : Future[List[UserResponse]] = init(Descending)
 
     /**
       * Calls Drops RESTful webservice.
@@ -157,16 +164,17 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
       * @param dir indicates if ascending or descending sortation
       * @return
       */
-    private def init(dir: SortDir): Future[List[UUID]] = ws.url(path)
+    private def init(dir: SortDir): Future[List[UserResponse]] = ws.url(path)
       .addQueryStringParameters("client_id" -> client_id, "client_secret" -> client_secret)
       .post(Json.toJson(UserCrewRequest(userIds, dir)))
-      .map(res => res.json.validate[List[UserResponse]].map(_.map(_.id)).fold(
-        invalid => {
-          println(invalid)
-          Nil
-        }, // Todo: something meaningful!
-        valid => valid
-      ))
+      .map(
+        _.json.validate[List[UserResponse]].fold(
+          invalid => {
+            println(invalid)
+            Nil
+          }, // Todo: something meaningful!
+          valid => valid
+        ))
 
     /**
       * Indicates if a set of users UUIDs is represented by this Datasource instance.
@@ -185,9 +193,12 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
       * @return
       */
     def get(dir: SortDir) : Future[List[UUID]] = dir match {
-      case Ascending => this.sortedByClassAscending
-      case Descending => this.sortedByClassDescending
+      case Ascending => this.sortedByClassAscending.map(_.map(_.id))
+      case Descending => this.sortedByClassDescending.map(_.map(_.id))
     }
+
+    def crewSupporter(crewId: UUID) : Future[List[UUID]] =
+      this.sortedByClassAscending.map(_.filter(_.crew.contains(crewId)).map(_.id))
 
     /**
       * Appends an additional users UUID to the set. The function returns a new Datasource instance.
@@ -222,6 +233,13 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
       this.source = DropsDatasource(userIds)
     }
     this.source.get(dir)
+  }
+
+  override def crewSupporter(userIds: List[UUID], crewId: UUID): Future[List[UUID]] = {
+    if(!(this.source ~ userIds)) {
+      this.source = DropsDatasource(userIds)
+    }
+    this.source.crewSupporter(crewId)
   }
 
   /**
