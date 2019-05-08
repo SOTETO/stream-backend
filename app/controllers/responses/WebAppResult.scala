@@ -23,10 +23,20 @@ case class WebAppResult(result: play.api.mvc.Results.Status, body: Either[Succes
 object WebAppResult {
   def Ok(data: JsValue)(implicit messagesProvider: MessagesProvider) = WebAppResult(play.api.mvc.Results.Ok, Left(Success(data)))
 
-  def BadRequest(errors: Seq[(JsPath, Seq[JsonValidationError])], i18n: String = "a")(implicit messagesProvider: MessagesProvider) = WebAppResult(
+  def BadRequest(errors: Seq[(JsPath, Seq[JsonValidationError])], i18n: String = "webapp.result.badRequest.jsonError")(implicit messagesProvider: MessagesProvider) = WebAppResult(
     play.api.mvc.Results.BadRequest,
     Right(Failure(Messages(i18n), i18n, errors.map(error =>
       error._1.toJsonString -> Json.toJson(error._2.map(_.messages))
     ).toMap))
+  )
+
+  def BadActionRequest(error: String, i18n: String = "webapp.result.badRequest.actionUnknown")(implicit messagesProvider: MessagesProvider) = WebAppResult(
+    play.api.mvc.Results.BadRequest,
+    Right(Failure(Messages(i18n), i18n, Map("msg" -> Json.toJson(error))))
+  )
+
+  def InternalServerError(error: Exception, i18n: String = "webapp.result.internalServerError")(implicit messagesProvider: MessagesProvider) = WebAppResult(
+    play.api.mvc.Results.InternalServerError,
+    Right(Failure(Messages(i18n), i18n, Map("msg" -> Json.toJson(error.getMessage))))
   )
 }
