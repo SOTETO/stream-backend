@@ -56,9 +56,9 @@ case class HouseholdFilter(
     ) &&
     amount.map(query => household.versions.lastOption.map(version => compareAmount(version.amount.amount, query)).getOrElse(false)).getOrElse(true) &&
     complete.map(query => query ? household).getOrElse(true) &&
-    repayment.map(query => household.state ? query).forall(_ == true) &&
-    volunteerManager.map(query => household.state ? query).forall(_ == true) &&
-    employee.map(query => household.state ? query).forall(_ == true)
+      (repayment.map(query => household.state ? query).foldLeft[Boolean](false)((acc, c) => acc || c) || repayment.isEmpty)&&
+      (volunteerManager.map(query => household.state ? query).foldLeft[Boolean](false)((acc, c) => acc || c) || volunteerManager.isEmpty) &&
+      (employee.map(query => household.state ? query).foldLeft[Boolean](false)((acc, c) => acc || c) || employee.isEmpty)
   }
 }
 object HouseholdFilter {
