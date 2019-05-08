@@ -59,36 +59,58 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
     * @param user
     * @return
     */
-  def update(household: Household, user: UUID): Future[Option[Household]] = household.versions.lastOption match {
+  def update(household: Household, user: UUID): Future[Option[Household]] = {
+    val switched = checkForSwitch(household, user)
+    dao.update(complete(switched))
+  }
+
+  private def checkForSwitch(household: Household, user: UUID) : Household = household.versions.lastOption match {
     case Some(version) => version.isRequest match {
       case true => household.state ? PlaceMessage("AppliedFor", 1) match {
         case true => household.state match { // current version is marked as "Requested", but the state is "AppliedFor" - SWITCH!
-          case petriNet : PetriNetHouseholdState => ActionMessageExecuter.from("request", petriNet).fold(
-            error => dao.update(household.update(user)),
+          case petriNet: PetriNetHouseholdState => ActionMessageExecuter.from("request", petriNet).fold(
+            error => household.update(user),
             action => household.state.transform(action.msg) match {
-              case Right(newState) => dao.update(household.updateStateByEditor(newState, user, "editor"))
-              case Left(error) => dao.update(household.update(user))
+              case Right(newState) => household.updateStateByEditor(newState, user, "editor")
+              case Left(error) => household.update(user)
             }
           )
-          case _ => dao.update(household.update(user)) // Not a petri net based state. If there will be something implemented, consider it here!
+          case _ => household.update(user) // Not a petri net based state. If there will be something implemented, consider it here!
         }
-        case false => dao.update(household.update(user)) // There is nothing to do, it has already the correct state
+        case false => household.update(user) // There is nothing to do, it has already the correct state
       }
       case false => household.state ? PlaceMessage("Requested", 1) match {
         case true => household.state match { // current version is marked as "AppliedFor", but the state is "Requested" - SWITCH!
           case petriNet: PetriNetHouseholdState => ActionMessageExecuter.from("apply", petriNet).fold(
-            error => dao.update(household.update(user)),
+            error => household.update(user),
             action => household.state.transform(action.msg) match {
-              case Right(newState) => dao.update(household.updateStateByEditor(newState, user, "editor"))
-              case Left(error) => dao.update(household.update(user))
+              case Right(newState) => household.updateStateByEditor(newState, user, "editor")
+              case Left(error) => household.update(user)
             }
           )
-          case _ => dao.update(household.update(user)) // Not a petri net based state. If there will be something implemented, consider it here!
+          case _ => household.update(user) // Not a petri net based state. If there will be something implemented, consider it here!
         }
-        case false => dao.update(household.update(user)) // There is nothing to do, it has already the correct state
+        case false => household.update(user) // There is nothing to do, it has already the correct state
       }
     }
-    case None => dao.update(household.update(user))
+    case None => household.update(user)
+  }
+
+  private def complete(household: Household): Household = household.versions.lastOption match {
+    case Some(version) => version.isComplete match {
+      case true => household.state.transform(ActionMessage("complete")).fold(
+        notAllowed => household,
+        updated => Household(household.id, updated, household.versions)
+      )
+      case false => household.state ? PlaceMessage("HouseholdComplete", 1) match {
+        case true => household.state.transform(ActionMessage("incomplete")).fold(
+          notAllowed => household,
+          updated => Household(household.id, updated, household.versions)
+        )
+        case false => household
+      }
+    }
+    case None => household
   }
 
   /**
