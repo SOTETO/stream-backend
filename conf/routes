@@ -4,23 +4,26 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
+GET     /                                           controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                               controllers.Assets.versioned(path="/public", file: Asset)
 
 # OAuth Login with Drops
-GET        /authenticate/:provider  controllers.DropsController.authenticate(provider, route: Option[String], ajax: Option[Boolean])
-POST       /authenticate/:provider  controllers.DropsController.authenticate(provider, route: Option[String], ajax: Option[Boolean])
+GET        /authenticate/:provider                  controllers.DropsController.authenticate(provider, route: Option[String], ajax: Option[Boolean])
+POST       /authenticate/:provider                  controllers.DropsController.authenticate(provider, route: Option[String], ajax: Option[Boolean])
 # WebApp route
-GET        /identity                controllers.DropsController.frontendLogin
+GET        /identity                                controllers.DropsController.frontendLogin
 
 # Donations
-GET        /donations               controllers.DonationsController.get
-POST       /donations/create        controllers.DonationsController.create
+GET        /donations                               controllers.DonationsController.get
+POST       /donations/create                        controllers.DonationsController.create
 
 # Household
-POST       /household/count         controllers.HouseholdController.count
-POST       /household               controllers.HouseholdController.read
-POST       /household/create        controllers.HouseholdController.create
-POST       /household/update        controllers.HouseholdController.update
+POST       /household/count                         controllers.HouseholdController.count
+POST       /household                               controllers.HouseholdController.read
+POST       /household/create                        controllers.HouseholdController.create
+POST       /household/update                        controllers.HouseholdController.update
+POST       /household/state/action/:uuid/:role      controllers.HouseholdController.stateUpdate(uuid, role)
+#POST       /household/state/action/allowed/:uuid    controllers.HouseholdController.stateAllowedTo(uuid)
+#POST       /household/state/action/all              controllers.HouseholdController.allAllowedActions
