@@ -25,18 +25,6 @@ class HouseholdController @Inject()(
                                      userService: UserService,
                                      service: HouseholdService
                                    ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
-  //  var household : Future[List[Household]] = Household.initTestData(20, config)
-
-  /**
-    * Reads all currently saved donations and returns them.
-    *
-    * @author Johann Sell
-    * @return
-    */
-//  def get = silhouette.SecuredAction.async { implicit request =>
-//    implicit val ec = ExecutionContext.global
-//    service.all.map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
-//  }
 
   /**
     * Saves a given donation on the server and returns it after successful saving.
@@ -102,32 +90,4 @@ class HouseholdController @Inject()(
         ))
     )
   }
-
-//  def stateAllowedTo(uuid: String) = silhouette.SecuredAction(parse.json).async { implicit request =>
-//    implicit val ec = ExecutionContext.global
-//    request.body.validate[ActionMessage].fold(
-//      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-//      actionMsg => service.stateAllowedTo(actionMsg, UUID.fromString(uuid))
-//          .map(boolOpt => WebAppResult.Ok(Json.toJson(boolOpt.getOrElse(false))).toResult(request))
-//    )
-//  }
-//
-//  case class IDRequest(ids: Set[String])
-//  object IDRequest {
-//    implicit val idRequestFormat = Json.format[IDRequest]
-//  }
-//  def allAllowedActions = silhouette.SecuredAction(parse.json).async { implicit request =>
-//    implicit val ec = ExecutionContext.global
-//    request.body.validate[IDRequest].fold(
-//      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-//      req => service.getAllowedActions(req.ids.map(UUID.fromString( _ ))).map(res =>
-//        WebAppResult.Ok(Json.toJson(res.map(entry =>
-//          Json.obj(
-//            "id" -> entry._1,
-//            "actions" -> Json.toJson(entry._2)
-//          )
-//        ))).toResult(request)
-//      )
-//    )
-//  }
 }

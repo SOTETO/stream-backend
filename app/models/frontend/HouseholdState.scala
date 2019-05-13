@@ -13,7 +13,16 @@ import scala.concurrent.Future
 
 class TransformationNotAllowed(msg: String) extends Exception(msg)
 
-trait HouseholdState {
+/**
+  * Represents a households state. It is implemented using the [[PetriNet]] implementation, but holds also a set of actions
+  * (groups of transitions that are semantically equivalent).
+  *
+  * @author Johann Sell
+  * @param petriNet
+  * @param actions
+  */
+case class PetriNetHouseholdState(petriNet: PetriNet, actions: Set[ActionMessageExecuter]) {
+
   /**
     * Create a new state from a given transformation.
     *
@@ -21,47 +30,7 @@ trait HouseholdState {
     * @param t
     * @return
     */
-  def transform(t: ActionMessage) : Either[TransformationNotAllowed, HouseholdState]
-
-  /**
-    * Checks if a given transformation is a allowed on this state.
-    *
-    * @author Johann Sell
-    * @param t
-    * @return
-    */
-  def isAllowed(t: ActionMessage) : Boolean
-
-  /**
-    * Returns a set of all currently allowed transformations.
-    *
-    * @author Johann Sell
-    * @return
-    */
-  def allAllowed : Set[ActionMessage]
-
-  /**
-    * Checks if a household state fulfills the given place. Thus, it proofs if the corresponding place of the household
-    * state holds equal or more tokens as required by the given place message.
-    *
-    * @author Johann Sell
-    * @param place
-    * @return
-    */
-  def ? (place: PlaceMessage): Boolean
-
-  /**
-    * Transforms the state into a list of messages. Only relevant (tokens > 0) places will be returned.
-    *
-    * @author Johann Sell
-    * @return
-    */
-  def toMessages : List[PlaceMessage]
-}
-
-case class PetriNetHouseholdState(petriNet: PetriNet, actions: Set[ActionMessageExecuter]) extends HouseholdState {
-
-  override def transform(t: ActionMessage) : Either[TransformationNotAllowed, PetriNetHouseholdState] =
+  def transform(t: ActionMessage) : Either[TransformationNotAllowed, PetriNetHouseholdState] =
     this.actions.find(action => action ~ t) match {
       case Some(action) => action.isAllowed match {
         case true => {
@@ -73,20 +42,55 @@ case class PetriNetHouseholdState(petriNet: PetriNet, actions: Set[ActionMessage
       case None => Left(new TransformationNotAllowed("Action does not exists."))
     }
 
-  override def isAllowed(t: ActionMessage): Boolean =
+  /**
+    * Checks if a given transformation is a allowed on this state.
+    *
+    * @author Johann Sell
+    * @param t
+    * @return
+    */
+  def isAllowed(t: ActionMessage): Boolean =
     this.actions.find(action => action ~ t) match {
       case Some(action) => action.isAllowed
       case None => false
     }
 
-  override def allAllowed: Set[ActionMessage] = actions.filter(executer => isAllowed( executer.msg )).map(_.msg)
+  /**
+    * Returns a set of all currently allowed transformations.
+    *
+    * @author Johann Sell
+    * @return
+    */
+  def allAllowed: Set[ActionMessage] = actions.filter(executer => isAllowed( executer.msg )).map(_.msg)
 
-  override def ?(place: PlaceMessage): Boolean = petriNet ? place.toPlace
+  /**
+    * Checks if a household state fulfills the given place. Thus, it proofs if the corresponding place of the household
+    * state holds equal or more tokens as required by the given place message.
+    *
+    * @author Johann Sell
+    * @param place
+    * @return
+    */
+  def ?(place: PlaceMessage): Boolean = petriNet ? place.toPlace
 
-  override def toMessages : List[PlaceMessage] = petriNet.getPlaces.filter(_ > Token(0)).map(PlaceMessage( _ ))
+  /**
+    * Transforms the state into a list of messages. Only relevant (tokens > 0) places will be returned.
+    *
+    * @author Johann Sell
+    * @return
+    */
+  def toMessages : List[PlaceMessage] = petriNet.getPlaces.filter(_ > Token(0)).map(PlaceMessage( _ ))
 }
 
 object PetriNetHouseholdState {
+  /**
+    * Instanciates a [[PetriNetHouseholdState]] from a static description of a Petri Net. The Petri Nets state is
+    * configurable by a given set of [[PlaceMessage]] instances.
+    *
+    * @author Johann Sell
+    * @param placeMessages
+    * @return
+    */
   def apply(placeMessages : Set[PlaceMessage]) : PetriNetHouseholdState = {
     def getTokens(name: String) : Token = placeMessages.find(_ ~ name) match {
       case Some(msg) => Token(msg.tokens)
@@ -163,6 +167,7 @@ object PetriNetHouseholdState {
     }
     PetriNetHouseholdState(petriNet, actions)
   }
+
   def apply(version: Option[HouseholdVersion]) : PetriNetHouseholdState = {
     val messages = Set(
       version.map(_.isRequest match {
@@ -177,12 +182,4 @@ object PetriNetHouseholdState {
     )
     PetriNetHouseholdState(messages)
   }
-
-//  implicit val householdStateWrites : Writes[PetriNetHouseholdState] = (
-//    (JsPath \ "places").write[Seq[PlaceMessage]]
-//  )((state : PetriNetHouseholdState) => Json.toJson(state.toMessages))
-//
-//  implicit val householdStateReads : Reads[PetriNetHouseholdState] = (
-//    (JsPath \ "places").read[Seq[PlaceMessage]]
-//  )((list: Seq[PlaceMessage]) => PetriNetHouseholdState(list.toSet))
 }

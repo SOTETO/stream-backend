@@ -64,6 +64,15 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
     dao.update(complete(switched))
   }
 
+  /**
+    * Checks if the household entry switches from `REQUESTED` to `APPLIEDFOR` or the other way around by the last version
+    * and updates the Petri Net, if required.
+    *
+    * @author Johann Sell
+    * @param household
+    * @param user
+    * @return
+    */
   private def checkForSwitch(household: Household, user: UUID) : Household = household.versions.lastOption match {
     case Some(version) => version.isRequest match {
       case true => household.state ? PlaceMessage("AppliedFor", 1) match {
@@ -96,6 +105,14 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
     case None => household.update(user)
   }
 
+  /**
+    * Checks if the household has been completed by the last version (or is now incomplete, after it has been complete
+    * before). It updates the Petri Net, if required.
+    *
+    * @author Johann Sell
+    * @param household
+    * @return
+    */
   private def complete(household: Household): Household = household.versions.lastOption match {
     case Some(version) => version.isComplete match {
       case true => household.state.transform(ActionMessage("complete")).fold(
@@ -143,26 +160,4 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
   class NoActionAlternativeHasBeenExecuted extends Exception("Their is no valid and executable action given.")
   class NotFoundAfterUpdate extends Exception("Household has not been found inside the database, after the update operation has been executed.")
   class NoHouseholdEntry extends Exception("The household entry has not been found inside the database.")
-//  /**
-//    * Checks if an action is allowed to be executed.
-//    *
-//    * @author Johann Sell
-//    * @param action
-//    * @param uuid
-//    * @return
-//    */
-//  def stateAllowedTo(action: ActionMessage, uuid: UUID): Future[Option[Boolean]] = dao.find(uuid).map(_.map(
-//    _.state.isAllowed(action)
-//  ))
-//
-//  /**
-//    * Returns for a set of given household identifiers all allowed actions.
-//    *
-//    * @author Johann Sell
-//    * @param uuids
-//    * @return
-//    */
-//  def getAllowedActions(uuids: Set[UUID]): Future[Map[UUID, Set[ActionMessage]]] = Future.sequence(uuids.map(id =>
-//    dao.find(id).map(_.map(household => household.id -> household.state.allAllowed)).filter(_.isDefined).map(_.get)
-//  )).map(_.toMap)
 }

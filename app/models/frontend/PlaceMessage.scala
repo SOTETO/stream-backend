@@ -3,6 +3,13 @@ package models.frontend
 import play.api.libs.json.Json
 import utils.petriNet.{Place, Token}
 
+/**
+  * Represents a format that can be used for the communication between client and server.
+  *
+  * @author Johann Sell
+  * @param name
+  * @param tokens
+  */
 case class PlaceMessage(name: String, tokens: Int) {
   def ~ (n : String) : Boolean = name == n
 
