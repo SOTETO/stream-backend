@@ -46,22 +46,9 @@ case class HouseholdVersion(
   def author(user: UUID): HouseholdVersion = this.copy(author = Some(user))
 }
 
-/**
-  * DEPRECATED!
-  * @author Johann Sell
-  * @param name
-  * @param tokens
-  */
-case class PetriNetPlace(name: String, tokens: Int) {
-  def >= (o: scala.Any): Boolean = o match {
-    case other: PetriNetPlace => this.name == other.name && this.tokens >= other.tokens
-    case _ => false
-  }
-}
-
 case class Household(
                     id: UUID,
-                    state: PetriNetHouseholdState, //List[PetriNetPlace],
+                    state: PetriNetHouseholdState,
                     versions: List[HouseholdVersion]
                     ) {
   def addVersion(version: HouseholdVersion) : Household =
@@ -219,14 +206,6 @@ object HouseholdVersion extends TestData[HouseholdVersion] {
         )
       )
     )
-  }
-}
-
-object PetriNetPlace extends TestData[List[PetriNetPlace]] {
-  implicit val petriNetPlaceFormat = Json.format[PetriNetPlace]
-
-  override def initTestData(count: Int, config: Configuration)(implicit ws: WSClient): Future[List[List[PetriNetPlace]]] = {
-    Future.successful((0 to count).map(_ => List(PetriNetPlace("ProcessState.AppliedFor", 1), PetriNetPlace("VolunteerManager.Idle", 1))).toList)
   }
 }
 

@@ -2,7 +2,7 @@ package utils
 
 import java.util.UUID
 
-import models.frontend.{Household, PetriNetPlace, PlaceMessage}
+import models.frontend.{Household, PlaceMessage}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.Logging
