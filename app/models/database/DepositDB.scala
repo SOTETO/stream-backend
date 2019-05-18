@@ -71,12 +71,12 @@ case class DepositDB(
   dateOfDeposit: Long
   ) {
     def toDeposit(depositUnitList: List[DepositUnit]) = 
-      DepositUnit(UUID.fromString(this.publicId), depositUnitList, this.state, this.crew, this.supporter, this.created, this.updated, this.dateOfDeposit)
+      Deposit(UUID.fromString(this.publicId), depositUnitList, this.state, UUID.fromString(this.crew), UUID.fromString(this.supporter), this.created, this.updated, this.dateOfDeposit)
   }
 
-object DepositDB extends ((Long, String, String, String, Long, Long, Long) => DepositDB){
-  def apply(tuple: (Long, String, String, String, Long, Long, Long)): DepositDB = 
-    DepositDB(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7)
+object DepositDB extends ((Long, String, String, String, String, Long, Long, Long) => DepositDB){
+  def apply(tuple: (Long, String, String, String, String, Long, Long, Long)): DepositDB = 
+    DepositDB(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8)
 }
 
 class DepositTableDef(tag: Tag) extends Table[DepositDB](tag, "Deposit") {
@@ -84,11 +84,12 @@ class DepositTableDef(tag: Tag) extends Table[DepositDB](tag, "Deposit") {
   def publicId = column[String]("publicId")
   def state = column[String]("state")
   def crew = column[String]("crew")
+  def supporter = column[String]("supporter")
   def created = column[Long]("created")
   def updated = column[Long]("updated")
   def dateOfDeposit = column[Long]("date_of_deposit")
   
   def * =
-    (id, publicId, state, crew, created, updated, dateOfDeposit) <> (DepositDB.tupled, DepositDB.unapply)
+    (id, publicId, state, crew, supporter, created, updated, dateOfDeposit) <> (DepositDB.tupled, DepositDB.unapply)
 
 }

@@ -32,13 +32,13 @@ case class Deposit(
   publicId: UUID,
   amount: List[DepositUnit],
   state: String, //TODO
-  crew: List[UUID],
-  supporter: List[UUID],
+  crew: UUID,
+  supporter: UUID,
   created: Long,
   updated: Long,
   dateOfDeposit: Long
   ) {
-  def toDepositDB : DepositDB = DepositDB(0, this.publicId.toString, this.state, this.created, this.updated, this.dateOfDeposit)  
+  def toDepositDB : DepositDB = DepositDB(0, this.publicId.toString, this.state, this.crew.toString, this.supporter.toString, this.created, this.updated, this.dateOfDeposit)  
 }
 object Deposit{
   implicit val depositFormat = Json.format[Deposit]
