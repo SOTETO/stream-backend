@@ -1,7 +1,7 @@
 name := """stream-backend"""
 organization := "org.vivaconagua"
 
-version := "1.0-SNAPSHOT"
+version := "0.0.1-debug"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -15,9 +15,10 @@ libraryDependencies += guice
 libraryDependencies += ws
 libraryDependencies += evolutions
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play-slick" % "3.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.0",
-  "com.h2database" % "h2" % "1.4.199"
+  "com.typesafe.play" %% "play-slick" % "4.0.0",
+  "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
+  "mysql" % "mysql-connector-java" % "8.0.15",
+
 )
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
 libraryDependencies += "org.vivaconagua" %% "play2-oauth-client" % "0.4.3-play27"
@@ -28,3 +29,6 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8.1"
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "org.vivaconagua.binders._"
+dockerExposedPorts := Seq(9000, 9443)
+dockerRepository := Some("vivaconagua")
+routesGenerator := InjectedRoutesGenerator
