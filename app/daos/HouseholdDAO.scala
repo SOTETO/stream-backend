@@ -6,6 +6,7 @@ import javax.inject.Inject
 import models.frontend.{Household, HouseholdVersion}
 import play.api.Configuration
 import play.api.libs.ws.WSClient
+import testdata.HouseholdTestData
 import utils._
 
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -24,7 +25,7 @@ trait HouseholdDAO {
 class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration, userDAO: UserDAO) extends HouseholdDAO with Filter[Household, SortDir] {
   implicit val ec = ExecutionContext.global
 
-  var householdEntries : Future[List[Household]] = Household.initTestData(20, config)
+  var householdEntries : Future[List[Household]] = HouseholdTestData(config).init(20)
 
   /**
     * Implements list of {{{FilteringOperation}}} for {{{HouseholdDAO}}}
