@@ -1,7 +1,7 @@
 name := """stream-backend"""
 organization := "org.vivaconagua"
 
-version := "0.0.1-debug"
+version := "0.0.2"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
