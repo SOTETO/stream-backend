@@ -15,7 +15,7 @@ class InvolvedSupporterTable(tag: Tag) extends Table[InvolvedSupporterReader](ta
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id, donation_id, supporter_id) <> (InvolvedSupporterReader.apply, InvolvedSupporterReader.unapply)
+  def * = (id.?, donation_id, supporter_id) <> (InvolvedSupporterReader.apply, InvolvedSupporterReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 }

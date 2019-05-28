@@ -19,7 +19,7 @@ class DonationTable(tag: Tag) extends Table[DonationReader](tag, "Donation") {
   def created = column[Long]("created")
   def updated = column[Long]("updated")
 
-  def * = (id, public_id, received, description, category, comment.?, reason_for_payment.?, receipt.?, author, updated, created) <> (DonationReader.apply, DonationReader.unapply)
+  def * = (id.?, public_id, received, description, category, comment.?, reason_for_payment.?, receipt.?, author, updated, created) <> (DonationReader.apply, DonationReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 }

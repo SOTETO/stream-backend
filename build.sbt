@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
 
 )
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
-libraryDependencies += "org.vivaconagua" %% "play2-oauth-client" % "0.4.4-play27"
+libraryDependencies += "org.vivaconagua" %% "play2-oauth-client" % "0.4.5-play27"
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8.1"
 
 // Adds additional packages into Twirl

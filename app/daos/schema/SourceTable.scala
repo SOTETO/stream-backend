@@ -18,7 +18,7 @@ class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id, donation_id, category, amount, currency, type_of_source) <> (SourceReader.apply, SourceReader.unapply)
+  def * = (id.?, donation_id, category, amount, currency, type_of_source) <> (SourceReader.apply, SourceReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 }

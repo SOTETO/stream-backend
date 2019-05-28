@@ -7,6 +7,7 @@ import com.mohiva.play.silhouette.api.Silhouette
 import org.vivaconagua.play2OauthClient.silhouette.CookieEnv
 import org.vivaconagua.play2OauthClient.silhouette.UserService
 import play.api.libs.json.{JsError, Json, Reads}
+import play.api.Configuration
 import models.frontend.Donation
 import responses.WebAppResult
 import service.DonationsService

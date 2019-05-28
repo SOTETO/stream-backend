@@ -40,6 +40,14 @@ class SQLDonationsDAO @Inject()
     ((don, sup), sou) <- donations joinLeft supporter on (_.id === _.donation_id) joinLeft sources on (_._1.id === _.donation_id)
   } yield (don, sup, sou)
 
+  private def find(id: Long): Future[Option[Donation]] =
+    db.run(donationJoin.filter(_._1.id === id).result.headOption).map(_.map(res =>
+      res._1.toDonation(
+        res._2.map(sup => List(sup.toUUID)).getOrElse(Nil), // involved supporter
+        res._3.map(source => List( source.toSource )).getOrElse(Nil) // sources
+      )
+    ))
+
   override def count(filter: Option[DonationFilter]): Future[Int] =
     db.run(donations.size.result)
 
@@ -59,7 +67,14 @@ class SQLDonationsDAO @Inject()
       )
     ))
 
-  override def save(donation: Donation): Future[Option[Donation]] = ???
+  override def save(donation: Donation): Future[Option[Donation]] = {
+    val insert = (for {
+      dID <- (donations returning donations.map(_.id)) += DonationReader(donation)
+      _ <- supporter ++= donation.amount.involvedSupporter.map(id => InvolvedSupporterReader( id, dID ))
+      _ <- sources ++= donation.amount.sources.map(source => SourceReader(source, dID))
+    } yield dID).transactionally
+    db.run(insert).flatMap(id => find(id))
+  }
 
   override def update(donation: Donation): Future[Option[Donation]] = ???
 
