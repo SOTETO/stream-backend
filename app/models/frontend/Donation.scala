@@ -2,8 +2,13 @@ package models.frontend
 
 import java.util.UUID
 
+import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.ws.WSClient
+import testdata.TestData
+
+import scala.concurrent.Future
 
 case class Details(reasonForPayment: String, receipt: Boolean) // Todo: Optional Partner
 

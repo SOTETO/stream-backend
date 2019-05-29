@@ -11,6 +11,7 @@ import utils.{Ascending, Descending, SortDir}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 /**
   * Interface for a UserDAO
@@ -18,6 +19,17 @@ import scala.concurrent.Future
   * @author Johann Sell
   */
 trait UserDAO {
+
+  /**
+    * Takes the first users from drops and shrink them onto their UUID. The amount of users is limited by the parameter
+    * [[limit]].
+    *
+    * @author Johann Sell
+    * @param limit
+    * @return
+    */
+  def get(limit: Int): Future[List[UUID]]
+
   /**
     * Sorts the given UUIDs of users by their crews name.
     *
@@ -219,6 +231,16 @@ class DropsUserDAO @Inject()(implicit ws: WSClient, config: Configuration) exten
       */
     def +: (id: UUID) : DropsDatasource = DropsDatasource(this.userIds.+:(id))
   }
+
+  override def get(limit: Int): Future[List[UUID]] =
+    ws.url(path)
+      .addHttpHeaders("Accept" -> "application/json", "Content-Type" -> "application/json")
+      .addQueryStringParameters("client_id" -> client_id, "client_secret" -> client_secret)
+      .withRequestTimeout(10000.millis)
+      .post(Json.obj("limit" -> limit))
+      .map {
+        response => (response.json \\ "id").map(_.as[UUID]).toList
+      }
 
   /**
     * Sorts a given list of UUIDs by their users crew names.

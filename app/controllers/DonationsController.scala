@@ -9,17 +9,19 @@ import org.vivaconagua.play2OauthClient.silhouette.UserService
 import play.api.libs.json.{JsError, Json, Reads}
 import models.frontend.Donation
 import responses.WebAppResult
+import service.DonationsService
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DonationsController @Inject()(
                                      cc: ControllerComponents,
                                      silhouette: Silhouette[CookieEnv],
-                                     userService: UserService
+                                     userService: UserService,
+                                     service: DonationsService
                                    ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
 
-  var donations : List[Donation] = Nil
+  implicit val ec = ExecutionContext.global
 
   /**
     * Reads all currently saved donations and returns them.
@@ -28,7 +30,7 @@ class DonationsController @Inject()(
     * @return
     */
   def get = silhouette.SecuredAction.async { implicit request =>
-    Future.successful(WebAppResult.Ok(Json.toJson(this.donations)).toResult(request))
+    service.all.map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
   }
 
   /**
@@ -41,7 +43,8 @@ class DonationsController @Inject()(
     Future.successful(request.body.validate[Donation].fold(
       errors => WebAppResult.BadRequest(errors).toResult(request),
       donation => {
-        this.donations = this.donations :+ donation
+//        this.donations = this.donations :+ donation
+        // Todo
         WebAppResult.Ok(Json.toJson(List(donation))).toResult(request)
       }
     ))
