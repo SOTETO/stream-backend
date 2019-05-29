@@ -36,7 +36,7 @@ case class HouseholdVersion(
                              employee: Option[UUID]
                            ) {
   def isComplete : Boolean =
-    iban.isDefined && iban != "" && bic.isDefined && bic != "" && amount.isDefined && reason.isDefined
+    iban.isDefined && iban.exists(_ != "") && bic.isDefined && bic.exists(_ != "") && amount.isDefined && reason.isDefined
 
   def isRequest : Boolean = this.request
 
