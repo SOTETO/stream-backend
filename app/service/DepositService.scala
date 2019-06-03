@@ -10,6 +10,10 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
 
+
+/**
+ * Deposit Service
+ */
 class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
 
 /*  private def prepare(filter: Option[HouseholdFilter]): Future[Option[HouseholdFilter]] =
@@ -28,7 +32,12 @@ class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
         case None => Future.successful(None)
       }})*/
   
-  def create(deposit: Deposit): Future[Option[Deposit]] = ???
+
+  def find(uuid: UUID): Future[Option[Deposit]] = {
+    dao.find(uuid.toString)
+  }
+  def create(deposit: Deposit): Future[Option[Deposit]] =
+    dao.create(deposit)
 
   def update(deposit: Deposit): Future[Option[Deposit]] = ???
 

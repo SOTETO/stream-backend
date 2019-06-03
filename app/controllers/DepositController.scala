@@ -32,13 +32,16 @@ class DepositController @Inject() (
    * else return BadRequest contains the JsError of the validation process
    */
   def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
- 
+  
+  // query body for sorting 
   case class QueryBody(page: Page, sort: Sort)
   object QueryBody {
       implicit val queryBodyFormat = Json.format[QueryBody]
   }
 
-  
+  /**
+   * All action controller return the Deposit Model as Json or an simple http error 
+   */
   def create = silhouette.SecuredAction(validateJson[Deposit]).async { implicit request => {
     service.create(request.body).map(result => result match {
       case Some(deposit) => Ok(Json.toJson(deposit))
@@ -53,13 +56,14 @@ class DepositController @Inject() (
     })
   }}
 
+  // return 200 if delete is successful 
   def delete(id: UUID) = silhouette.SecuredAction.async { implicit request => {
     service.delete(id).map(result => result match {
       case true => Ok("TODO: delete message")
       case false => BadRequest("TODO: delete error")
     })
   }}
-/*
+
   def all = silhouette.SecuredAction(validateJson[QueryBody]).async { implicit request => {
     service.all(request.body.page, request.body.sort, request.body.filter).map(result => result match {
       case Some(list) => Ok(Json.toJson(list))
@@ -72,5 +76,5 @@ class DepositController @Inject() (
       case Some(list) => Ok(Json.obj("count" -> list ))
       case _ => BadRequest("TODO: count error")
     })
-  }}*/
+  }}
 }

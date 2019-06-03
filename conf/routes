@@ -24,3 +24,9 @@ POST       /household/count         controllers.HouseholdController.count
 POST       /household               controllers.HouseholdController.read
 POST       /household/create        controllers.HouseholdController.create
 POST       /household/update        controllers.HouseholdController.update
+
+# Deposit
+
+POST      /deposit/create
+GET       /deposits
+

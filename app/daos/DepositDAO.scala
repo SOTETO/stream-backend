@@ -24,6 +24,7 @@ trait DepositDAO {
   def create(deposit: Deposit): Future[Option[Deposit]]
   def update(deposit: Deposit): Future[Option[Deposit]]
   def delete(uuid: UUID): Future[Boolean]
+  def all(page: Option[Page], sort: Option[Sort]): Future[List[Option[Donation]]]
 }
 
 @Singleton
@@ -85,7 +86,7 @@ class MariaDBDepositDAO @Inject()
 
   override def update(deposit: Deposit): Future[Option[Deposit]] = ???
   override def delete(uuid: UUID): Future[Boolean] = ???
-  
+  override def all(page: Option[Page], sort: Option[Sort]) = ???
   /**
    * Transform the Seq[(DepositDB, Option[DepositUnitDB])] to Option[Deposit]
    */
