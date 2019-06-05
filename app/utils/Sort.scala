@@ -63,10 +63,37 @@ object SortDir {
   * A complete description of a sorting criteria of requests of sets of business objects.
   *
   * @author Johann Sell
-  * @param field describes the attribute that has to be used as a sorting criteria.
+  * @param fieldDescription describes the attribute that has to be used as a sorting criteria.
   * @param dir describes the direction of sorting
   */
-case class Sort(field: String, dir: SortDir)
+case class Sort(private val fieldDescription: String, dir: SortDir) {
+  /**
+    * Returns the field
+    *
+    * @author Johann Sell
+    * @return
+    */
+  def field: String = fieldDescription.split('.').last
+
+  /**
+    * Returns a referenced model, if given.
+    *
+    * @author Johann Sell
+    * @return
+    */
+  def model: Option[String] = fieldDescription.split('.') match {
+    case array if array.length > 1 => array.headOption
+    case _ => None
+  }
+
+  /**
+    * Checks, if a model has been referenced
+    *
+    * @author Johann Sell
+    * @return
+    */
+  def hasModel: Boolean = model.isDefined
+}
 
 object Sort {
   implicit val sortReads: Reads[Sort] = (

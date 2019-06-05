@@ -18,10 +18,14 @@ case class DonationReader(
                          created: Long,
                          updated: Long
                          ) {
-  def toDonation(supporter: List[UUID] = Nil, sources: List[Source] = Nil) : Donation =
+  def toDonation(supporter: Seq[InvolvedSupporterReader] = Nil, sources: Seq[SourceReader] = Nil) : Donation =
     Donation(
       publicId,
-      DonationAmount(received, supporter, sources),
+      DonationAmount(
+        received,
+        id.map(did => supporter.filter(_.donation_id == did).map(_.toUUID)).getOrElse(Nil).toList,
+        id.map(did => sources.filter(_.donation_id == did).map(_.toSource)).getOrElse(Nil).toList
+      ),
       Context(description, category),
       comment,
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),

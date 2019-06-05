@@ -11,6 +11,7 @@ import play.api.Configuration
 import models.frontend.Donation
 import responses.WebAppResult
 import service.DonationsService
+import utils.{Ascending, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,8 +31,11 @@ class DonationsController @Inject()(
     * @author Johann Sell
     * @return
     */
-  def get = silhouette.SecuredAction.async { implicit request =>
-    service.all.map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
+  def get = silhouette.SecuredAction(parse.json).async { implicit request =>
+    request.body.validate[QueryBody].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      query => service.all(query.page, query.sort).map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
+    )
   }
 
   /**
@@ -41,13 +45,14 @@ class DonationsController @Inject()(
     * @return
     */
   def create = silhouette.SecuredAction(parse.json).async { implicit request => {
-    Future.successful(request.body.validate[Donation].fold(
-      errors => WebAppResult.BadRequest(errors).toResult(request),
+    request.body.validate[Donation].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       donation => {
-//        this.donations = this.donations :+ donation
-        // Todo
-        WebAppResult.Ok(Json.toJson(List(donation))).toResult(request)
+        service.save(donation).map(_ match {
+          case Right(databaseDonation) => WebAppResult.Ok(Json.toJson(List(databaseDonation))).toResult(request)
+          case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
+        })
       }
-    ))
+    )
   }}
 }
