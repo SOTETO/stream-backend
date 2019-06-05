@@ -5,9 +5,10 @@ package services
 import java.util.UUID
 import daos.{DepositDAO, UserDAO}
 import javax.inject.Inject
-import models.frontend.Deposit
+import models.frontend.{DepositFilter, Deposit}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import utils.{Page, Sort}
 
 
 
@@ -40,6 +41,9 @@ class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
     dao.create(deposit)
 
   def update(deposit: Deposit): Future[Option[Deposit]] = ???
+
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]):Future[Option[List[Deposit]]] = ???
+  def count(): Future[Option[Int]] = ???
 
   def read(uuid: UUID): Future[Option[Deposit]] = ???
   def delete(uuid: UUID): Future[Boolean] = ???

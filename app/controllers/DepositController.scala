@@ -6,7 +6,7 @@ import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject._
 import org.vivaconagua.play2OauthClient.silhouette.{CookieEnv, UserService}
 import play.api.mvc.{AbstractController, ControllerComponents, BodyParsers}
-import models.frontend.Deposit
+import models.frontend.{DepositFilter, Deposit}
 import play.api.Configuration
 import play.api.libs.json.{Json, Reads, JsError}
 import responses.WebAppResult
@@ -31,10 +31,11 @@ class DepositController @Inject() (
    * if the Json is valid, the function return the request
    * else return BadRequest contains the JsError of the validation process
    */
+
   def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
   
   // query body for sorting 
-  case class QueryBody(page: Page, sort: Sort)
+  case class QueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter])
   object QueryBody {
       implicit val queryBodyFormat = Json.format[QueryBody]
   }
@@ -72,8 +73,8 @@ class DepositController @Inject() (
   }}
   
   def count = silhouette.SecuredAction(validateJson[QueryBody]).async { implicit request => {
-    service.count(request.body.filter).map(result => result match {
-      case Some(list) => Ok(Json.obj("count" -> list ))
+    service.count().map(result => result match {
+      case Some(list) => Ok(Json.obj("count" -> Json.toJson(list) ))
       case _ => BadRequest("TODO: count error")
     })
   }}

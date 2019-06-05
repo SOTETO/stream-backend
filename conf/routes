@@ -30,6 +30,6 @@ POST       /household/state/action/:uuid/:role      controllers.HouseholdControl
 
 # Deposit
 
-POST      /deposit/create
-GET       /deposits
+#POST      /deposit/create
+#GET       /deposits
 

@@ -1,6 +1,6 @@
 package models.frontend
 
-import models.database.{DepositDB, DepositUnitDB}
+import daos.reader.{DepositReader, DepositUnitReader}
 import java.util.UUID
 
 import play.api.libs.json._
@@ -18,7 +18,7 @@ case class DepositUnit(
   amount: Double,
   created: Long
 ) {
-  def toDepositUnitDB(depositId: Long) = DepositUnitDB(0, this.publicId.toString, this.received, this.amount, this.created, depositId)
+  def toDepositUnitReader(depositId: Long) = DepositUnitReader(0, this.publicId.toString, this.received, this.amount, this.created, depositId)
 }
 object DepositUnit {
   implicit val depositUnitFormat = Json.format[DepositUnit]
@@ -38,8 +38,18 @@ case class Deposit(
   updated: Long,
   dateOfDeposit: Long
   ) {
-  def toDepositDB : DepositDB = DepositDB(0, this.publicId.toString, this.state, this.crew.toString, this.supporter.toString, this.created, this.updated, this.dateOfDeposit)  
+  def toDepositReader : DepositReader = DepositReader(0, this.publicId.toString, this.state, this.crew.toString, this.supporter.toString, this.created, this.updated, this.dateOfDeposit)  
 }
 object Deposit{
   implicit val depositFormat = Json.format[Deposit]
+}
+
+/** filter data struct for Deposit
+ *
+ */
+case class DepositFilter(
+    filter: String
+)
+object DepositFilter{
+  implicit val depositFilterFormat = Json.format[DepositFilter]
 }
