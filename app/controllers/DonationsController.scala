@@ -55,4 +55,17 @@ class DonationsController @Inject()(
       }
     )
   }}
+
+  /**
+    * Returns the count of donations.
+    *
+    * @author Johann Sell
+    * @return
+    */
+  def count = silhouette.SecuredAction(parse.json).async { implicit request =>
+    request.body.validate[QueryBody].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      query => service.count(None).map(count => WebAppResult.Ok(Json.obj("count" -> count )).toResult(request))
+    )
+  }
 }

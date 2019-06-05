@@ -6,7 +6,7 @@ import javax.inject.Inject
 import models.frontend.Donation
 import play.api.Configuration
 import testdata.DonationTestData
-import utils.{Page, Sort}
+import utils.{DonationFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,5 +16,6 @@ class DonationsService @Inject() (config: Configuration, dao: DonationsDAO, impl
     .flatMap(list => Future.sequence(list.map(donation => save(donation))))
 
   def all(page: Page, sort: Sort) = dao.all(Some(page), Some(sort), None)
+  def count(filter: Option[DonationFilter]) = dao.count(filter)
   def save(donation: Donation): Future[Either[DonationAddException, Donation]] = dao.save(donation)
 }

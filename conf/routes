@@ -17,6 +17,7 @@ GET        /identity                                controllers.DropsController.
 
 # Donations
 POST       /donations                               controllers.DonationsController.get
+POST       /donations/count                         controllers.DonationsController.count
 POST       /donations/create                        controllers.DonationsController.create
 
 # Household
