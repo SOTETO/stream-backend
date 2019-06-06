@@ -16,7 +16,8 @@ POST       /authenticate/:provider                  controllers.DropsController.
 GET        /identity                                controllers.DropsController.frontendLogin
 
 # Donations
-GET        /donations                               controllers.DonationsController.get
+POST       /donations                               controllers.DonationsController.get
+POST       /donations/count                         controllers.DonationsController.count
 POST       /donations/create                        controllers.DonationsController.create
 
 # Household
