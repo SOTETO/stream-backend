@@ -28,3 +28,9 @@ POST       /household/update                        controllers.HouseholdControl
 POST       /household/state/action/:uuid/:role      controllers.HouseholdController.stateUpdate(uuid, role)
 #POST       /household/state/action/allowed/:uuid    controllers.HouseholdController.stateAllowedTo(uuid)
 #POST       /household/state/action/all              controllers.HouseholdController.allAllowedActions
+
+# Deposit
+
+#POST      /deposit/create
+#GET       /deposits
+

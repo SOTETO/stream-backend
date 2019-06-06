@@ -50,7 +50,6 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
       case None => Future.successful(None) // given household has not been saved
     })
   }
-
   /**
     * Updates a given household entry considering the editor and if the state has to change based on the given version.
     *
