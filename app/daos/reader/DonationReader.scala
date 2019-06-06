@@ -23,8 +23,8 @@ case class DonationReader(
       publicId,
       DonationAmount(
         received,
-        id.map(did => supporter.filter(_.donation_id == did).map(_.toUUID)).getOrElse(Nil).toList,
-        id.map(did => sources.filter(_.donation_id == did).map(_.toSource)).getOrElse(Nil).toList
+        id.map(did => supporter.filter(_.donation_id == did).map(_.toUUID)).getOrElse(Nil).toList.distinct,
+        id.map(did => sources.filter(_.donation_id == did).map(_.toSource)).getOrElse(Nil).toList.distinct
       ),
       Context(description, category),
       comment,
