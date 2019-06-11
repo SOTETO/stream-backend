@@ -34,11 +34,8 @@ class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
       }})*/
   
 
-  def find(uuid: UUID): Future[Option[Deposit]] = {
-    dao.find(uuid.toString)
-  }
-  def create(deposit: Deposit): Future[Option[Deposit]] =
-    dao.create(deposit)
+  def find(uuid: UUID): Future[Option[Deposit]] = dao.find(uuid)
+  def create(deposit: Deposit): Future[Option[Deposit]] = dao.create(deposit)
 
   def update(deposit: Deposit): Future[Option[Deposit]] = ???
 

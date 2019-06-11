@@ -24,9 +24,10 @@ class DepositUnitTable(tag: Tag) extends Table[DepositUnitReader](tag, "Deposit_
   def amount = column[Double]("amount")
   def created = column[Long]("created")
   def depositId = column[Long]("deposit_id")
+  def donationId = column[Long]("donation_id")
 
   def * =
-    (id, publicId, received, amount, created, depositId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
+    (id, publicId, received, amount, created, depositId, donationId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
   
   def depositKey = foreignKey("deposit_id", depositId, TableQuery[DepositTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
 }

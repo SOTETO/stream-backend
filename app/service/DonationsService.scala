@@ -12,10 +12,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DonationsService @Inject() (config: Configuration, dao: DonationsDAO, implicit val userDAO: UserDAO) {
   implicit val ec = ExecutionContext.global
-  val testData = DonationTestData(config).init(20)
+  DonationTestData(config).init(20)
     .flatMap(list => Future.sequence(list.map(donation => save(donation))))
 
-  def all(page: Page, sort: Sort) = dao.all(Some(page), Some(sort), None)
-  def count(filter: Option[DonationFilter]) = dao.count(filter)
+  def all(page: Page, sort: Sort) : Future[List[Donation]] = dao.all(Some(page), Some(sort), None)
+  def count(filter: Option[DonationFilter]) : Future[Int] = dao.count(filter)
   def save(donation: Donation): Future[Either[DonationAddException, Donation]] = dao.save(donation)
 }

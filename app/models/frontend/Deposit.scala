@@ -14,12 +14,11 @@ import play.api.libs.functional.syntax._
  */
 case class DepositUnit(
   publicId: UUID,
+  donationId: UUID,
   received: Long,
   amount: Double,
   created: Long
-) {
-  def toDepositUnitReader(depositId: Long) = DepositUnitReader(0, this.publicId.toString, this.received, this.amount, this.created, depositId)
-}
+)
 object DepositUnit {
   implicit val depositUnitFormat = Json.format[DepositUnit]
 }
@@ -37,9 +36,7 @@ case class Deposit(
   created: Long,
   updated: Long,
   dateOfDeposit: Long
-  ) {
-  def toDepositReader : DepositReader = DepositReader(0, this.publicId.toString, this.state, this.crew.toString, this.supporter.toString, this.created, this.updated, this.dateOfDeposit)  
-}
+  )
 object Deposit{
   implicit val depositFormat = Json.format[Deposit]
 }
