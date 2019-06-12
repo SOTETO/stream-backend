@@ -3,11 +3,11 @@ package daos
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import play.api.Play
-import models.frontend.Deposit
+import models.frontend.{Deposit, DepositFilter}
 import daos.schema.{ DepositTable, DepositUnitTable }
 import daos.reader.{DepositReader, DepositUnitReader}
 import play.api.Configuration
-import utils._
+import utils.{Page, Sort}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
@@ -25,7 +25,7 @@ trait DepositDAO {
   def create(deposit: Deposit): Future[Option[Deposit]]
   def update(deposit: Deposit): Future[Option[Deposit]]
   def delete(uuid: UUID): Future[Boolean]
-  def all(page: Option[Page], sort: Option[Sort]): Future[Option[List[Deposit]]]
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]): Future[Option[List[Deposit]]]
 }
 
 @Singleton
@@ -99,7 +99,7 @@ class MariaDBDepositDAO @Inject()
   /**
    * get all deposits
    */
-  override def all(page: Option[Page], sort: Option[Sort]): Future[Option[List[Deposit]]] = {
+  override def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]): Future[Option[List[Deposit]]] = {
     val action = for {
       (deposit, depositUnit) <- (depositTable joinLeft depositUnitTable on (_.id === _.depositId))
     } yield (deposit, depositUnit)

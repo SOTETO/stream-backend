@@ -30,6 +30,9 @@ POST       /household/state/action/:uuid/:role      controllers.HouseholdControl
 
 # Deposit
 
-#POST      /deposit/create
-#GET       /deposits
+POST      /deposit/create                           controllers.DepositController.create
+GET       /deposits                                 controllers.DepositController.all
+PUT       /deposit/update                           controllers.DepositController.update
+#DELETE    /deposit/delete/:uuid                     controllers.DepositController.delete(uuid: UUID)
+
 

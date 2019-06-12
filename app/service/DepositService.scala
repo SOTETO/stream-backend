@@ -34,18 +34,15 @@ class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
       }})*/
   
 
-  def find(uuid: UUID): Future[Option[Deposit]] = {
-    dao.find(uuid.toString)
-  }
-  def create(deposit: Deposit): Future[Option[Deposit]] =
-    dao.create(deposit)
+  def find(uuid: UUID): Future[Option[Deposit]] = dao.find(uuid.toString)
+  
+  def create(deposit: Deposit): Future[Option[Deposit]] = dao.create(deposit)
 
-  def update(deposit: Deposit): Future[Option[Deposit]] = ???
+  def update(deposit: Deposit): Future[Option[Deposit]] = dao.update(deposit)
 
-  def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]):Future[Option[List[Deposit]]] = ???
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]):Future[Option[List[Deposit]]] = dao.all(page, sort, filter)
   def count(): Future[Option[Int]] = ???
 
-  def read(uuid: UUID): Future[Option[Deposit]] = ???
-  def delete(uuid: UUID): Future[Boolean] = ???
+  def delete(uuid: UUID): Future[Boolean] = dao.delete(uuid)
 
 }
