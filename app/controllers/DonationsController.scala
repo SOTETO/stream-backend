@@ -6,6 +6,7 @@ import play.api.mvc._
 import com.mohiva.play.silhouette.api.Silhouette
 import org.vivaconagua.play2OauthClient.silhouette.CookieEnv
 import org.vivaconagua.play2OauthClient.silhouette.UserService
+import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.libs.json.{JsError, Json, Reads}
 import play.api.Configuration
 import models.frontend.Donation
@@ -31,7 +32,9 @@ class DonationsController @Inject()(
     * @author Johann Sell
     * @return
     */
-  def get = silhouette.SecuredAction(parse.json).async { implicit request =>
+  def get = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(parse.json) { implicit request =>
     request.body.validate[QueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       query => service.all(query.page, query.sort).map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
@@ -44,7 +47,9 @@ class DonationsController @Inject()(
     * @author Johann Sell
     * @return
     */
-  def create = silhouette.SecuredAction(parse.json).async { implicit request => {
+  def create = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(parse.json) { implicit request => {
     request.body.validate[Donation].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       donation => {
@@ -62,7 +67,9 @@ class DonationsController @Inject()(
     * @author Johann Sell
     * @return
     */
-  def count = silhouette.SecuredAction(parse.json).async { implicit request =>
+  def count = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(parse.json) { implicit request =>
     request.body.validate[QueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       query => service.count(None).map(count => WebAppResult.Ok(Json.obj("count" -> count )).toResult(request))

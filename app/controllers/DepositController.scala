@@ -2,19 +2,20 @@ package controllers
 
 
 import java.util.UUID
+
 import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject._
 import org.vivaconagua.play2OauthClient.silhouette.{CookieEnv, UserService}
-import play.api.mvc.{AbstractController, ControllerComponents, BodyParsers}
-import models.frontend.{DepositFilter, Deposit}
+import play.api.mvc.{AbstractController, BodyParsers, ControllerComponents}
+import models.frontend.Deposit
+import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.Configuration
-import play.api.libs.json.{Json, Reads, JsError}
+import play.api.libs.json.{JsError, Json, Reads}
 import responses.WebAppResult
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.DepositService
-import utils.{Page, Sort}
 //import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 @Singleton
@@ -33,24 +34,22 @@ class DepositController @Inject() (
    */
 
   def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
-  
-  // query body for sorting 
-  case class QueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter])
-  object QueryBody {
-      implicit val queryBodyFormat = Json.format[QueryBody]
-  }
 
   /**
    * All action controller return the Deposit Model as Json or an simple http error 
    */
-  def create = silhouette.SecuredAction(validateJson[Deposit]).async { implicit request => {
+  def create = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(validateJson[Deposit]) { implicit request => {
     service.create(request.body).map(result => result match {
       case Some(deposit) => Ok(Json.toJson(deposit))
       case _ => BadRequest("TODO: create error")
     })
   }}
 
-  def update = silhouette.SecuredAction(validateJson[Deposit]).async { implicit request => {
+  def update = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(validateJson[Deposit]) { implicit request => {
     service.update(request.body).map(result => result match {
       case Some(deposit) => Ok(Json.toJson(deposit))
       case _ => BadRequest("TODO: create error")
@@ -58,21 +57,27 @@ class DepositController @Inject() (
   }}
 
   // return 200 if delete is successful 
-  def delete(id: UUID) = silhouette.SecuredAction.async { implicit request => {
+  def delete(id: UUID) = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async { implicit request => {
     service.delete(id).map(result => result match {
       case true => Ok("TODO: delete message")
       case false => BadRequest("TODO: delete error")
     })
   }}
 
-  def all = silhouette.SecuredAction(validateJson[QueryBody]).async { implicit request => {
-    service.all(request.body.page, request.body.sort, request.body.filter).map(result => result match {
+  def all = silhouette.SecuredAction(
+    IsEmployee || IsAdmin
+  ).async(validateJson[QueryBody]) { implicit request => {
+    service.all(Some(request.body.page), Some(request.body.sort), None).map(result => result match {
       case Some(list) => Ok(Json.toJson(list))
       case _ => BadRequest("TODO: all error")
     })
   }}
   
-  def count = silhouette.SecuredAction(validateJson[QueryBody]).async { implicit request => {
+  def count = silhouette.SecuredAction(
+    IsEmployee || IsAdmin
+  ).async(validateJson[QueryBody]) { implicit request => {
     service.count().map(result => result match {
       case Some(list) => Ok(Json.obj("count" -> Json.toJson(list) ))
       case _ => BadRequest("TODO: count error")
