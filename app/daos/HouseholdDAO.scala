@@ -4,6 +4,10 @@ import java.util.UUID
 
 import javax.inject.Inject
 import models.frontend.{Household, HouseholdVersion}
+import daos.schema.{HouseholdTable, HouseholdVersionTable, PlaceMessageTable}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import slick.jdbc.JdbcProfile
+import slick.lifted.TableQuery
 import play.api.Configuration
 import play.api.libs.ws.WSClient
 //import testdata.HouseholdTestData
@@ -14,7 +18,7 @@ import scala.concurrent.duration._
 
 trait HouseholdDAO {
   def count(filter: Option[HouseholdFilter]) : Future[Int]
-  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]]
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[Option[List[Household]]]
   def find(uuid: UUID) : Future[Option[Household]]
   def save(household: Household): Future[Option[Household]]
   def update(household: Household): Future[Option[Household]]
@@ -22,10 +26,52 @@ trait HouseholdDAO {
   def delete(uuid: UUID): Future[Boolean]
 }
 
-class SQLHouseholdDAO @Inject()(userDAO: UserDAO) extends HouseholdDAO {
+class SQLHouseholdDAO @Inject()
+  (userDAO: UserDAO,
+   protected val dbConfigProvider: DatabaseConfigProvider )
+  (implicit ec: ExecutionContext) extends HouseholdDAO with HasDatabaseConfigProvider[JdbcProfile]{
+  
+  val householdTable = TableQuery[HouseholdTable]
+  val householdVersionTable = TableQuery[HouseholdVersionTable]
+  val placeMessageTable = TableQuery[PlaceMessageTable]
+
+  /* pirvate function
+   *
+   */
+  private def join = for {
+    ((household, householdVersion), placeMessage) <- householdTable joinLeft 
+      householdVersionTable on (_.id === _.householdId) joinLeft 
+      placeMessage on (_._2.map(_.householdId) === _.id)
+  } yield (household, householdVersion, placeMessage)
+  
+  private def read(entries: Seq[(HouseholdReader, Option[HouseholdVersionReader], Option[PlaceMessageReader])]): Household = {
+    val placeMessages: PetriNetHouseholdState = entries.groupBy(_._3).toSeq.filter(_._1.isDefined).map(current =>
+     PetriNetHouseholdState(current._1.toSet)
+        )
+  }
+  
+  private def readList(entries: Seq[(HouseholdReader, Option[HouseholdVersionReader], Option[PlaceMessageReader])]): List[Household] = {
+    entries.groupBy(_._1).map( grouped => read(grouped._1)).toList
+  }
+  /* public functions
+   *
+   */
   def count(filter: Option[HouseholdFilter]) : Future[Int] = ???
-  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]] = ???
-  def find(uuid: UUID) : Future[Option[Household]] = ???
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]] = {
+    db.run(join.result).map( result => result.isEmpty match {
+      case false => Some(readList(result))
+      case true => None
+    })
+  }
+  
+  def find(uuid: UUID) : Future[Option[Household]] = {
+    db.run(join.filter(_._1.publicId === uuid).result).map(result => result.isEmpty match {
+      case false => Some(read(result))
+      case true => None
+    })
+  }
+
+
   def save(household: Household): Future[Option[Household]] = ???
   def update(household: Household): Future[Option[Household]] = ???
   def addVersion(uuid: UUID, version: HouseholdVersion): Future[Option[Household]] = ???
