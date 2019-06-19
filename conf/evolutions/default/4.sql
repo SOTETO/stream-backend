@@ -23,6 +23,7 @@ CREATE Table Household_Version (
   author VARCHAR(36),
   editor VARCHAR(36),
   amount BIGINT(20),
+  currency VARCHAR(36),
   reason_what VARCHAR(36),
   reason_werefor VARCHAR(36),
   request BOOLEAN, 
