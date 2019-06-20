@@ -84,7 +84,21 @@ class SQLHouseholdDAO @Inject()
   }
 
 
-  def save(household: Household): Future[Option[Household]] = ???
+  def save(household: Household): Future[Option[Household]] = {
+    db.run((householdTable returning householdTable.map(_.id) += HouseholdReader(household)).map(householdId => {
+      household.state.toMessages.foreach(pm => {
+        db.run(placeMessageTable returning placeMessageTable.map(_.id)) +=
+          PlaceMessageReader(pm, householdId)
+        db.run()
+      })
+      household.versions.foreach(v =>{
+        db.run(householdVersionTable returning householdVersionTable.map(_.id)) +=
+          HouseholdVersionReader(v, householdId)
+      })
+    }))
+
+    
+  }
   def update(household: Household): Future[Option[Household]] = ???
   def addVersion(uuid: UUID, version: HouseholdVersion): Future[Option[Household]] = ???
   def delete(uuid: UUID): Future[Boolean] = ???
