@@ -12,7 +12,7 @@ import play.api.Configuration
 import models.frontend.Donation
 import responses.WebAppResult
 import service.DonationsService
-import utils.{Ascending, Page, Sort}
+import utils.{Ascending, DonationFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,6 +26,11 @@ class DonationsController @Inject()(
 
   implicit val ec = ExecutionContext.global
 
+  case class DonationQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DonationFilter])
+  object DonationQueryBody {
+    implicit val donationQueryBodyFormat = Json.format[DonationQueryBody]
+  }
+
   /**
     * Reads all currently saved donations and returns them.
     *
@@ -35,9 +40,9 @@ class DonationsController @Inject()(
   def get = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request =>
-    request.body.validate[QueryBody].fold(
+    request.body.validate[DonationQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.all(query.page, query.sort).map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
+      query => service.all(query.page, query.sort, query.filter).map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
     )
   }
 
@@ -70,9 +75,9 @@ class DonationsController @Inject()(
   def count = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request =>
-    request.body.validate[QueryBody].fold(
+    request.body.validate[DonationQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.count(None).map(count => WebAppResult.Ok(Json.obj("count" -> count )).toResult(request))
+      query => service.count(query.filter).map(count => WebAppResult.Ok(Json.obj("count" -> count )).toResult(request))
     )
   }
 }

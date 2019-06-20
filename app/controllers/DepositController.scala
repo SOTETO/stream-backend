@@ -3,6 +3,8 @@ package controllers
 
 import java.util.UUID
 
+import play.api._
+import play.api.mvc._
 import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject._
 import org.vivaconagua.play2OauthClient.silhouette.{CookieEnv, UserService}
@@ -26,7 +28,7 @@ class DepositController @Inject() (
   userService: UserService,
   service: DepositService,
   implicit val ec: ExecutionContext
-) extends AbstractController(cc) {
+) extends AbstractController(cc) with play.api.i18n.I18nSupport {
   
   /* validate a given Json
    * if the Json is valid, the function return the request
@@ -40,11 +42,14 @@ class DepositController @Inject() (
    */
   def create = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(validateJson[Deposit]) { implicit request => {
-    service.create(request.body).map(result => result match {
-      case Some(deposit) => Ok(Json.toJson(deposit))
-      case _ => BadRequest("TODO: create error")
-    })
+  ).async(parse.json) { implicit request => {
+    request.body.validate[Deposit].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      deposit => service.create(deposit).map(result => result match {
+        case Right(deposit) => WebAppResult.Ok(Json.toJson(List(deposit))).toResult(request)
+        case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
+      })
+    )
   }}
 
   def update = silhouette.SecuredAction(

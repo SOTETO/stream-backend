@@ -47,13 +47,15 @@ class SQLDonationsDAO @Inject()
     * @param sort
     * @return
     */
-  private def donationJoin(page: Option[Page] = None, sort: Option[Sort] = None) = {
+  private def donationJoin(page: Option[Page] = None, sort: Option[Sort] = None, filter: Option[DonationFilter] = None) = {
+    val filteredDons = filter.flatMap(_.name.map(name => donations.filter(_.description like ("%" + name + "%")))).getOrElse(donations)
+
     val sortedDons = sort.map(s => s.model match {
-      case Some(model) if model == "donation" => donations.sortBy(_.sortBy(s).get)
+      case Some(model) if model == "donation" => filteredDons.sortBy(_.sortBy(s).get)
 //      case Some(model) if model == "donation" && s.field == "crew" => donations.sortBy(_.author) // TODO!
-      case None => donations.sortBy(_.sortBy(s).get)
-      case _ => donations
-    }).getOrElse(donations)
+      case None => filteredDons.sortBy(_.sortBy(s).get)
+      case _ => filteredDons
+    }).getOrElse(filteredDons)
     val pagedDons = page.map(p => sortedDons.drop(p.offset).take(p.size)).getOrElse(sortedDons)
 
     val sortedSources = sort.map(s => s.model match {
@@ -88,10 +90,10 @@ class SQLDonationsDAO @Inject()
     db.run(donationJoin(None, None).filter(_._1.id === id).result).map(res => reader( res ).headOption)
 
   override def count(filter: Option[DonationFilter]): Future[Int] =
-    db.run(donations.size.result)
+    db.run(donationJoin(None, None, filter).size.result)
 
   override def all(page: Option[Page], sort: Option[Sort], filter: Option[DonationFilter]): Future[List[Donation]] =
-    db.run(donationJoin(page, sort).result).map(reader( _ ).toList)
+    db.run(donationJoin(page, sort, filter).result).map(reader( _ ).toList)
 
   override def find(uuid: UUID): Future[Option[Donation]] =
     db.run(donationJoin(None, None).filter(_._1.public_id === uuid.toString).result).map(reader( _ ).headOption)

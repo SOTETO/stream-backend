@@ -2,6 +2,7 @@ package daos
 
 import java.util.UUID
 
+import daos.exceptions.DepositAddException
 import javax.inject.{Inject, Singleton}
 import play.api.Play
 import models.frontend.Deposit
@@ -23,7 +24,7 @@ trait DepositDAO {
 // def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]): Future[Option[List[Deposit]]]
   def find(id: Long): Future[Option[Deposit]]
   def find(uuid: UUID): Future[Option[Deposit]]
-  def create(deposit: Deposit): Future[Option[Deposit]]
+  def create(deposit: Deposit): Future[Either[DepositAddException, Deposit]]
   def update(deposit: Deposit): Future[Option[Deposit]]
   def delete(uuid: UUID): Future[Boolean]
   def all(page: Option[Page], sort: Option[Sort]): Future[Option[List[Deposit]]]
@@ -88,7 +89,7 @@ class MariaDBDepositDAO @Inject()
    *  depositUnit : DepositUnit
    *  id : Long
    */
-  override def create(deposit: Deposit): Future[Option[Deposit]] = {
+  override def create(deposit: Deposit): Future[Either[DepositAddException, Deposit]] = {
     //insert deposit into DepositTable
     db.run((depositTable returning depositTable.map(_.id)) += DepositReader(deposit)).map(depositId => {
       //insert depositUnits with depositId as foreignKey 
@@ -103,7 +104,10 @@ class MariaDBDepositDAO @Inject()
       //return depositId
       depositId
       // return Option[Deposit] via find(id: Long) function
-    }).flatMap(id => find(id))
+    }).flatMap(id => find(id).map(_ match {
+      case Some(don) => Right(don)
+      case None => Left(DepositAddException(deposit))
+    }))
   }
 
   override def update(deposit: Deposit): Future[Option[Deposit]] = ???

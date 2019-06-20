@@ -3,9 +3,12 @@ package services
 
 
 import java.util.UUID
+
+import daos.exceptions.DepositAddException
 import daos.{DepositDAO, UserDAO}
 import javax.inject.Inject
-import models.frontend.{DepositFilter, Deposit}
+import models.frontend.{Deposit, DepositFilter}
+
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 import utils.{Page, Sort}
@@ -35,7 +38,7 @@ class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
   
 
   def find(uuid: UUID): Future[Option[Deposit]] = dao.find(uuid)
-  def create(deposit: Deposit): Future[Option[Deposit]] = dao.create(deposit)
+  def create(deposit: Deposit): Future[Either[DepositAddException, Deposit]] = dao.create(deposit)
 
   def update(deposit: Deposit): Future[Option[Deposit]] = ???
 

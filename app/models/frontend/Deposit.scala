@@ -15,7 +15,7 @@ import play.api.libs.functional.syntax._
 case class DepositUnit(
   publicId: UUID,
   donationId: UUID,
-  received: Long,
+  confirmed: Long,
   amount: Double,
   created: Long
 )
