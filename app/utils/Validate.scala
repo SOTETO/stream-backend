@@ -10,4 +10,11 @@ object Validate {
       case None => None
     }
   }
+
+  def optionString(uuidOption: Option[UUID]): Option[String] = {
+    uuidOption match {
+      case Some(uuid) => Some(uuid.toString)
+      case None => None
+    }
+  }
 }

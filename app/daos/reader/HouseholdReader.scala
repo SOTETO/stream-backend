@@ -25,17 +25,19 @@ import utils.Validate
 
 case class PlaceMessageReader(
   id: Long,
-  token: Int,
   name: String,
+  token: Int,
+  householdId: Long
   ){
     def toPlaceMessage: PlaceMessage = 
       PlaceMessage(this.name, this.token)
   }
 
-object PlaceMessageReader extends ((Long, Int, String) => PlaceMessageReader) {
-  
-  def apply(tuple: (Long, Int, String)): PlaceMessageReader =
-    PlaceMessageReader( tuple._1, tuple._2, tuple._3)
+object PlaceMessageReader extends ((Long, String, Int, Long) => PlaceMessageReader) {
+  def apply(placeMessage: PlaceMessage, id: Long, householdId: Long): PlaceMessageReader =
+    PlaceMessageReader(id, placeMessage.name, placeMessage.tokens, householdId)
+  def apply(tuple: (Long, String, Int, Long)): PlaceMessageReader =
+    PlaceMessageReader( tuple._1, tuple._2, tuple._3, tuple._4)
 }
 
 case class HouseholdVersionReader(
@@ -49,7 +51,7 @@ case class HouseholdVersionReader(
   amount: Double,
   currency: String,
   reasonWhat: Option[String],    
-  reasonWerefor: Option[String],
+  reasonWherefor: Option[String],
   request: Boolean,
   volunteerManager: Option[String], //String representation of a UUID
   employee: Option[String], //String representation of a UUID
@@ -65,8 +67,8 @@ case class HouseholdVersionReader(
         Validate.optionUUID(this.author),
         Validate.optionUUID(this.editor),
         HouseholdAmount(this.amount, this.currency),
-        Reason(this.reasonWhat, this.reasonWerefor),
-        request,
+        Reason(this.reasonWhat, this.reasonWherefor),
+        this.request,
         Validate.optionUUID(this.volunteerManager),
         Validate.optionUUID(this.employee)
       )
@@ -74,6 +76,25 @@ case class HouseholdVersionReader(
   }
 
 object HouseholdVersionReader {
+  
+  def apply(household: HouseholdVersion, id: Long, householdId: Long): HouseholdVersionReader =
+    HouseholdVersionReader(
+      id, 
+      household.iban, 
+      household.bic, 
+      household.created, 
+      household.updated, 
+      Validate.optionString(household.author), 
+      Validate.optionString(household.editor), 
+      household.amount.amount, 
+      household.amount.currency,
+      household.reason.what,
+      household.reason.wherefor,
+      household.request,
+      Validate.optionString(household.volunteerManager),
+      Validate.optionString(household.employee),
+      householdId
+    )
   
   def apply(tuple: (Long, Option[String], Option[String], Long, Long, Option[String], Option[String], Double, String, Option[String], Option[String], Boolean, Option[String], Option[String], Long)): HouseholdVersionReader = 
     HouseholdVersionReader(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9, tuple._10, tuple._11, tuple._12, tuple._13, tuple._14, tuple._15)

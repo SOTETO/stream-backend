@@ -33,24 +33,24 @@ class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag,
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def reasonWhat = column[String]("reason_what")
-  def reasonWerefor = column[String]("reason_wherefor")
+  def reasonWherefor = column[String]("reason_wherefor")
   def request = column[Boolean]("request")
   def volunteerManager = column[String]("volunteer_manager")
   def employee = column[String]("employee")
   def householdId = column[Long]("household_id")
 
-  def * = (id, iban.?, bic.?, created, updated, author.?, editor.?, amount, currency, reasonWhat.?, reasonWerefor.?, request, volunteerManager.?, employee.?, householdId) <> (HouseholdVersionReader.apply, HouseholdVersionReader.unapply)
+  def * = (id, iban.?, bic.?, created, updated, author.?, editor.?, amount, currency, reasonWhat.?, reasonWherefor.?, request, volunteerManager.?, employee.?, householdId) <> (HouseholdVersionReader.apply, HouseholdVersionReader.unapply)
 
   def householdKey = foreignKey("household_id", householdId, TableQuery[HouseholdTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
 }
 
 class PlaceMessageTable(tag: Tag) extends Table[PlaceMessageReader](tag, "Place_Message") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-  def token = column[Int]("token")
   def name = column[String]("name")
+  def token = column[Int]("token")
   def householdId = column[Long]("household_id")
   
-  def * = (id, token, name) <> (PlaceMessageReader.apply, PlaceMessageReader.unapply)
+  def * = (id, name, token, householdId) <> (PlaceMessageReader.apply, PlaceMessageReader.unapply)
   
   def householdKey = foreignKey("household_id", householdId, TableQuery[HouseholdTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
 }
