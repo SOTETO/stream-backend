@@ -3,8 +3,8 @@ package daos
 import java.util.UUID
 
 import daos.exceptions.DonationAddException
-import daos.reader.{DonationReader, InvolvedSupporterReader, SourceReader}
-import daos.schema.{DonationTable, InvolvedSupporterTable, SourceTable}
+import daos.reader.{DepositUnitReader, DonationReader, InvolvedSupporterReader, SourceReader}
+import daos.schema.{DepositUnitTable, DonationTable, InvolvedSupporterTable, SourceTable}
 import javax.inject.{Inject, Singleton}
 import models.frontend.Donation
 import play.api.Play
@@ -34,9 +34,11 @@ class SQLDonationsDAO @Inject()
   val donations = TableQuery[DonationTable]
   val supporter = TableQuery[InvolvedSupporterTable]
   val sources = TableQuery[SourceTable]
+  val depositUnits = TableQuery[DepositUnitTable]
   import DonationReader._
   import InvolvedSupporterReader._
   import SourceReader._
+  import daos.reader.DepositUnitReader._
 
   /**
     * Generates a sorted and paginated join. While sorting can be excuted on all parts of the join, we only want to
@@ -64,8 +66,12 @@ class SQLDonationsDAO @Inject()
     }).getOrElse(sources)
 
     for {
-      ((don, sup), sou) <- (pagedDons joinLeft supporter on (_.id === _.donation_id)) joinLeft sortedSources on (_._1.id === _.donation_id)
-    } yield (don, sup, sou)
+      (((don, sup), sou), units) <- (
+        pagedDons joinLeft
+        supporter on (_.id === _.donation_id)) joinLeft
+        sortedSources on (_._1.id === _.donation_id) joinLeft
+        depositUnits on (_._1._1.id === _.donationId)
+    } yield (don, sup, sou, units)
   }
 
   /**
@@ -75,13 +81,15 @@ class SQLDonationsDAO @Inject()
     * @param results
     * @return
     */
-  private def reader(results : Seq[(DonationReader, Option[InvolvedSupporterReader], Option[SourceReader])]) : Seq[Donation] = {
+  private def reader(results : Seq[(DonationReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader])]) : Seq[Donation] = {
     val supporter = results.map(_._2).filter(_.isDefined).map(_.get)
     val sources = results.map(_._3).filter(_.isDefined).map(_.get)
+    val units = results.map(_._4).filter(_.isDefined).map(_.get)
     results.map(res =>
       res._1.toDonation(
         supporter.filter(_.donation_id == res._1.id), // involved supporter
-        sources.filter(_.donation_id == res._1.id) // sources
+        sources.filter(_.donation_id == res._1.id), // sources
+        units.filter(_.donationId == res._1.id) // deposit units
       )
     ).distinct
   }
