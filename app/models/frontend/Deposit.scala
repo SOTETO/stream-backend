@@ -17,10 +17,16 @@ case class DepositUnit(
   donationId: UUID,
   confirmed: Option[Long],
   amount: Double,
+  currency: String,
   created: Long
 )
 object DepositUnit {
   implicit val depositUnitFormat = Json.format[DepositUnit]
+}
+
+case class FullAmount(amount: Double, currency: String)
+object FullAmount {
+  implicit val fullAmountFormat = Json.format[FullAmount]
 }
 
 /**
@@ -29,6 +35,7 @@ object DepositUnit {
 
 case class Deposit(
   publicId: UUID,
+  full: FullAmount,
   amount: List[DepositUnit],
   confirmed: Option[Long],
   crew: UUID,

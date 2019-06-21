@@ -22,12 +22,13 @@ class DepositUnitTable(tag: Tag) extends Table[DepositUnitReader](tag, "Deposit_
   def publicId = column[String]("public_id")
   def confirmed = column[Long]("confirmed")
   def amount = column[Double]("amount")
+  def currency = column[String]("currency")
   def created = column[Long]("created")
   def depositId = column[Long]("deposit_id")
   def donationId = column[Long]("donation_id")
 
   def * =
-    (id, publicId, confirmed.?, amount, created, depositId, donationId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
+    (id, publicId, confirmed.?, amount, currency, created, depositId, donationId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
   
@@ -38,6 +39,8 @@ class DepositUnitTable(tag: Tag) extends Table[DepositUnitReader](tag, "Deposit_
 class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def publicId = column[String]("public_id")
+  def fullAmount = column[Double]("full_amount")
+  def currency = column[String]("currency")
   def confirmed = column[Long]("confirmed")
   def crew = column[String]("crew")
   def supporter = column[String]("supporter")
@@ -46,7 +49,7 @@ class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
   def dateOfDeposit = column[Long]("date_of_deposit")
   
   def * =
-    (id, publicId, confirmed.?, crew, supporter, created, updated, dateOfDeposit) <> (DepositReader.tupled, DepositReader.unapply)
+    (id, publicId, fullAmount, currency, confirmed.?, crew, supporter, created, updated, dateOfDeposit) <> (DepositReader.tupled, DepositReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 

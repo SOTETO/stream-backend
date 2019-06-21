@@ -1,6 +1,6 @@
 package daos.reader
 
-import models.frontend.{Deposit, DepositUnit}
+import models.frontend.{Deposit, DepositUnit, FullAmount}
 import java.util.UUID
 
 import slick.jdbc.GetResult
@@ -19,6 +19,7 @@ case class DepositUnitReader(
   publicId: String,
   confirmed: Option[Long],
   amount: Double,
+  currency: String,
   created: Long,
   depositId: Long,
   donationId: Long
@@ -26,10 +27,10 @@ case class DepositUnitReader(
     /**
      * map database model to frontend model
      */
-    def toDepositUnit(donationId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), donationId, this.confirmed, this.amount, this.created)
+    def toDepositUnit(donationId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), donationId, this.confirmed, this.amount, this.currency, this.created)
   }
 
-object DepositUnitReader extends ((Long, String, Option[Long], Double, Long, Long, Long) => DepositUnitReader){
+object DepositUnitReader extends ((Long, String, Option[Long], Double, String, Long, Long, Long) => DepositUnitReader){
 
 //  def apply(tuple: (Long, String, Option[Long], Double, Long, Long, Long)): DepositUnitReader =
 //    DepositUnitReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7)
@@ -43,13 +44,14 @@ object DepositUnitReader extends ((Long, String, Option[Long], Double, Long, Lon
       depositUnit.publicId.toString,
       depositUnit.confirmed,
       depositUnit.amount,
+      depositUnit.currency,
       depositUnit.created,
       depositId,
       donationId
     )
 
   implicit val getDepositUnitReader = GetResult(r =>
-    DepositUnitReader(r.nextLong, r.nextString, r.nextLongOption, r.nextDouble, r.nextLong, r.nextLong, r.nextLong)
+    DepositUnitReader(r.nextLong, r.nextString, r.nextLongOption, r.nextDouble, r.nextString, r.nextLong, r.nextLong, r.nextLong)
   )
 }
 
@@ -62,6 +64,8 @@ object DepositUnitReader extends ((Long, String, Option[Long], Double, Long, Lon
 case class DepositReader(
   id: Long,
   publicId: String,
+  fullAmount: Double,
+  currency: String,
   confirmed: Option[Long],
   crew: String,
   supporter: String,
@@ -70,10 +74,20 @@ case class DepositReader(
   dateOfDeposit: Long
   ) {
     def toDeposit(depositUnitList: List[DepositUnit]) = 
-      Deposit(UUID.fromString(this.publicId), depositUnitList, this.confirmed, UUID.fromString(this.crew), UUID.fromString(this.supporter), this.created, this.updated, this.dateOfDeposit)
+      Deposit(
+        UUID.fromString(this.publicId),
+        FullAmount(this.fullAmount, this.currency),
+        depositUnitList,
+        this.confirmed,
+        UUID.fromString(this.crew),
+        UUID.fromString(this.supporter),
+        this.created,
+        this.updated,
+        this.dateOfDeposit
+      )
   }
 
-object DepositReader extends ((Long, String, Option[Long], String, String, Long, Long, Long) => DepositReader){
+object DepositReader extends ((Long, String, Double, String, Option[Long], String, String, Long, Long, Long) => DepositReader){
 
 //  def apply(tuple: (Long, String, Option[Long], String, String, Long, Long, Long)): DepositReader =
 //    DepositReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8)
@@ -85,6 +99,8 @@ object DepositReader extends ((Long, String, Option[Long], String, String, Long,
     DepositReader(
       id.getOrElse(0L),
       deposit.publicId.toString,
+      deposit.full.amount,
+      deposit.full.currency,
       deposit.confirmed,
       deposit.crew.toString,
       deposit.supporter.toString,
@@ -94,7 +110,7 @@ object DepositReader extends ((Long, String, Option[Long], String, String, Long,
     )
 
   implicit val getDepositReader = GetResult(r =>
-    DepositReader(r.nextLong, r.nextString, r.nextLongOption, r.nextString, r.nextString, r.nextLong, r.nextLong, r.nextLong)
+    DepositReader(r.nextLong, r.nextString, r.nextDouble, r.nextString, r.nextLongOption, r.nextString, r.nextString, r.nextLong, r.nextLong, r.nextLong)
   )
 }
 
