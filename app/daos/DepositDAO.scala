@@ -2,10 +2,10 @@ package daos
 
 import java.util.UUID
 
-import daos.exceptions.DepositAddException
+import daos.exceptions.{DatabaseException, DepositAddException, DepositUnitAddException, DonationNotFoundException}
 import javax.inject.{Inject, Singleton}
 import play.api.Play
-import models.frontend.Deposit
+import models.frontend.{Deposit, DepositUnit}
 import daos.schema.{DepositTable, DepositUnitTable, DonationTable}
 import daos.reader.{DepositReader, DepositUnitReader, DonationReader}
 import play.api.Configuration
@@ -24,7 +24,7 @@ trait DepositDAO {
 // def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]): Future[Option[List[Deposit]]]
   def find(id: Long): Future[Option[Deposit]]
   def find(uuid: UUID): Future[Option[Deposit]]
-  def create(deposit: Deposit): Future[Either[DepositAddException, Deposit]]
+  def create(deposit: Deposit): Future[Either[DatabaseException, Deposit]]
   def update(deposit: Deposit): Future[Option[Deposit]]
   def delete(uuid: UUID): Future[Boolean]
   def all(page: Option[Page], sort: Option[Sort]): Future[Option[List[Deposit]]]
@@ -41,6 +41,10 @@ class MariaDBDepositDAO @Inject()
   val donationsTable = TableQuery[DonationTable]
   val depositUnitTable = TableQuery[DepositUnitTable]
   val depositTable = TableQuery[DepositTable]
+
+  import DonationReader._
+  import DepositReader._
+  import DepositUnitReader._
 
   /**
     * Creates a joined query instance
@@ -81,33 +85,50 @@ class MariaDBDepositDAO @Inject()
       case true => None
     })
   }
-  /**
-   * save deposit into database 
-   * used variables:
-   *  deposit : Deposit
-   *  depositId : Long 
-   *  depositUnit : DepositUnit
-   *  id : Long
-   */
-  override def create(deposit: Deposit): Future[Either[DepositAddException, Deposit]] = {
+
+  override def create(deposit: Deposit): Future[Either[DatabaseException, Deposit]] = {
+    def unitCreateQuery(unit: DepositUnit, depositId: Long) = (for {
+      donationId <- donationsTable.filter(_.public_id === unit.donationId.toString).map(_.id).result
+      depositUnit <- if(donationId.nonEmpty) {
+        (depositUnitTable returning depositUnitTable.map(_.id)) +=
+          DepositUnitReader(unit, depositId, donationId.head)
+      } else {
+        throw new DonationNotFoundException(unit.donationId)
+      }
+    } yield depositUnit).transactionally
+
+    val createQuery = (for {
+      depositId <- (depositTable returning depositTable.map(_.id)) += DepositReader(deposit)
+      _ <- DBIO.sequence(deposit.amount.map(unit => unitCreateQuery(unit, depositId))).transactionally
+    } yield depositId).transactionally
+
+    try {
+      db.run(createQuery).flatMap(id => find(id).map(_ match {
+        case Some(dep) => Right(dep)
+        case None => Left(DepositAddException(deposit))
+      }))
+    } catch {
+      case de: DatabaseException => Future.successful(Left(de))
+    }
+
     //insert deposit into DepositTable
-    db.run((depositTable returning depositTable.map(_.id)) += DepositReader(deposit)).map(depositId => {
-      //insert depositUnits with depositId as foreignKey 
-      deposit.amount.foreach(depositUnit => {
-       db.run(donationsTable.filter(_.public_id === depositUnit.donationId.toString).map(_.id).result)
-         .map(_.headOption).filter(_.isDefined).map(_.get) // handle case: no donation has been found
-         .map(donationId =>
-            db.run((depositUnitTable returning depositUnitTable.map(_.id)) +=
-              DepositUnitReader(depositUnit, depositId, donationId))
-           )
-         })
-      //return depositId
-      depositId
-      // return Option[Deposit] via find(id: Long) function
-    }).flatMap(id => find(id).map(_ match {
-      case Some(don) => Right(don)
-      case None => Left(DepositAddException(deposit))
-    }))
+//    db.run((depositTable returning depositTable.map(_.id)) += DepositReader(deposit)).map(depositId => {
+//      //insert depositUnits with depositId as foreignKey
+//      deposit.amount.foreach(depositUnit => {
+//       db.run(donationsTable.filter(_.public_id === depositUnit.donationId.toString).map(_.id).result)
+//         .map(_.headOption).filter(_.isDefined).map(_.get) // handle case: no donation has been found
+//         .map(donationId =>
+//            db.run((depositUnitTable returning depositUnitTable.map(_.id)) +=
+//              DepositUnitReader(depositUnit, depositId, donationId))
+//           )
+//         })
+//      //return depositId
+//      depositId
+//      // return Option[Deposit] via find(id: Long) function
+//    }).flatMap(id => find(id).map(_ match {
+//      case Some(don) => Right(don)
+//      case None => Left(DepositAddException(deposit))
+//    }))
   }
 
   override def update(deposit: Deposit): Future[Option[Deposit]] = ???

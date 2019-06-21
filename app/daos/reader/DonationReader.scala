@@ -6,7 +6,7 @@ import models.frontend._
 import slick.jdbc.GetResult
 
 case class DonationReader(
-                         id: Option[Long],
+                         id: Long,
                          publicId: UUID,
                          received: Long,
                          description: String,
@@ -27,24 +27,24 @@ case class DonationReader(
       publicId,
       DonationAmount(
         received,
-        id.map(did => supporter.filter(_.donation_id == did).map(_.toUUID)).getOrElse(Nil).toList.distinct,
-        id.map(did => sources.filter(_.donation_id == did).map(_.toSource)).getOrElse(Nil).toList.distinct
+        supporter.filter(_.donation_id == id).map(_.toUUID).toList.distinct,
+        sources.filter(_.donation_id == id).map(_.toSource).toList.distinct
       ),
       Context(description, category),
       comment,
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
-      id.map(did => depositUnits.filter(_.donationId == did).map(_.toDepositUnit(publicId)).toList.distinct).getOrElse(Nil),
+      depositUnits.filter(_.donationId == id).map(_.toDepositUnit(publicId)).toList.distinct,
       author,
       created,
       updated
     )
 }
 
-object DonationReader extends ((Option[Long], UUID, Long, String, String, Option[String], Option[String], Option[Boolean], UUID, Long, Long) => DonationReader ) {
+object DonationReader extends ((Long, UUID, Long, String, String, Option[String], Option[String], Option[Boolean], UUID, Long, Long) => DonationReader ) {
 
-  def apply(donation: Donation): DonationReader =
+  def apply(donation: Donation, id: Option[Long] = None): DonationReader =
     DonationReader(
-      None,
+      id.getOrElse(0),
       donation.id,
       donation.amount.received,
       donation.context.description,
@@ -57,13 +57,13 @@ object DonationReader extends ((Option[Long], UUID, Long, String, String, Option
       donation.updated
     )
 
-  def apply(tuple: (Option[Long], String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)): DonationReader =
+  def apply(tuple: (Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)): DonationReader =
     DonationReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, UUID.fromString(tuple._9), tuple._10, tuple._11)
 
-  def unapply(arg: DonationReader): Option[(Option[Long], String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)] =
+  def unapply(arg: DonationReader): Option[(Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)] =
     Some((arg.id, arg.publicId.toString, arg.received, arg.description, arg.category, arg.comment, arg.reason_for_payment, arg.receipt, arg.author.toString, arg.created, arg.updated))
 
   implicit val getDonationReader = GetResult(r =>
-    DonationReader(r.nextLongOption, UUID.fromString(r.nextString), r.nextLong, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, UUID.fromString(r.nextString), r.nextLong, r.nextLong)
+    DonationReader(r.nextLong, UUID.fromString(r.nextString), r.nextLong, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, UUID.fromString(r.nextString), r.nextLong, r.nextLong)
   )
 }

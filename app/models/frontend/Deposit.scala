@@ -15,7 +15,7 @@ import play.api.libs.functional.syntax._
 case class DepositUnit(
   publicId: UUID,
   donationId: UUID,
-  confirmed: Long,
+  confirmed: Option[Long],
   amount: Double,
   created: Long
 )
@@ -30,7 +30,7 @@ object DepositUnit {
 case class Deposit(
   publicId: UUID,
   amount: List[DepositUnit],
-  state: String, //TODO
+  confirmed: Option[Long],
   crew: UUID,
   supporter: UUID,
   created: Long,

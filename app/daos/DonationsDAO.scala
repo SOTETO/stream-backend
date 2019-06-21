@@ -80,8 +80,8 @@ class SQLDonationsDAO @Inject()
     val sources = results.map(_._3).filter(_.isDefined).map(_.get)
     results.map(res =>
       res._1.toDonation(
-        res._1.id.map(did => supporter.filter(_.donation_id == did)).getOrElse(Nil), // involved supporter
-        res._1.id.map(did => sources.filter(_.donation_id == did)).getOrElse(Nil) // sources
+        supporter.filter(_.donation_id == res._1.id), // involved supporter
+        sources.filter(_.donation_id == res._1.id) // sources
       )
     ).distinct
   }
