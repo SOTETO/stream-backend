@@ -57,6 +57,7 @@ object PlaceMessageReader extends ((Long, String, Int, Long) => PlaceMessageRead
 
 case class HouseholdVersionReader(
   id: Long,
+  publicId: String,
   iban: Option[String],
   bic: Option[String],
   created: Long,
@@ -75,6 +76,7 @@ case class HouseholdVersionReader(
     def toHouseholdVersion: HouseholdVersion = {
       val author : Option[UUID] = Validate.optionUUID(this.author)
       HouseholdVersion(
+        Some(UUID.fromString(this.publicId)),
         this.iban,
         this.bic,
         this.created,
@@ -99,7 +101,8 @@ object HouseholdVersionReader {
 
   def apply(household: HouseholdVersion, householdId: Long): HouseholdVersionReader =
     HouseholdVersionReader(
-      0, 
+      0,
+      UUID.randomUUID().toString,
       household.iban, 
       household.bic, 
       household.created, 
@@ -122,6 +125,7 @@ object HouseholdVersionReader {
   def apply(household: HouseholdVersion, id: Long, householdId: Long): HouseholdVersionReader =
     HouseholdVersionReader(
       id, 
+      household.publicId.toString,
       household.iban, 
       household.bic, 
       household.created, 
@@ -142,8 +146,8 @@ object HouseholdVersionReader {
    * apply database tuple to HouseholdVersionReader
    * ## database out
    */
-  def apply(tuple: (Long, Option[String], Option[String], Long, Long, Option[String], Option[String], Double, String, Option[String], Option[String], Boolean, Option[String], Option[String], Long)): HouseholdVersionReader = 
-    HouseholdVersionReader(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9, tuple._10, tuple._11, tuple._12, tuple._13, tuple._14, tuple._15)
+  def apply(tuple: (Long, String, Option[String], Option[String], Long, Long, Option[String], Option[String], Double, String, Option[String], Option[String], Boolean, Option[String], Option[String], Long)): HouseholdVersionReader = 
+    HouseholdVersionReader(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9, tuple._10, tuple._11, tuple._12, tuple._13, tuple._14, tuple._15, tuple._16)
 }
 
 case class HouseholdReader(

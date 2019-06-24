@@ -24,6 +24,7 @@ import slick.lifted.Tag
 
 class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag, "Household_Version") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  def publicId = column[String]("public_id")
   def iban = column[String]("iban")
   def bic = column[String]("bic")
   def created = column[Long]("created")
@@ -39,7 +40,7 @@ class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag,
   def employee = column[String]("employee")
   def householdId = column[Long]("household_id")
 
-  def * = (id, iban.?, bic.?, created, updated, author.?, editor.?, amount, currency, reasonWhat.?, reasonWherefor.?, request, volunteerManager.?, employee.?, householdId) <> (HouseholdVersionReader.apply, HouseholdVersionReader.unapply)
+  def * = (id, publicId, iban.?, bic.?, created, updated, author.?, editor.?, amount, currency, reasonWhat.?, reasonWherefor.?, request, volunteerManager.?, employee.?, householdId) <> (HouseholdVersionReader.apply, HouseholdVersionReader.unapply)
 
   def householdKey = foreignKey("household_id", householdId, TableQuery[HouseholdTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
 }

@@ -65,10 +65,26 @@ class SQLHouseholdDAO @Inject()
   private def readList(entries: Seq[(HouseholdReader, Option[HouseholdVersionReader], Option[PlaceMessageReader])]): List[Household] = {
     entries.groupBy(_._1).map( grouped => read(grouped._2)).toList
   }
+  
+  /**
+   * insert PlaceMessage
+   */
+  private def insertPlaceMessage(pm: PlaceMessage, householdId: Long): Future[Long] = {
+    db.run((placeMessageTable returning placeMessageTable.map(_.id)) += 
+      PlaceMessageReader(pm, householdId))
+  }
+
+  /**
+   * insert HouseholdVersion
+   */
+  private def insertHouseholdVersion(hv: HouseholdVersion, householdId: Long): Future[Long] = {
+    db.run((householdVersionTable returning householdVersionTable.map(_.id)) +=
+          HouseholdVersionReader(hv, householdId))
+  } 
   /* public functions
    *
    */
-  def count(filter: Option[HouseholdFilter]) : Future[Int] = ???
+  def count(filter: Option[HouseholdFilter]) : Future[Int] = db.run(householdTable.size.result)
   def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]] = {
     db.run(join.result).map( result => result.isEmpty match {
       case false => readList(result)
@@ -83,23 +99,60 @@ class SQLHouseholdDAO @Inject()
     })
   }
 
+  def find(id: Long) : Future[Option[Household]] = {
+    db.run(join.filter(_._1.id === id).result).map(result => result.isEmpty match {
+      case false => Some(read(result))
+      case true => None
+    })
+  }
+
 
   def save(household: Household): Future[Option[Household]] = {
-    db.run((householdTable returning householdTable.map(_.id) += HouseholdReader(household)).map(householdId => {
+    db.run((householdTable returning householdTable.map(_.id)) += HouseholdReader(household)).map(householdId => {
       household.state.toMessages.foreach(pm => {
-        db.run(placeMessageTable returning placeMessageTable.map(_.id)) +=
-          PlaceMessageReader(pm, householdId)
-        db.run()
+        db.run((placeMessageTable returning placeMessageTable.map(_.id)) +=
+          PlaceMessageReader(pm, householdId))
       })
       household.versions.foreach(v =>{
-        db.run(householdVersionTable returning householdVersionTable.map(_.id)) +=
-          HouseholdVersionReader(v, householdId)
+        db.run((householdVersionTable returning householdVersionTable.map(_.id)) +=
+          HouseholdVersionReader(v, householdId))
       })
-    }))
+    householdId
+    }).flatMap(id => find(id))
 
     
   }
-  def update(household: Household): Future[Option[Household]] = ???
+  
+  private def deletePlaceMessages(householdId: Long): Future[Int] = {
+    db.run((placeMessageTable.filter(_.householdId === householdId).delete))
+  }
+
+  def update(household: Household): Future[Option[Household]] = {
+    // filter household via uuid
+    db.run((householdTable.filter(_.publicId === household.id.toString).result)
+      // show if result is empty
+      .map(result => result.isEmpty match {
+        case false => {
+          //delete PlaceMessages
+          deletePlaceMessages(result.head.id)
+          //create PlaceMessages
+          household.state.toMessages.foreach(pm => {
+            insertPlaceMessage(pm, result.head.id)
+          })
+          //filter householdVersion
+          val householdVersionNew = household.versions.filter(_.publicId == None)
+          //append householdVersion
+          householdVersionNew.foreach(v =>{
+            insertHouseholdVersion(v, result.head.id)
+          })
+          //update household model is not necessary because it contains only the uuid and the database id 
+          //returning Household via find
+          find(result.head.id).map(result => result)
+        }
+        case true => None
+      }))  
+      find(household.id).map(result => result)
+  }
   def addVersion(uuid: UUID, version: HouseholdVersion): Future[Option[Household]] = ???
   def delete(uuid: UUID): Future[Boolean] = ???
  

@@ -15,6 +15,7 @@ case class Reason(what: Option[String], wherefor: Option[String]) {
 }
 
 case class HouseholdVersion(
+                             publicId: Option[UUID],
                              iban: Option[String],
                              bic: Option[String],
                              created: Long,
