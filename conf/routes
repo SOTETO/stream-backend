@@ -31,6 +31,7 @@ POST       /household/state/action/:uuid/:role      controllers.HouseholdControl
 
 # Deposit
 
-POST      /deposit/create                           controllers.DepositController.create
-GET       /deposits                                 controllers.DepositController.all
+POST      /deposits                                 controllers.DepositController.all
+POST      /deposits/count                           controllers.DepositController.count
+POST      /deposits/create                          controllers.DepositController.create
 

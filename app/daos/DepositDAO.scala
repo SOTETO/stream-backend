@@ -27,7 +27,8 @@ trait DepositDAO {
   def create(deposit: Deposit): Future[Either[DatabaseException, Deposit]]
   def update(deposit: Deposit): Future[Option[Deposit]]
   def delete(uuid: UUID): Future[Boolean]
-  def all(page: Option[Page], sort: Option[Sort]): Future[Option[List[Deposit]]]
+  def all(page: Option[Page], sort: Option[Sort]): Future[List[Deposit]]
+  def count : Future[Int]
 }
 
 @Singleton
@@ -52,12 +53,26 @@ class MariaDBDepositDAO @Inject()
     * @author Johann Sell
     * @return {{{ Seq[DepositReader, Option[DepositUnitReader], Option[DonationReader]] }}}
     */
-  private def join = for {
-    ((deposit, depositUnit), donation) <-
-      depositTable joinLeft
-        depositUnitTable on (_.id === _.depositId) joinLeft
-        donationsTable on (_._2.map(_.donationId) === _.id)
-  } yield (deposit, depositUnit, donation)
+  private def join(page: Option[Page] = None, sort: Option[Sort] = None) = {
+    val sortedDeposits = sort.map(s => s.model match {
+      case Some(model) if model == "deposit" => depositTable.sortBy(_.sortBy(s).get)
+      case None => depositTable.sortBy(_.sortBy(s).get)
+      case _ => depositTable
+    }).getOrElse(depositTable)
+    val pagedDons = page.map(p => sortedDeposits.drop(p.offset).take(p.size)).getOrElse(sortedDeposits)
+
+    val sortedDonations = sort.map(s => s.model match {
+      case Some(model) if model == "donation" => donationsTable.sortBy(_.sortBy(s).get)
+      case _ => donationsTable
+    }).getOrElse(donationsTable)
+
+    for {
+      ((deposit, depositUnit), donation) <-
+        pagedDons joinLeft
+          depositUnitTable on (_.id === _.depositId) joinLeft
+          sortedDonations on (_._2.map(_.donationId) === _.id)
+    } yield (deposit, depositUnit, donation)
+  }
 
   /**
    * return the Deposit Model via id
@@ -67,7 +82,7 @@ class MariaDBDepositDAO @Inject()
     //run the action and match the Seq
     //if the seq is empty, return None
     //else transform the result Seq via read function to Deposit
-    db.run(join.filter(_._1.id === id).result).map(result => result.isEmpty match {
+    db.run(join(None, None).filter(_._1.id === id).result).map(result => result.isEmpty match {
       case false => Some(read(result))
       case true => None
     })
@@ -80,7 +95,7 @@ class MariaDBDepositDAO @Inject()
    */
   override def find(uuid: UUID): Future[Option[Deposit]] = {
     //run the action and transform the result Seq via read function to Option[Deposit]
-    db.run(join.filter(_._1.publicId === uuid.toString).result).map( result => result.isEmpty match {
+    db.run(join(None, None).filter(_._1.publicId === uuid.toString).result).map( result => result.isEmpty match {
       case false => Some(read(result))
       case true => None
     })
@@ -137,15 +152,12 @@ class MariaDBDepositDAO @Inject()
   /**
    * get all deposits
    */
-  override def all(page: Option[Page], sort: Option[Sort]): Future[Option[List[Deposit]]] = {
-    db.run(join.result).map( result =>
-      result.isEmpty match {
-        case false => Some(readList(result))
-        case true => None
-      }
-    )
+  override def all(page: Option[Page], sort: Option[Sort]): Future[List[Deposit]] = {
+    db.run(join(page, sort).result).map( readList( _ ))
   }
 
+  override def count: Future[Int] =
+    db.run(join(None, None).size.result)
 
   /**
    * Transform the Seq[(DepositReader, Option[DepositUnitReader])] to Deposit

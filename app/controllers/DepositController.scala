@@ -72,20 +72,22 @@ class DepositController @Inject() (
   }}
 
   def all = silhouette.SecuredAction(
-    IsEmployee || IsAdmin
-  ).async(validateJson[QueryBody]) { implicit request => {
-    service.all(Some(request.body.page), Some(request.body.sort), None).map(result => result match {
-      case Some(list) => Ok(Json.toJson(list))
-      case _ => BadRequest("TODO: all error")
-    })
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(parse.json) { implicit request => {
+    request.body.validate[QueryBody].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      query => service.all(Some(query.page), Some(query.sort), None).map(list =>
+        WebAppResult.Ok(Json.toJson(list)).toResult(request)
+      )
+    )
   }}
   
   def count = silhouette.SecuredAction(
-    IsEmployee || IsAdmin
-  ).async(validateJson[QueryBody]) { implicit request => {
-    service.count().map(result => result match {
-      case Some(list) => Ok(Json.obj("count" -> Json.toJson(list) ))
-      case _ => BadRequest("TODO: count error")
-    })
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(parse.json) { implicit request => {
+    request.body.validate[QueryBody].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      query => service.count.map(result => WebAppResult.Ok(Json.obj("count" -> result)).toResult(request))
+    )
   }}
 }
