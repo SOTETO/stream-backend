@@ -90,4 +90,25 @@ class DepositController @Inject() (
       query => service.count.map(result => WebAppResult.Ok(Json.obj("count" -> result)).toResult(request))
     )
   }}
+
+
+  case class ConfirmBody(id: UUID, date: Long)
+  object ConfirmBody {
+    implicit val confirmBodyFormat = Json.format[ConfirmBody]
+  }
+
+  def confirm = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async(parse.json) { implicit request => {
+    request.body.validate[ConfirmBody].fold(
+      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
+      query => service.confirm(query.id, query.date).map(result => WebAppResult.Ok(
+        Json.obj("state" -> (result match {
+          case true => "SUCCESS"
+          case false => "FAILURE"
+        }))
+      ).toResult(request))
+    )
+  }
+  }
 }

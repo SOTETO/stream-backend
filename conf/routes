@@ -34,4 +34,5 @@ POST       /household/state/action/:uuid/:role      controllers.HouseholdControl
 POST      /deposits                                 controllers.DepositController.all
 POST      /deposits/count                           controllers.DepositController.count
 POST      /deposits/create                          controllers.DepositController.create
+POST      /deposits/confirm                         controllers.DepositController.confirm
 

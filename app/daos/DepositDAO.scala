@@ -29,6 +29,7 @@ trait DepositDAO {
   def delete(uuid: UUID): Future[Boolean]
   def all(page: Option[Page], sort: Option[Sort]): Future[List[Deposit]]
   def count : Future[Int]
+  def confirm(uuid: UUID, date: Long) : Future[Boolean]
 }
 
 @Singleton
@@ -125,27 +126,20 @@ class MariaDBDepositDAO @Inject()
     } catch {
       case de: DatabaseException => Future.successful(Left(de))
     }
-
-    //insert deposit into DepositTable
-//    db.run((depositTable returning depositTable.map(_.id)) += DepositReader(deposit)).map(depositId => {
-//      //insert depositUnits with depositId as foreignKey
-//      deposit.amount.foreach(depositUnit => {
-//       db.run(donationsTable.filter(_.public_id === depositUnit.donationId.toString).map(_.id).result)
-//         .map(_.headOption).filter(_.isDefined).map(_.get) // handle case: no donation has been found
-//         .map(donationId =>
-//            db.run((depositUnitTable returning depositUnitTable.map(_.id)) +=
-//              DepositUnitReader(depositUnit, depositId, donationId))
-//           )
-//         })
-//      //return depositId
-//      depositId
-//      // return Option[Deposit] via find(id: Long) function
-//    }).flatMap(id => find(id).map(_ match {
-//      case Some(don) => Right(don)
-//      case None => Left(DepositAddException(deposit))
-//    }))
   }
 
+  override def confirm(uuid: UUID, date: Long): Future[Boolean] = {
+    db.run(depositTable.filter(_.publicId === uuid.toString).map(_.id).result).flatMap(_.headOption.map(deposit => {
+      val qDeposit = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed
+      val qDepositUnit = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed
+      val operations = (for {
+        countDeposit <- qDeposit.update(date)
+        countDepositUnit <- qDepositUnit.update(date)
+      } yield (countDeposit, countDepositUnit)).transactionally
+
+      db.run(operations).map(res => res._1 > 1 && res._2 > 1)
+    }).getOrElse(Future.successful(false)))
+  }
   override def update(deposit: Deposit): Future[Option[Deposit]] = ???
   override def delete(uuid: UUID): Future[Boolean] = ???
 
