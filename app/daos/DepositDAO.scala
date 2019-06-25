@@ -151,7 +151,7 @@ class MariaDBDepositDAO @Inject()
   }
 
   override def count: Future[Int] =
-    db.run(join(None, None).size.result)
+    db.run(join(None, None).groupBy(_._1).size.result)
 
   /**
    * Transform the Seq[(DepositReader, Option[DepositUnitReader])] to Deposit

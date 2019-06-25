@@ -115,7 +115,7 @@ class SQLDonationsDAO @Inject()
     db.run(donationJoin(None, None).filter(_._1.id === id).result).map(res => reader( res ).headOption)
 
   override def count(filter: Option[DonationFilter]): Future[Int] =
-    db.run(donationJoin(None, None, filter).size.result)
+    db.run(donationJoin(None, None, filter).groupBy(_._1).size.result)
 
   override def all(page: Option[Page], sort: Option[Sort], filter: Option[DonationFilter]): Future[List[Donation]] =
     db.run(donationJoin(page, sort, filter).result).map(reader( _ ).toList)
