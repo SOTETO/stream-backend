@@ -98,7 +98,7 @@ class DepositController @Inject() (
   }
 
   def confirm = silhouette.SecuredAction(
-    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+    IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
     request.body.validate[ConfirmBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
