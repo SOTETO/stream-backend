@@ -59,10 +59,6 @@ class HouseholdController @Inject()(
     )
   }
 
-  case class QueryBody(page: Page, sort: Sort, filter: Option[HouseholdFilter])
-  object QueryBody {
-    implicit val queryBodyFormat = Json.format[QueryBody]
-  }
   def read = silhouette.SecuredAction(parse.json).async { implicit request =>
     implicit val ec = ExecutionContext.global
     request.body.validate[QueryBody].fold(
@@ -78,7 +74,6 @@ class HouseholdController @Inject()(
       query => service.count(query.filter).map(i => WebAppResult.Ok(Json.obj("count" -> i )).toResult(request))
     )
   }
-
   def stateUpdate(uuid: String, role: String) = silhouette.SecuredAction(parse.json).async { implicit request =>
     implicit val ec = ExecutionContext.global
     request.body.validate[List[ActionMessage]].fold(

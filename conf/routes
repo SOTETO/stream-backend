@@ -16,7 +16,8 @@ POST       /authenticate/:provider                  controllers.DropsController.
 GET        /identity                                controllers.DropsController.frontendLogin
 
 # Donations
-GET        /donations                               controllers.DonationsController.get
+POST       /donations                               controllers.DonationsController.get
+POST       /donations/count                         controllers.DonationsController.count
 POST       /donations/create                        controllers.DonationsController.create
 
 # Household
@@ -27,3 +28,11 @@ POST       /household/update                        controllers.HouseholdControl
 POST       /household/state/action/:uuid/:role      controllers.HouseholdController.stateUpdate(uuid, role)
 #POST       /household/state/action/allowed/:uuid    controllers.HouseholdController.stateAllowedTo(uuid)
 #POST       /household/state/action/all              controllers.HouseholdController.allAllowedActions
+
+# Deposit
+
+POST      /deposits                                 controllers.DepositController.all
+POST      /deposits/count                           controllers.DepositController.count
+POST      /deposits/create                          controllers.DepositController.create
+POST      /deposits/confirm                         controllers.DepositController.confirm
+

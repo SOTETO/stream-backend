@@ -24,6 +24,7 @@ case class Donation(
                    context: Context,
                    comment: Option[String],
                    details: Option[Details],
+                   depositUnits: List[DepositUnit],
                    author: UUID,
                    created: Long,
                    updated: Long

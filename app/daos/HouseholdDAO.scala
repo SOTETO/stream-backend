@@ -6,7 +6,7 @@ import javax.inject.Inject
 import models.frontend.{Household, HouseholdVersion}
 import play.api.Configuration
 import play.api.libs.ws.WSClient
-import testdata.HouseholdTestData
+//import testdata.HouseholdTestData
 import utils._
 
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -22,15 +22,26 @@ trait HouseholdDAO {
   def delete(uuid: UUID): Future[Boolean]
 }
 
-class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration, userDAO: UserDAO) extends HouseholdDAO with Filter[Household, SortDir] {
-  implicit val ec = ExecutionContext.global
+class SQLHouseholdDAO @Inject()(userDAO: UserDAO) extends HouseholdDAO {
+  def count(filter: Option[HouseholdFilter]) : Future[Int] = ???
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]] = ???
+  def find(uuid: UUID) : Future[Option[Household]] = ???
+  def save(household: Household): Future[Option[Household]] = ???
+  def update(household: Household): Future[Option[Household]] = ???
+  def addVersion(uuid: UUID, version: HouseholdVersion): Future[Option[Household]] = ???
+  def delete(uuid: UUID): Future[Boolean] = ???
+ 
+}
 
-  var householdEntries : Future[List[Household]] = HouseholdTestData(config).init(20)
+/*class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration, userDAO: UserDAO) extends HouseholdDAO with Filter[Household, SortDir] {
+  implicit val ec = ExecutionContext.global*/
+
+  //var householdEntries : Future[List[Household]] = HouseholdTestData(config).init(20)
 
   /**
     * Implements list of {{{FilteringOperation}}} for {{{HouseholdDAO}}}
     */
-  override val operations: List[FilteringOperation[Household, SortDir]] = List(
+ /* override val operations: List[FilteringOperation[Household, SortDir]] = List(
     FilteringOperation[Household, SortDir](
       FilterableField("household.what"),
       (dir: SortDir) => (h1: Household, h2: Household) => {
@@ -147,8 +158,8 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
         (dir == Ascending && h1.versions.last.updated <= h2.versions.last.updated) ||
           (dir == Descending && h1.versions.last.updated > h2.versions.last.updated)
     )
-  )
-
+  )*/
+  /*
   override def count(filter: Option[HouseholdFilter]): Future[Int] = householdEntries.map(
     _.filter(h => filter.map(_ ? h).getOrElse(true)).size
   )
@@ -188,4 +199,4 @@ class InMemoryHousholdDAO @Inject()(implicit ws: WSClient, config: Configuration
     householdEntries = householdEntries.map(_.filter(_.id != uuid))
     count.flatMap(c => householdEntries.map(_.size + 1 == c))
   }
-}
+}*/

@@ -18,13 +18,22 @@ case class DonationReader(
                          created: Long,
                          updated: Long
                          ) {
-  def toDonation(supporter: List[UUID] = Nil, sources: List[Source] = Nil) : Donation =
+  def toDonation(
+                  supporter: Seq[InvolvedSupporterReader] = Nil,
+                  sources: Seq[SourceReader] = Nil,
+                  depositUnits: Seq[DepositUnitReader] = Nil
+                ) : Donation =
     Donation(
       publicId,
-      DonationAmount(received, supporter, sources),
+      DonationAmount(
+        received,
+        supporter.filter(_.donation_id == id).map(_.toUUID).toList.distinct,
+        sources.filter(_.donation_id == id).map(_.toSource).toList.distinct
+      ),
       Context(description, category),
       comment,
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
+      depositUnits.filter(_.donationId == id).map(_.toDepositUnit(publicId)).toList.distinct,
       author,
       created,
       updated
@@ -32,6 +41,21 @@ case class DonationReader(
 }
 
 object DonationReader extends ((Long, UUID, Long, String, String, Option[String], Option[String], Option[Boolean], UUID, Long, Long) => DonationReader ) {
+
+  def apply(donation: Donation, id: Option[Long] = None): DonationReader =
+    DonationReader(
+      id.getOrElse(0),
+      donation.id,
+      donation.amount.received,
+      donation.context.description,
+      donation.context.category,
+      donation.comment,
+      donation.details.map(_.reasonForPayment),
+      donation.details.map(_.receipt),
+      donation.author,
+      donation.created,
+      donation.updated
+    )
 
   def apply(tuple: (Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)): DonationReader =
     DonationReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, UUID.fromString(tuple._9), tuple._10, tuple._11)
