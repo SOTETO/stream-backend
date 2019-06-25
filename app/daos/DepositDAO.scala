@@ -171,10 +171,11 @@ class MariaDBDepositDAO @Inject()
   /**
    *  Transform the entries to a list of Deposit
    *  We group the Seq by the Deposit Models and use the read function for transform
+    *  Zipping with index is required to preserve the order
    */
   private def readList(entries: Seq[(DepositReader, Option[DepositUnitReader], Option[DonationReader])]): List[Deposit] = {
-    entries.groupBy(_._1).map( grouped => 
-      read(grouped._2)
-    ).toList
+    entries.zipWithIndex.groupBy(_._1._1).map( grouped =>
+      grouped._2.headOption.map(row => (read(grouped._2.map(_._1)), row._2)) // row._2 contains the index that indicates a sort from database
+    ).filter(_.isDefined).map(_.get).toList.sortBy(_._2).map(_._1)
   }
 }
