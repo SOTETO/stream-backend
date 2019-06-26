@@ -15,6 +15,7 @@ case class DonationReader(
                          reason_for_payment: Option[String],
                          receipt: Option[Boolean],
                          author: UUID,
+                         crew: UUID,
                          created: Long,
                          updated: Long
                          ) {
@@ -35,12 +36,13 @@ case class DonationReader(
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
       depositUnits.filter(_.donationId == id).map(_.toDepositUnit(publicId)).toList.distinct,
       author,
+      crew,
       created,
       updated
     )
 }
 
-object DonationReader extends ((Long, UUID, Long, String, String, Option[String], Option[String], Option[Boolean], UUID, Long, Long) => DonationReader ) {
+object DonationReader extends ((Long, UUID, Long, String, String, Option[String], Option[String], Option[Boolean], UUID, UUID, Long, Long) => DonationReader ) {
 
   def apply(donation: Donation, id: Option[Long] = None): DonationReader =
     DonationReader(
@@ -53,17 +55,18 @@ object DonationReader extends ((Long, UUID, Long, String, String, Option[String]
       donation.details.map(_.reasonForPayment),
       donation.details.map(_.receipt),
       donation.author,
+      donation.crew,
       donation.created,
       donation.updated
     )
 
-  def apply(tuple: (Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)): DonationReader =
-    DonationReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, UUID.fromString(tuple._9), tuple._10, tuple._11)
+  def apply(tuple: (Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, String, Long, Long)): DonationReader =
+    DonationReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, UUID.fromString(tuple._9), UUID.fromString(tuple._10), tuple._11, tuple._12)
 
-  def unapply(arg: DonationReader): Option[(Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, Long, Long)] =
-    Some((arg.id, arg.publicId.toString, arg.received, arg.description, arg.category, arg.comment, arg.reason_for_payment, arg.receipt, arg.author.toString, arg.created, arg.updated))
+  def unapply(arg: DonationReader): Option[(Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, String, Long, Long)] =
+    Some((arg.id, arg.publicId.toString, arg.received, arg.description, arg.category, arg.comment, arg.reason_for_payment, arg.receipt, arg.author.toString, arg.crew.toString, arg.created, arg.updated))
 
   implicit val getDonationReader = GetResult(r =>
-    DonationReader(r.nextLong, UUID.fromString(r.nextString), r.nextLong, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, UUID.fromString(r.nextString), r.nextLong, r.nextLong)
+    DonationReader(r.nextLong, UUID.fromString(r.nextString), r.nextLong, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, UUID.fromString(r.nextString), UUID.fromString(r.nextString), r.nextLong, r.nextLong)
   )
 }

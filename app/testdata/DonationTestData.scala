@@ -80,6 +80,7 @@ case class DonationTestData(config: Configuration)(implicit userDAO: UserDAO) ex
               details,
               Nil,
               author.getOrElse(UUID.randomUUID()),
+              UUID.randomUUID(),
               System.currentTimeMillis(),
               System.currentTimeMillis()
             )

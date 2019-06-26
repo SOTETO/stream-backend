@@ -26,6 +26,7 @@ case class Donation(
                    details: Option[Details],
                    depositUnits: List[DepositUnit],
                    author: UUID,
+                   crew: UUID,
                    created: Long,
                    updated: Long
                    )
