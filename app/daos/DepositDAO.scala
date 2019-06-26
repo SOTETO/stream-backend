@@ -27,8 +27,8 @@ trait DepositDAO {
   def create(deposit: Deposit): Future[Either[DatabaseException, Deposit]]
   def update(deposit: Deposit): Future[Option[Deposit]]
   def delete(uuid: UUID): Future[Boolean]
-  def all(page: Option[Page], sort: Option[Sort]): Future[List[Deposit]]
-  def count : Future[Int]
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter] = None): Future[List[Deposit]]
+  def count(filter: Option[DepositFilter] = None) : Future[Int]
   def confirm(uuid: UUID, date: Long) : Future[Boolean]
 }
 
@@ -54,12 +54,27 @@ class MariaDBDepositDAO @Inject()
     * @author Johann Sell
     * @return {{{ Seq[DepositReader, Option[DepositUnitReader], Option[DonationReader]] }}}
     */
-  private def join(page: Option[Page] = None, sort: Option[Sort] = None) = {
-    val sortedDeposits = sort.map(s => s.model match {
-      case Some(model) if model == "deposit" => depositTable.sortBy(_.sortBy(s).get)
-      case None => depositTable.sortBy(_.sortBy(s).get)
-      case _ => depositTable
+  private def join(page: Option[Page] = None, sort: Option[Sort] = None, filter: Option[DepositFilter] = None) = {
+    println(filter.isDefined)
+    val filteredDeposits = filter.map(f => {
+      //      f.name.map(name => donations.filter(_.description like ("%" + name + "%")))
+      depositTable.filter(table => {
+        val crewFilter = f.crew.map(crewIds => (t: DepositTable) => t.crew.inSet(crewIds.map(_.toString)))
+
+          /**
+            * Looks a little bit complicated, but it's equivalent to usage of filters on donations (more than one paramter)
+            */
+        crewFilter match {
+          case Some(cf) => cf(table)
+          case None => table.id === table.id
+        }
+      })
     }).getOrElse(depositTable)
+    val sortedDeposits = sort.map(s => s.model match {
+      case Some(model) if model == "deposit" => filteredDeposits.sortBy(_.sortBy(s).get)
+      case None => filteredDeposits.sortBy(_.sortBy(s).get)
+      case _ => filteredDeposits
+    }).getOrElse(filteredDeposits)
     val pagedDons = page.map(p => sortedDeposits.drop(p.offset).take(p.size)).getOrElse(sortedDeposits)
 
     val sortedDonations = sort.map(s => s.model match {
@@ -146,12 +161,12 @@ class MariaDBDepositDAO @Inject()
   /**
    * get all deposits
    */
-  override def all(page: Option[Page], sort: Option[Sort]): Future[List[Deposit]] = {
-    db.run(join(page, sort).result).map( readList( _ ))
+  override def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter] = None): Future[List[Deposit]] = {
+    db.run(join(page, sort, filter).result).map( readList( _ ))
   }
 
-  override def count: Future[Int] =
-    db.run(join(None, None).groupBy(_._1).size.result)
+  override def count(filter: Option[DepositFilter] = None): Future[Int] =
+    db.run(join(None, None, filter).groupBy(_._1).size.result)
 
   /**
    * Transform the Seq[(DepositReader, Option[DepositUnitReader])] to Deposit
