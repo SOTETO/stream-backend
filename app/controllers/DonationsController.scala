@@ -1,5 +1,7 @@
 package controllers
 
+import java.util.UUID
+
 import javax.inject._
 import play.api._
 import play.api.mvc._
@@ -39,12 +41,25 @@ class DonationsController @Inject()(
     */
   def get = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request =>
+  ).async(parse.json) { implicit request => {
+    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
+    val crewFilter : Option[DonationFilter] = request.identity.isOnlyVolunteer match {
+      case true => request.identity.getCrew.map((crewID) => DonationFilter(None, Some(Set(crewID)), None))
+      case false => None
+    }
     request.body.validate[DonationQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.all(query.page, query.sort, query.filter).map(donations => WebAppResult.Ok(Json.toJson(donations)).toResult(request))
+      query => {
+        val filter = query.filter match {
+          case Some(f) => Some(f + crewFilter)
+          case None => crewFilter
+        }
+        service.all(query.page, query.sort, filter).map(donations =>
+          WebAppResult.Ok(Json.toJson(donations)).toResult(request)
+        )
+      }
     )
-  }
+  }}
 
   /**
     * Saves a given donation on the server and returns it after successful saving.
@@ -74,10 +89,24 @@ class DonationsController @Inject()(
     */
   def count = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request =>
+  ).async(parse.json) { implicit request => {
+    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
+    val crewFilter : Option[DonationFilter] = request.identity.isOnlyVolunteer match {
+      case true => request.identity.getCrew.map(crewId => DonationFilter(None, Some(Set(crewId)), None))
+      case false => None
+    }
     request.body.validate[DonationQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.count(query.filter).map(count => WebAppResult.Ok(Json.obj("count" -> count )).toResult(request))
+      query => {
+
+        val filter = query.filter match {
+          case Some(f) => Some(f + crewFilter)
+          case None => crewFilter
+        }
+        service.count(filter).map(count =>
+          WebAppResult.Ok(Json.obj("count" -> count )).toResult(request)
+        )
+      }
     )
-  }
+  }}
 }

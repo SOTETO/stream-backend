@@ -51,21 +51,16 @@ class SQLDonationsDAO @Inject()
     */
   private def donationJoin(page: Option[Page] = None, sort: Option[Sort] = None, filter: Option[DonationFilter] = None) = {
     val filteredDons = filter.map(f => {
-//      f.name.map(name => donations.filter(_.description like ("%" + name + "%")))
       donations.filter(table => {
         val nameFilter = f.name.map(n => (t: DonationTable) => t.description like ("%" + n + "%"))
         val idFilter = f.publicId.map(ids => (t: DonationTable) => t.public_id.inSet(ids.map(_.toString)))
+        val crewFilter = f.crew.map(crewIds => (t: DonationTable) => t.crew.inSet(crewIds.map(_.toString)))
 
-        nameFilter match {
-          case Some(nf) => idFilter match {
-            case Some(idf) => nf(table) && idf(table)
-            case None => nf(table)
-          }
-          case None => idFilter match {
-            case Some(idf) => idf(table)
-            case None => table.id === table.id
-          }
-        }
+        val nf = nameFilter.map(f => f(table)).getOrElse(table.id === table.id)
+        val idf = idFilter.map(f => f(table)).getOrElse(table.id === table.id)
+        val cf = crewFilter.map(f => f(table)).getOrElse(table.id === table.id)
+
+        nf && idf && cf
       })
     }).getOrElse(donations)
 
