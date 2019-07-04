@@ -40,33 +40,61 @@ class SQLHouseholdDAO @Inject()
   /* pirvate function
    *
    */
-  private def join = for {
-    ((household, householdVersion), placeMessage) <- householdTable joinLeft 
-      householdVersionTable on (_.id === _.householdId) joinLeft
-      placeMessageTable on (_._1.id === _.householdId)
-  } yield (household, householdVersion, placeMessage)
+  private def join(page: Option[Page] = None, sort: Option[Sort] = None) = {
+    val sortedHouseholdVersion = sort.map(s => s.model match {
+      case Some(model) if model == "household_version" => householdVersionTable.sortBy(t => t.sortBy(s).getOrElse(t.id.asc))
+      //      case Some(model) if model == "donation" && s.field == "crew" => donations.sortBy(_.author) // TODO!
+      case None => householdVersionTable.sortBy(t => t.sortBy(s).getOrElse(t.id.asc))
+      case _ => householdVersionTable
+    }).getOrElse(householdVersionTable)
+
+
+    val sortedPlaceMessages = sort.map(s => s.model match {
+      case Some(model) if model == "place_message" => placeMessageTable.sortBy(_.sortBy(s).get)
+      //      case Some(model) if model == "donation" && s.field == "crew" => donations.sortBy(_.author) // TODO!
+      case None => placeMessageTable.sortBy(t => t.sortBy(s).getOrElse(t.id.asc))
+      case _ => placeMessageTable
+    }).getOrElse(placeMessageTable)
+
+    val pagedHousehold = page.map(p => householdTable.drop(p.offset).take(p.size)).getOrElse(householdTable)
+
+    (for {
+      ((household, householdVersion), placeMessage) <- pagedHousehold join
+        sortedHouseholdVersion on (_.id === _.householdId) join
+        sortedPlaceMessages on (_._1.id === _.householdId)
+    } yield (household, householdVersion, placeMessage))
+      .sortBy(result => sort match {
+          // Sorting afterwards required, since joinLefts seem to break the order defined in request
+        case Some(s) => s.model match {
+          case Some("household_version") => result._2.sortBy(s).getOrElse(result._1.id.asc)
+          case Some("place_message") => result._3.sortBy(s).getOrElse(result._1.id.asc)
+          case _ => result._1.id.asc
+        }
+        case _ => result._1.id.asc
+      })
+  }
 
   /** 
    *  Read a Database Seq and return Household model
    *
    */
 
-  private def read(entries: Seq[(HouseholdReader, Option[HouseholdVersionReader], Option[PlaceMessageReader])]): Household = {
+  private def read(entries: Seq[(HouseholdReader, HouseholdVersionReader, PlaceMessageReader)]): Household = {
     /*
      * Create a Set of PlaceMessageReader and 
      */
-    val placeMessages: Set[PlaceMessage] = entries.groupBy(_._3).toSeq.filter(_._1.isDefined).map(current =>
-     current._1.head.toPlaceMessage).toSet
+    val placeMessages: Set[PlaceMessage] = entries.groupBy(_._3).toSeq.map(current =>
+     current._1.toPlaceMessage).toSet
     val householdVersion: List[HouseholdVersion] =
-      entries.groupBy(_._2).toSeq.filter(_._1.isDefined)
-        .sortBy(_._1.map(_.id).getOrElse(0L)) // this is important since the frontend assumes an ordered list of versions
+      entries.groupBy(_._2).toSeq
+        .sortBy(_._1.id) // this is important since the frontend assumes an ordered list of versions
         .map(current =>
-          current._1.get.toHouseholdVersion
+          current._1.toHouseholdVersion
         ).toList
     Household(entries.map(seq => UUID.fromString(seq._1.publicId)).head, PetriNetHouseholdState(placeMessages), householdVersion)
   }
   
-  private def readList(entries: Seq[(HouseholdReader, Option[HouseholdVersionReader], Option[PlaceMessageReader])]): List[Household] = {
+  private def readList(entries: Seq[(HouseholdReader, HouseholdVersionReader, PlaceMessageReader)]): List[Household] = {
     // Zipping with index preserves the order
     entries.zipWithIndex.groupBy(_._1._1).map( grouped => (read(grouped._2.map(_._1)), grouped._2.head._2) ).toList.sortBy(_._2).map(_._1)
   }
@@ -75,22 +103,18 @@ class SQLHouseholdDAO @Inject()
    *
    */
   def count(filter: Option[HouseholdFilter]) : Future[Int] = db.run(householdTable.size.result)
-  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]] = {
-    db.run(join.result).map( result => result.isEmpty match {
-      case false => readList(result)
-      case true => Nil
-    })
-  }
+  def all(page: Option[Page], sort: Option[Sort], filter: Option[HouseholdFilter]) : Future[List[Household]] =
+    db.run(join(page, sort).result).map(readList( _ ))
   
   def find(uuid: UUID) : Future[Option[Household]] = {
-    db.run(join.filter(_._1.publicId === uuid.toString).result).map(result => result.isEmpty match {
+    db.run(join(None, None).filter(_._1.publicId === uuid.toString).result).map(result => result.isEmpty match {
       case false => Some(read(result))
       case true => None
     })
   }
 
   def find(id: Long) : Future[Option[Household]] = {
-    db.run(join.filter(_._1.id === id).result).map(result => result.isEmpty match {
+    db.run(join(None, None).filter(_._1.id === id).result).map(result => result.isEmpty match {
       case false => Some(read(result))
       case true => None
     })

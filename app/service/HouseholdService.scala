@@ -30,10 +30,12 @@ class HouseholdService @Inject() (dao: HouseholdDAO, userDAO: UserDAO) {
       }})
 
   def count(filter: Option[HouseholdFilter]) : Future[Int] =
-    this.prepare(filter).flatMap(hf => dao.count(hf))
+    dao.count(filter)
+//    this.prepare(filter).flatMap(hf => dao.count(hf))
 
   def all(page: Page, sort: Sort, filter: Option[HouseholdFilter]) : Future[List[Household]] =
-    this.prepare(filter).flatMap(hf => dao.all(Some(page), Some(sort), hf))
+    dao.all(Some(page), Some(sort), filter)
+//    this.prepare(filter).flatMap(hf => dao.all(Some(page), Some(sort), hf))
 
   def save(household: Household, user: UUID): Future[Option[Household]] = {
     dao.save(household.setAuthor(user)).flatMap(_ match {
