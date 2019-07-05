@@ -18,6 +18,7 @@ case class HouseholdVersion(
                              publicId: Option[UUID],
                              iban: Option[String],
                              bic: Option[String],
+                             crewId: UUID,
                              created: Long,
                              updated: Long,
                              author: Option[UUID],

@@ -28,6 +28,7 @@ class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag,
   def publicId = column[String]("public_id")
   def iban = column[String]("iban")
   def bic = column[String]("bic")
+  def crewId = column[String]("crew_id")
   def created = column[Long]("created")
   def updated = column[Long]("updated")
   def author = column[String]("author")
@@ -41,7 +42,7 @@ class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag,
   def employee = column[String]("employee")
   def householdId = column[Long]("household_id")
 
-  def * = (id, publicId, iban.?, bic.?, created, updated, author.?, editor.?, amount, currency, reasonWhat.?, reasonWherefor.?, request, volunteerManager.?, employee.?, householdId) <> (HouseholdVersionReader.apply, HouseholdVersionReader.unapply)
+  def * = (id, publicId, iban.?, bic.?, crewId, created, updated, author.?, editor.?, amount, currency, reasonWhat.?, reasonWherefor.?, request, volunteerManager.?, employee.?, householdId) <> (HouseholdVersionReader.apply, HouseholdVersionReader.unapply)
 
   def householdKey = foreignKey("household_id", householdId, TableQuery[HouseholdTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
 
@@ -50,6 +51,7 @@ class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag,
       case "public_id" => Some(this.publicId)
       case "iban" => Some(this.iban)
       case "bic" => Some(this.bic)
+      case "crew_id" => Some(this.crewId)
       case "created" => Some(this.created)
       case "updated" => Some(this.updated)
       case "author" => Some(this.author)

@@ -75,6 +75,7 @@ case class HouseholdTestData(config: Configuration)(implicit userDAO: UserDAO) e
                   case true => created
                   case _ => System.currentTimeMillis()
                 },
+                crewId = UUID.randomUUID(),
                 amount = amount.head,
                 reason = reason.head,
                 request = r.nextBoolean(),
