@@ -7,23 +7,23 @@ import utils.{Ascending, Descending, Sort}
 /**
  * Implements the Database Schema of Household
  *
- * -------------         --------------------
- * | Household | 1 <-- n | HouseholdVersion |
- * -------------         --------------------
- *        1
- *        ^
- *        |
+ * -------------         ---------------------------
+ * | Household | 1 <-- 1 | HouseholdVersion        |
+ * ------------- 1 <--   ---------------------------
+ *        1          |   ---------------------------
+ *        ^          - n | HouseholdVersionHistory |
+ *        |              ---------------------------
  *        n
  * ----------------
  * | PlaceMessage |
  * ----------------
- * 
- *
  */
 
 
+class HouseholdVersionTable(tag: Tag) extends HouseholdVersionStubTable("Household_Version", tag)
+class HouseholdVersionHistoryTable(tag: Tag) extends HouseholdVersionStubTable("Household_Version_History", tag)
 
-class HouseholdVersionTable(tag: Tag) extends Table[HouseholdVersionReader](tag, "Household_Version") {
+class HouseholdVersionStubTable(tableName: String, tag: Tag) extends Table[HouseholdVersionReader](tag, tableName) {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def publicId = column[String]("public_id")
   def iban = column[String]("iban")

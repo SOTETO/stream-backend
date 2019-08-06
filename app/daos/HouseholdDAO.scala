@@ -4,11 +4,11 @@ import java.util.UUID
 
 import javax.inject.Inject
 import models.frontend.{Household, HouseholdVersion, PetriNetHouseholdState, PlaceMessage}
-import daos.schema.{HouseholdTable, HouseholdVersionTable, PlaceMessageTable}
+import daos.schema.{HouseholdTable, HouseholdVersionHistoryTable, HouseholdVersionTable, PlaceMessageTable}
 import daos.reader.{HouseholdReader, HouseholdVersionReader, PlaceMessageReader}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
-import slick.lifted.TableQuery
+import slick.lifted.{Rep, TableQuery}
 import slick.jdbc.MySQLProfile.api._
 import play.api.Configuration
 import play.api.libs.ws.WSClient
@@ -35,6 +35,7 @@ class SQLHouseholdDAO @Inject()
   
   val householdTable = TableQuery[HouseholdTable]
   val householdVersionTable = TableQuery[HouseholdVersionTable]
+  val householdVersionHistoryTable = TableQuery[HouseholdVersionHistoryTable]
   val placeMessageTable = TableQuery[PlaceMessageTable]
 
   /* pirvate function
@@ -59,15 +60,16 @@ class SQLHouseholdDAO @Inject()
     val pagedHousehold = page.map(p => householdTable.drop(p.offset).take(p.size)).getOrElse(householdTable)
 
     (for {
-      ((household, householdVersion), placeMessage) <- pagedHousehold join
-        sortedHouseholdVersion on (_.id === _.householdId) join
-        sortedPlaceMessages on (_._1.id === _.householdId)
-    } yield (household, householdVersion, placeMessage))
+      (((household, householdVersion), placeMessage), oldVersions) <- pagedHousehold join
+        sortedHouseholdVersion on (_.id === _.householdId) joinLeft
+        sortedPlaceMessages on (_._1.id === _.householdId) joinLeft
+        householdVersionHistoryTable on (_._1._1.id === _.householdId)
+    } yield (household, householdVersion, placeMessage, oldVersions))
       .sortBy(result => sort match {
           // Sorting afterwards required, since joinLefts seem to break the order defined in request
         case Some(s) => s.model match {
           case Some("household_version") => result._2.sortBy(s).getOrElse(result._1.id.asc)
-          case Some("place_message") => result._3.sortBy(s).getOrElse(result._1.id.asc)
+//          case Some("place_message") => result._3.get.sortBy(s).getOrElse(result._1.id.asc) // TODO
           case _ => result._1.id.asc
         }
         case _ => result._1.id.asc
@@ -79,22 +81,31 @@ class SQLHouseholdDAO @Inject()
    *
    */
 
-  private def read(entries: Seq[(HouseholdReader, HouseholdVersionReader, PlaceMessageReader)]): Household = {
+  private def read(entries: Seq[(HouseholdReader, HouseholdVersionReader, Option[PlaceMessageReader], Option[HouseholdVersionReader])]): Household = {
     /*
      * Create a Set of PlaceMessageReader and 
      */
     val placeMessages: Set[PlaceMessage] = entries.groupBy(_._3).toSeq.map(current =>
-     current._1.toPlaceMessage).toSet
+     current._1.map(_.toPlaceMessage)).toSet.filter(_.isDefined).map(_.get)
     val householdVersion: List[HouseholdVersion] =
       entries.groupBy(_._2).toSeq
         .sortBy(_._1.id) // this is important since the frontend assumes an ordered list of versions
         .map(current =>
           current._1.toHouseholdVersion
         ).toList
-    Household(entries.map(seq => UUID.fromString(seq._1.publicId)).head, PetriNetHouseholdState(placeMessages), householdVersion)
+
+    val oldHouseholdVersion: List[HouseholdVersion] =
+      entries.groupBy(_._4).toSeq
+        .sortBy(_._1.map(_.id).getOrElse(0L)) // this is important since the frontend assumes an ordered list of versions
+        .map(current =>
+        current._1.map(_.toHouseholdVersion)
+      ).toList.filter(_.isDefined).map(_.get)
+    Household(entries.map(seq =>
+      UUID.fromString(seq._1.publicId)).head, PetriNetHouseholdState(placeMessages), oldHouseholdVersion ++ householdVersion
+    )
   }
   
-  private def readList(entries: Seq[(HouseholdReader, HouseholdVersionReader, PlaceMessageReader)]): List[Household] = {
+  private def readList(entries: Seq[(HouseholdReader, HouseholdVersionReader, Option[PlaceMessageReader], Option[HouseholdVersionReader])]): List[Household] = {
     // Zipping with index preserves the order
     entries.zipWithIndex.groupBy(_._1._1).map( grouped => (read(grouped._2.map(_._1)), grouped._2.head._2) ).toList.sortBy(_._2).map(_._1)
   }
@@ -122,35 +133,36 @@ class SQLHouseholdDAO @Inject()
 
 
   def save(household: Household): Future[Option[Household]] = {
-    db.run((householdTable returning householdTable.map(_.id)) += HouseholdReader(household)).map(householdId => {
-      household.state.toMessages.foreach(pm => {
-        db.run((placeMessageTable returning placeMessageTable.map(_.id)) +=
-          PlaceMessageReader(pm, householdId))
-      })
-      household.versions.foreach(v =>{
-        db.run((householdVersionTable returning householdVersionTable.map(_.id)) +=
-          HouseholdVersionReader(v, householdId))
-      })
-    householdId
-    }).flatMap(id => find(id))
-
-    
+    val insert = (for {
+      householdId <- (householdTable returning householdTable.map(_.id)) += HouseholdReader(household)
+      _ <- placeMessageTable ++= household.state.toMessages.map(pm => PlaceMessageReader(pm, householdId))
+      _ <- householdVersionTable += HouseholdVersionReader(household.versions.reverse.head, householdId)
+      _ <- householdVersionHistoryTable ++= household.versions.reverse.tail.reverse.map(v => HouseholdVersionReader(v, householdId))
+    } yield householdId).transactionally
+    db.run(insert).flatMap(id => find(id))
   }
 
   def update(household: Household): Future[Option[Household]] = {
-    val query = (for {
+    val updateQuery = (for {
       // find the household
-      householdId <- householdTable.filter(_.publicId === household.id.toString).map(_.id).result.headOption
+      householdId <- householdTable.filter(_.publicId === household.id.toString).map(_.id).result //.result.headOption
       // delete the previous state
-      _ <- placeMessageTable.filter(_.householdId === householdId).delete
+      _ <- placeMessageTable.filter(_.householdId === householdId.head).delete
       // save the new state
-      countPMInserts <- placeMessageTable ++= household.state.toMessages.map(pm => PlaceMessageReader(pm, householdId.get))
+      _ <- placeMessageTable ++= household.state.toMessages.map(pm => PlaceMessageReader(pm, householdId.head))
+      // get id of current version
+      currentVersion <- householdVersionTable.filter(_.householdId === householdId.head).map(_.publicId).result
+      // delete current version - this version is either equivalent to current version (head of versions) or part of the tail of versions
+      _ <- householdVersionTable.filter(_.householdId === householdId.head).delete
+      // save current version
+      _ <- householdVersionTable += HouseholdVersionReader(household.versions.reverse.head, householdId.head)
       // save new versions
-      countVersionInserts <- householdVersionTable ++= household.versions.filter(_.publicId == None)
-        .map(v => HouseholdVersionReader(v, householdId.get))
+      _ <- householdVersionHistoryTable ++= household.versions.reverse.tail.reverse.filter(v =>
+        v.publicId.isEmpty || v.publicId.exists(_.toString == currentVersion.head)
+      ).map(v => HouseholdVersionReader(v, householdId.head))
     } yield householdId).transactionally
 
-    db.run(query).flatMap(_ match {
+    db.run(updateQuery).flatMap(_.headOption match {
       case Some(id) => find(id)
       case None => Future.successful(None)
     })
