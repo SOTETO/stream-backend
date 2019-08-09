@@ -15,6 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.HouseholdService
 import utils.{HouseholdFilter, Page, Sort}
+import play.api.Logger
 
 @Singleton
 class HouseholdController @Inject()(
@@ -63,7 +64,22 @@ class HouseholdController @Inject()(
     implicit val ec = ExecutionContext.global
     request.body.validate[QueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.all(query.page, query.sort, query.filter).map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
+      query => {
+        //crewFilter for Volunteer using isOnlyVolunteer
+        val crewFilter : Option[HouseholdFilter] = request.identity.isOnlyVolunteer match {
+          case true => {
+            //show if filter exists
+            query.filter match {
+              //extend filter
+              case Some(filter) => Some(filter.addCrew(request.identity.getCrew))
+              //create filter for user crew
+              case None => Some(HouseholdFilter(None, None, request.identity.getCrew, Nil, None, None, Nil, Nil, Nil))
+          }}
+          // if user is not only Volunteer use requested filter
+          case false => query.filter
+        }
+        service.all(query.page, query.sort, crewFilter).map(list => WebAppResult.Ok(Json.toJson( list )).toResult(request))
+      }
     )
   }
 

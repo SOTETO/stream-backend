@@ -31,6 +31,10 @@ case class HouseholdFilter(
                           employee: List[PlaceMessage]
                           ) extends Logging {
 
+  // used for extend the filter by crew for not Volunteer
+  def addCrew(crew: Option[UUID]) : HouseholdFilter =
+    HouseholdFilter(this.what, this.wherefor, crew, this.crewSupporter, this.amount, this.complete, this.repayment, this.volunteerManager, this.employee)
+
   def >> (crewSupporter: List[UUID]) : HouseholdFilter =
     HouseholdFilter(this.what, this.wherefor, this.crew, crewSupporter, this.amount, this.complete, this.repayment,
       this.volunteerManager, this.employee)
