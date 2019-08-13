@@ -16,11 +16,11 @@ case class Context(description: String, category: String)
 
 case class Source(category: String, amount: Double, currency: String, typeOfSource: String)
 
-case class DonationAmount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
+case class Amount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
 
 case class Donation(
                    id: UUID,
-                   amount: DonationAmount,
+                   amount: Amount,
                    context: Context,
                    comment: Option[String],
                    details: Option[Details],
