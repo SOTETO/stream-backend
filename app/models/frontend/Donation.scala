@@ -22,6 +22,7 @@ case class Donation(
                    id: UUID,
                    amount: DonationAmount,
                    context: Context,
+                   norms: String,
                    comment: Option[String],
                    details: Option[Details],
                    depositUnits: List[DepositUnit],

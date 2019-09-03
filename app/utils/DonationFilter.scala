@@ -9,7 +9,8 @@ import slick.lifted.TableQuery
 case class DonationFilter(
                          publicId: Option[Set[UUID]], // content of the set has to be concatenated by OR
                          crew: Option[Set[UUID]],
-                         name: Option[String]
+                         name: Option[String],
+                         norms: Option[String]
                          ) {
   def + (filter: Option[DonationFilter]) : DonationFilter =
     DonationFilter(
@@ -27,7 +28,8 @@ case class DonationFilter(
         }
         case None => filter.flatMap(_.crew)
       },
-      name // TODO: Do something with other name
+      name, // TODO: Do something with other name
+      norms
     )
 }
 

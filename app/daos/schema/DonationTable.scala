@@ -13,6 +13,7 @@ class DonationTable(tag: Tag) extends Table[DonationReader](tag, "Donation") {
   def received = column[Long]("received")
   def description = column[String]("description")
   def category = column[String]("category")
+  def norms = column[String]("norms")
   def comment = column[String]("comment")
   def reason_for_payment = column[String]("reason_for_payment")
   def receipt = column[Boolean]("receipt")
@@ -21,7 +22,7 @@ class DonationTable(tag: Tag) extends Table[DonationReader](tag, "Donation") {
   def created = column[Long]("created")
   def updated = column[Long]("updated")
 
-  def * = (id, public_id, received, description, category, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (DonationReader.apply, DonationReader.unapply)
+  def * = (id, public_id, received, description, category, norms, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (DonationReader.apply, DonationReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 
@@ -46,6 +47,11 @@ class DonationTable(tag: Tag) extends Table[DonationReader](tag, "Donation") {
         case Descending => this.category.desc.nullsFirst
         case Ascending => this.category.asc.nullsFirst
         case _ => this.category.asc.nullsFirst
+      })
+      case "norms" => Some(sort.dir match {
+        case Descending => this.norms.desc.nullsFirst
+        case Ascending => this.norms.asc.nullsFirst
+        case _ => this.norms.asc.nullsFirst
       })
       case "comment" => Some(sort.dir match {
         case Descending => this.comment.desc.nullsFirst
