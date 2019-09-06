@@ -20,6 +20,7 @@ import utils.{Ascending, Descending, Sort}
  */
 
 
+
 class HouseholdVersionTable(tag: Tag) extends HouseholdVersionStubTable("Household_Version", tag)
 class HouseholdVersionHistoryTable(tag: Tag) extends HouseholdVersionStubTable("Household_Version_History", tag)
 
@@ -69,24 +70,24 @@ class HouseholdVersionStubTable(tableName: String, tag: Tag) extends Table[House
 
   def sortByDir(sort: Sort, field: Rep[_ >: String with Long with Double with Boolean]) = sort.dir match {
     case Descending => field match {
-      case l: Rep[Long] => Some(l.desc.nullsFirst)
-      case s: Rep[String] => Some(s.desc.nullsFirst)
-      case d: Rep[Double] => Some(d.desc.nullsFirst)
-      case b: Rep[Boolean] => Some(b.desc.nullsFirst)
+      case l: Rep[Long @unchecked] => Some(l.desc.nullsFirst)
+      //case s: Rep[String @unchecked] => Some(s.desc.nullsFirst)
+     // case d: Rep[Double @unchecked] => Some(d.desc.nullsFirst)
+      //case b: Rep[Boolean @unchecked] => Some(b.desc.nullsFirst)
       case _ => None
     }
     case Ascending => field match {
-      case l: Rep[Long] => Some(l.asc.nullsFirst)
-      case s: Rep[String] => Some(s.asc.nullsFirst)
-      case d: Rep[Double] => Some(d.asc.nullsFirst)
-      case b: Rep[Boolean] => Some(b.asc.nullsFirst)
+      case l: Rep[Long  @unchecked] => Some(l.asc.nullsFirst)
+      //case s: Rep[String @unchecked] => Some(s.asc.nullsFirst)
+      //case d: Rep[Double @unchecked] => Some(d.asc.nullsFirst)
+      //case b: Rep[Boolean @unchecked] => Some(b.asc.nullsFirst)
       case _ => None
     }
     case _ => field match {
-      case l: Rep[Long] => Some(l.asc.nullsFirst)
-      case s: Rep[String] => Some(s.asc.nullsFirst)
-      case d: Rep[Double] => Some(d.asc.nullsFirst)
-      case b: Rep[Boolean] => Some(b.asc.nullsFirst)
+      case l: Rep[Long @unchecked] => Some(l.asc.nullsFirst)
+      //case s: Rep[String @unchecked] => Some(s.asc.nullsFirst)
+      //case d: Rep[Double @unchecked] => Some(d.asc.nullsFirst)
+      //case b: Rep[Boolean @unchecked] => Some(b.asc.nullsFirst)
       case _ => None
     }
   }
