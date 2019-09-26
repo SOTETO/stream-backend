@@ -44,7 +44,7 @@ class DonationsController @Inject()(
   ).async(parse.json) { implicit request => {
     // Prefilter results by the users crew, if the user is a volunteer manager and no employee
     val crewFilter : Option[DonationFilter] = request.identity.isOnlyVolunteer match {
-      case true => request.identity.getCrew.map((crewID) => DonationFilter(None, Some(Set(crewID)), None, Some("Donation")))
+      case true => request.identity.getCrew.map((crewID) => DonationFilter(None, Some(Set(crewID)), None, None))
       case false => None
     }
     request.body.validate[DonationQueryBody].fold(
@@ -92,7 +92,7 @@ class DonationsController @Inject()(
   ).async(parse.json) { implicit request => {
     // Prefilter results by the users crew, if the user is a volunteer manager and no employee
     val crewFilter : Option[DonationFilter] = request.identity.isOnlyVolunteer match {
-      case true => request.identity.getCrew.map(crewId => DonationFilter(None, Some(Set(crewId)), None, Some("Donation")))
+      case true => request.identity.getCrew.map(crewId => DonationFilter(None, Some(Set(crewId)), None, None))
       case false => None
     }
     request.body.validate[DonationQueryBody].fold(
