@@ -2,18 +2,18 @@ package utils
 
 import java.util.UUID
 
-import daos.schema.DonationTable
+import daos.schema.TakingTable
 import play.api.libs.json.Json
 import slick.lifted.TableQuery
 
-case class DonationFilter(
+case class TakingFilter(
                          publicId: Option[Set[UUID]], // content of the set has to be concatenated by OR
                          crew: Option[Set[UUID]],
                          name: Option[String],
                          norms: Option[String]
                          ) {
-  def + (filter: Option[DonationFilter]) : DonationFilter =
-    DonationFilter(
+  def + (filter: Option[TakingFilter]) : TakingFilter =
+    TakingFilter(
       publicId match {
         case Some(ids) => filter.flatMap(_.publicId) match {
           case Some(otherIDs) => Some(ids ++ otherIDs)
@@ -33,6 +33,6 @@ case class DonationFilter(
     )
 }
 
-object DonationFilter {
-  implicit val donationFilterFormat = Json.format[DonationFilter]
+object TakingFilter {
+  implicit val takingFilterFormat = Json.format[TakingFilter]
 }

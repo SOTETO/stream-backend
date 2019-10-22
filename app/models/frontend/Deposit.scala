@@ -9,12 +9,12 @@ import play.api.libs.functional.syntax._
 
 
 /* Amount Unit Json
- * Contains the uuid of the donation and 
- * the amount of the deposit in relation to the donation
+ * Contains the uuid of the taking and 
+ * the amount of the deposit in relation to the taking
  */
 case class DepositUnit(
   publicId: UUID,
-  donationId: UUID,
+  takingId: UUID,
   confirmed: Option[Long],
   amount: Double,
   currency: String,

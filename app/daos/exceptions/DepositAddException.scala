@@ -1,6 +1,6 @@
 package daos.exceptions
 
-import models.frontend.{Deposit, Donation}
+import models.frontend.{Deposit, Taking}
 
 case class DepositAddException(deposit: Deposit) extends DatabaseException {
   override def getMessage: String =

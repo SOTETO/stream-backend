@@ -22,12 +22,12 @@ case class DepositUnitReader(
   currency: String,
   created: Long,
   depositId: Long,
-  donationId: Long
+  takingId: Long
   ) {
     /**
      * map database model to frontend model
      */
-    def toDepositUnit(donationId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), donationId, this.confirmed, this.amount, this.currency, this.created)
+    def toDepositUnit(takingId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), takingId, this.confirmed, this.amount, this.currency, this.created)
   }
 
 object DepositUnitReader extends ((Long, String, Option[Long], Double, String, Long, Long, Long) => DepositUnitReader){
@@ -36,9 +36,9 @@ object DepositUnitReader extends ((Long, String, Option[Long], Double, String, L
 //    DepositUnitReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7)
 //
 //  def unapply(arg: DepositUnitReader): Option[(Long, String, Option[Long], Double, Long, Long, Long)] =
-//    Some((arg.id, arg.publicId.toString, arg.confirmed, arg.amount, arg.created, arg.depositId, arg.donationId))
+//    Some((arg.id, arg.publicId.toString, arg.confirmed, arg.amount, arg.created, arg.depositId, arg.takingId))
 
-  def apply(depositUnit: DepositUnit, depositId: Long, donationId: Long, id : Option[Long] = None) : DepositUnitReader =
+  def apply(depositUnit: DepositUnit, depositId: Long, takingId: Long, id : Option[Long] = None) : DepositUnitReader =
     DepositUnitReader(
       id.getOrElse(0L),
       depositUnit.publicId.toString,
@@ -47,7 +47,7 @@ object DepositUnitReader extends ((Long, String, Option[Long], Double, String, L
       depositUnit.currency,
       depositUnit.created,
       depositId,
-      donationId
+      takingId
     )
 
   implicit val getDepositUnitReader = GetResult(r =>

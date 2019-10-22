@@ -3,12 +3,12 @@ package daos.schema
 import java.util.UUID
 
 import slick.jdbc.MySQLProfile.api._
-import daos.reader.DonationReader
+import daos.reader.TakingReader
 import slick.lifted.{ColumnOrdered, Tag}
 import utils.{Ascending, Descending, Sort}
-import utils.DonationFilter
+import utils.TakingFilter
 
-class DonationTable(tag: Tag) extends Table[DonationReader](tag, "Donation") {
+class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def public_id = column[String]("public_id")
   def received = column[Long]("received")
@@ -23,11 +23,11 @@ class DonationTable(tag: Tag) extends Table[DonationReader](tag, "Donation") {
   def created = column[Long]("created")
   def updated = column[Long]("updated")
 
-  def * = (id, public_id, received, description, category, norms, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (DonationReader.apply, DonationReader.unapply)
+  def * = (id, public_id, received, description, category, norms, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (TakingReader.apply, TakingReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
   
-  def filter(filter: Option[DonationFilter]) = {
+  def filter(filter: Option[TakingFilter]) = {
     filter.map(f => {
         List(
           f.name.map(name => this.description like "%" + name +"%"),

@@ -11,30 +11,30 @@ import org.vivaconagua.play2OauthClient.silhouette.UserService
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.libs.json.{JsError, Json, Reads}
 import play.api.Configuration
-import models.frontend.Donation
+import models.frontend.Taking
 import responses.WebAppResult
-import service.DonationsService
-import utils.{Ascending, DonationFilter, Page, Sort}
+import service.TakingsService
+import utils.{Ascending, TakingFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DonationsController @Inject()(
+class TakingsController @Inject()(
                                      cc: ControllerComponents,
                                      silhouette: Silhouette[CookieEnv],
                                      userService: UserService,
-                                     service: DonationsService
+                                     service: TakingsService
                                    ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
 
   implicit val ec = ExecutionContext.global
 
-  case class DonationQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DonationFilter])
-  object DonationQueryBody {
-    implicit val donationQueryBodyFormat = Json.format[DonationQueryBody]
+  case class TakingQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter])
+  object TakingQueryBody {
+    implicit val takingQueryBodyFormat = Json.format[TakingQueryBody]
   }
 
   /**
-    * Reads all currently saved donations and returns them.
+    * Reads all currently saved takings and returns them.
     *
     * @author Johann Sell
     * @return
@@ -43,26 +43,26 @@ class DonationsController @Inject()(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
     // Prefilter results by the users crew, if the user is a volunteer manager and no employee
-    val crewFilter : Option[DonationFilter] = request.identity.isOnlyVolunteer match {
-      case true => request.identity.getCrew.map((crewID) => DonationFilter(None, Some(Set(crewID)), None, None))
+    val crewFilter : Option[TakingFilter] = request.identity.isOnlyVolunteer match {
+      case true => request.identity.getCrew.map((crewID) => TakingFilter(None, Some(Set(crewID)), None, None))
       case false => None
     }
-    request.body.validate[DonationQueryBody].fold(
+    request.body.validate[TakingQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       query => {
         val filter = query.filter match {
           case Some(f) => Some(f + crewFilter)
           case None => crewFilter
         }
-        service.all(query.page, query.sort, filter).map(donations =>
-          WebAppResult.Ok(Json.toJson(donations)).toResult(request)
+        service.all(query.page, query.sort, filter).map(takings =>
+          WebAppResult.Ok(Json.toJson(takings)).toResult(request)
         )
       }
     )
   }}
 
   /**
-    * Saves a given donation on the server and returns it after successful saving.
+    * Saves a given taking on the server and returns it after successful saving.
     *
     * @author Johann Sell
     * @return
@@ -70,11 +70,11 @@ class DonationsController @Inject()(
   def create = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
-    request.body.validate[Donation].fold(
+    request.body.validate[Taking].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      donation => {
-        service.save(donation).map(_ match {
-          case Right(databaseDonation) => WebAppResult.Ok(Json.toJson(List(databaseDonation))).toResult(request)
+      taking => {
+        service.save(taking).map(_ match {
+          case Right(databaseTaking) => WebAppResult.Ok(Json.toJson(List(databaseTaking))).toResult(request)
           case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
         })
       }
@@ -82,7 +82,7 @@ class DonationsController @Inject()(
   }}
 
   /**
-    * Returns the count of donations.
+    * Returns the count of takings.
     *
     * @author Johann Sell
     * @return
@@ -91,11 +91,11 @@ class DonationsController @Inject()(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
     // Prefilter results by the users crew, if the user is a volunteer manager and no employee
-    val crewFilter : Option[DonationFilter] = request.identity.isOnlyVolunteer match {
-      case true => request.identity.getCrew.map(crewId => DonationFilter(None, Some(Set(crewId)), None, None))
+    val crewFilter : Option[TakingFilter] = request.identity.isOnlyVolunteer match {
+      case true => request.identity.getCrew.map(crewId => TakingFilter(None, Some(Set(crewId)), None, None))
       case false => None
     }
-    request.body.validate[DonationQueryBody].fold(
+    request.body.validate[TakingQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
       query => {
 
