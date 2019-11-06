@@ -89,7 +89,15 @@ class MariaDBDepositDAO @Inject()
           sortedTakings on (_._2.map(_.takingId) === _.id)
     } yield (deposit, depositUnit, taking)
   }
-
+  
+  private def joined()= {
+    (for {
+      ((deposit, depositUnit), taking) <-
+        depositTable joinLeft 
+        depositUnitTable on (_.id === _.depositId) joinLeft
+        takingsTable on (_._2.map(_.takingId) === _.id)
+    } yield (deposit, depositUnit, taking))
+  }
   /**
    * return the Deposit Model via id
    */
@@ -165,9 +173,10 @@ class MariaDBDepositDAO @Inject()
     db.run(join(page, sort, filter).result).map( readList( _ ))
   }
 
-  override def count(filter: Option[DepositFilter] = None): Future[Int] =
-    db.run(join(None, None, filter).groupBy(_._1).size.result)
-
+  override def count(filter: Option[DepositFilter] = None): Future[Int] = {
+    val query = joined()
+    db.run(query.length.result)
+  }
   /**
    * Transform the Seq[(DepositReader, Option[DepositUnitReader])] to Deposit
    */
