@@ -1,4 +1,4 @@
-package testdata
+/*package testdata
 
 import java.util.UUID
 
@@ -76,10 +76,12 @@ case class DonationTestData(config: Configuration)(implicit userDAO: UserDAO) ex
               UUID.randomUUID(),
               amount.head,
               context.head,
+              norms,
               comment,
               details,
               Nil,
               author.getOrElse(UUID.randomUUID()),
+              UUID.randomUUID(),
               System.currentTimeMillis(),
               System.currentTimeMillis()
             )
@@ -88,4 +90,4 @@ case class DonationTestData(config: Configuration)(implicit userDAO: UserDAO) ex
       )
     )
   }
-}
+}*/

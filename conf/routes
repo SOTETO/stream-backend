@@ -15,10 +15,10 @@ POST       /authenticate/:provider                  controllers.DropsController.
 # WebApp route
 GET        /identity                                controllers.DropsController.frontendLogin
 
-# Donations
-POST       /donations                               controllers.DonationsController.get
-POST       /donations/count                         controllers.DonationsController.count
-POST       /donations/create                        controllers.DonationsController.create
+# Takings
+POST       /takings                               controllers.TakingsController.get
+POST       /takings/count                         controllers.TakingsController.count
+POST       /takings/create                        controllers.TakingsController.create
 
 # Household
 POST       /household/count                         controllers.HouseholdController.count

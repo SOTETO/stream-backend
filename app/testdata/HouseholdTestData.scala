@@ -61,6 +61,7 @@ case class HouseholdTestData(config: Configuration)(implicit userDAO: UserDAO) e
           ReasonTestData.init(1).map(reason =>
             (0 to count).foldLeft[List[HouseholdVersion]](Nil)((versions, i) => versions ++ List(
               HouseholdVersion(
+                Some(UUID.randomUUID()),
                 iban = r.nextBoolean() match {
                   case true => Some(iban(r.nextInt(iban.size)))
                   case _ => None
@@ -74,6 +75,7 @@ case class HouseholdTestData(config: Configuration)(implicit userDAO: UserDAO) e
                   case true => created
                   case _ => System.currentTimeMillis()
                 },
+                crewId = UUID.randomUUID(),
                 amount = amount.head,
                 reason = reason.head,
                 request = r.nextBoolean(),

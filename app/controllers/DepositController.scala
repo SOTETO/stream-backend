@@ -18,6 +18,7 @@ import responses.WebAppResult
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.DepositService
+import utils.{DepositFilter, Page, Sort}
 //import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 @Singleton
@@ -36,6 +37,11 @@ class DepositController @Inject() (
    */
 
   def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
+
+  case class DepositQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter])
+  object DepositQueryBody {
+    implicit val depositQueryBodyFormat = Json.format[DepositQueryBody]
+  }
 
   /**
    * All action controller return the Deposit Model as Json or an simple http error 
@@ -74,20 +80,38 @@ class DepositController @Inject() (
   def all = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
-    request.body.validate[QueryBody].fold(
+    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
+    val preFilter : Option[DepositFilter] = request.identity.isOnlyVolunteer match {
+      case true => request.identity.getCrew.map(DepositFilter( _ ))
+      case false => None
+    }
+    request.body.validate[DepositQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.all(Some(query.page), Some(query.sort), None).map(list =>
-        WebAppResult.Ok(Json.toJson(list)).toResult(request)
-      )
+      query => {
+        val filter = preFilter match {
+          case Some(pf) => Some(query.filter.map(_ + pf).getOrElse(pf))
+          case None => query.filter
+        }
+        service.all(query.page, query.sort, filter).map(list =>
+          WebAppResult.Ok(Json.toJson(list)).toResult(request)
+        )
+      }
     )
   }}
   
   def count = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
-    request.body.validate[QueryBody].fold(
+    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
+    val preFilter : Option[DepositFilter] = request.identity.isOnlyVolunteer match {
+      case true => request.identity.getCrew.map(DepositFilter( _ ))
+      case false => None
+    }
+    request.body.validate[DepositQueryBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.count.map(result => WebAppResult.Ok(Json.obj("count" -> result)).toResult(request))
+      query => service.count(preFilter.flatMap(pf => query.filter.map(_ + pf))).map(result =>
+        WebAppResult.Ok(Json.obj("count" -> result)).toResult(request)
+      )
     )
   }}
 
