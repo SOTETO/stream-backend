@@ -4,20 +4,6 @@ import slick.jdbc.MySQLProfile.api._
 import daos.reader.{HouseholdReader, HouseholdVersionReader, PlaceMessageReader}
 import slick.lifted.Tag
 import utils.{Ascending, Descending, Sort}
-/**
- * Implements the Database Schema of Household
- *
- * -------------         ---------------------------
- * | Household | 1 <-- 1 | HouseholdVersion        |
- * ------------- 1 <--   ---------------------------
- *        1          |   ---------------------------
- *        ^          - n | HouseholdVersionHistory |
- *        |              ---------------------------
- *        n
- * ----------------
- * | PlaceMessage |
- * ----------------
- */
 
 
 

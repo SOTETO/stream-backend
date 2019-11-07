@@ -7,6 +7,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.8"
 
+autoAPIMappings := true
 //resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 resolvers ++= Seq(
   Resolver.sonatypeRepo("public"),

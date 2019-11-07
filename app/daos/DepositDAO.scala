@@ -33,13 +33,23 @@ trait DepositDAO {
 }
 
 @Singleton
-class MariaDBDepositDAO @Inject()
+class SQLDepositDAO @Inject()
   /**
    * Database tables and provider
    */
   (protected val dbConfigProvider: DatabaseConfigProvider) 
   (implicit ec: ExecutionContext) extends DepositDAO with HasDatabaseConfigProvider[JdbcProfile] {
 
+  
+  type DepositQuery = slick.lifted.Query[
+  (daos.schema.DepositTable, 
+    slick.lifted.Rep[Option[daos.schema.DepositUnitTable]], 
+    slick.lifted.Rep[Option[daos.schema.TakingTable]]),
+  (daos.reader.DepositReader, 
+    Option[daos.reader.DepositUnitReader], 
+    Option[daos.reader.TakingReader]),
+  Seq]  
+  
   val takingsTable = TableQuery[TakingTable]
   val depositUnitTable = TableQuery[DepositUnitTable]
   val depositTable = TableQuery[DepositTable]
@@ -48,49 +58,12 @@ class MariaDBDepositDAO @Inject()
   import DepositReader._
   import DepositUnitReader._
 
-  /**
-    * Creates a joined query instance
-    *
-    * @author Johann Sell
-    * @return {{{ Seq[DepositReader, Option[DepositUnitReader], Option[TakingReader]] }}}
-    */
-  private def join(page: Option[Page] = None, sort: Option[Sort] = None, filter: Option[DepositFilter] = None) = {
-    println(filter.isDefined)
-    val filteredDeposits = filter.map(f => {
-      //      f.name.map(name => takings.filter(_.description like ("%" + name + "%")))
-      depositTable.filter(table => {
-        val crewFilter = f.crew.map(crewIds => (t: DepositTable) => t.crew.inSet(crewIds.map(_.toString)))
 
-          /**
-            * Looks a little bit complicated, but it's equivalent to usage of filters on takings (more than one paramter)
-            */
-        crewFilter match {
-          case Some(cf) => cf(table)
-          case None => table.id === table.id
-        }
-      })
-    }).getOrElse(depositTable)
-    val sortedDeposits = sort.map(s => s.model match {
-      case Some(model) if model == "deposit" => filteredDeposits.sortBy(_.sortBy(s).get)
-      case None => filteredDeposits.sortBy(_.sortBy(s).get)
-      case _ => filteredDeposits
-    }).getOrElse(filteredDeposits)
-    val pagedDons = page.map(p => sortedDeposits.drop(p.offset).take(p.size)).getOrElse(sortedDeposits)
-
-    val sortedTakings = sort.map(s => s.model match {
-      case Some(model) if model == "taking" => takingsTable.sortBy(_.sortBy(s).get)
-      case _ => takingsTable
-    }).getOrElse(takingsTable)
-
-    for {
-      ((deposit, depositUnit), taking) <-
-        pagedDons joinLeft
-          depositUnitTable on (_.id === _.depositId) joinLeft
-          sortedTakings on (_._2.map(_.takingId) === _.id)
-    } yield (deposit, depositUnit, taking)
-  }
-  
-  private def joined()= {
+ /**
+   * Generate Query for DepositTable
+   * @return
+   */
+  private def joined():DepositQuery = {
     (for {
       ((deposit, depositUnit), taking) <-
         depositTable joinLeft 
@@ -98,33 +71,85 @@ class MariaDBDepositDAO @Inject()
         takingsTable on (_._2.map(_.takingId) === _.id)
     } yield (deposit, depositUnit, taking))
   }
+
   /**
-   * return the Deposit Model via id
+    * Sort a given [[DepositQuery]] by given [[Sort]]
+    * @param query
+    * @param sort
+    * @return
+    */
+  private def sorted(query: DepositQuery, sort: Option[Sort]) = {
+    query.sortBy(result => sort match {
+      case Some(s) => s.model match {
+        case Some(model) if model == "deposit" => result._1.sortBy(s).getOrElse(result._1.id.asc)
+        case _ => result._1.id.asc
+      }
+      case _ => result._1.id.asc
+    })
+  }
+  
+  /**
+    * Set limit and offset for given [[DepositQuery]]
+    * @param query
+    * @param page
+    * @return
+    */
+  private def paged(query: DepositQuery, page: Option[Page]) = {
+    page.map(p => query.drop(p.offset).take(p.size)).getOrElse(query)
+  }
+  
+  /**
+    * Filter given [[DepositQuery]] by [[DepositQuery]]
+    * provides only AND conditions
+    * @param query
+    * @param filter
+    * @return
+    */
+  private def filtered(query: DepositQuery, filter: Option[DepositFilter]) = {
+    filter.map(f => {
+      query.filter(table => {
+        List(
+          f.publicId.map(ids => table._1.publicId.inSet(ids.map(_.toString()))),
+          f.takingsId.map(ids => table._3.filter(_.public_id.inSet(ids.map(_.toString()))).isDefined),
+          //f.crew.map(table.crew === _.toString())
+          //f.norms.map(norms => table._1.norms === norms)
+        ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
+      })
+    }).getOrElse(query)
+  }
+
+  /**
+   * Find user by id. Use `joined` function to create a [[DepositQuery]]
+   * and filter by id.
+   * @param id
+   * @return
    */
   override def find(id: Long): Future[Option[Deposit]] = {
-    // action filter deposit Table via id and join all depositUnits
-    //run the action and match the Seq
-    //if the seq is empty, return None
-    //else transform the result Seq via read function to Deposit
-    db.run(join(None, None).filter(_._1.id === id).result).map(result => result.isEmpty match {
+    db.run(joined().filter(_._1.id === id).result).map(result => result.isEmpty match {
       case false => Some(read(result))
       case true => None
     })
   }
 
-
-  /**
-   * Implements find via UUID for Deposit Model
-   * return the Deposit with all Units
+ /**
+   * Find user by public_id. Use `joined` function to create a [[DepositQuery]]
+   * and filter by public_id.
+   * @param public_id
+   * @return
    */
-  override def find(uuid: UUID): Future[Option[Deposit]] = {
-    //run the action and transform the result Seq via read function to Option[Deposit]
-    db.run(join(None, None).filter(_._1.publicId === uuid.toString).result).map( result => result.isEmpty match {
+  override def find(public_id: UUID): Future[Option[Deposit]] = {
+    db.run(joined().filter(_._1.publicId === public_id.toString).result).map( result => result.isEmpty match {
       case false => Some(read(result))
       case true => None
     })
   }
-
+  
+  /**
+    * Create [[daos.schema.DepositTable]] and [[daos.schema.DepositUnitTable]] based on [[models.frontend.Deposit]]
+    * and save it into Database
+    * @param deposit
+    * @return
+    */
   override def create(deposit: Deposit): Future[Either[DatabaseException, Deposit]] = {
     def unitCreateQuery(unit: DepositUnit, depositId: Long) = (for {
       takingId <- takingsTable.filter(_.public_id === unit.takingId.toString).map(_.id).result
@@ -150,7 +175,13 @@ class MariaDBDepositDAO @Inject()
       case de: DatabaseException => Future.successful(Left(de))
     }
   }
-
+  
+  /** 
+    * Confirm [[models.frontend.Deposit]] by public_id
+    * @param uuid
+    * @param date
+    * @return
+    */
   override def confirm(uuid: UUID, date: Long): Future[Boolean] = {
     db.run(depositTable.filter(_.publicId === uuid.toString).map(_.id).result).flatMap(_.headOption.map(deposit => {
       val qDeposit = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed
@@ -167,10 +198,19 @@ class MariaDBDepositDAO @Inject()
   override def delete(uuid: UUID): Future[Boolean] = ???
 
   /**
-   * get all deposits
+   * Get all [[models.frontend.Deposit]]. The function use `joined` for create [[DepositQuery]]. 
+   * This Query is than filtered by `filtered` and than sorted by `sorted`.  
+   * Last pagination is added by `paged`
+   * @param page
+   * @param sort
+   * @param filter
    */
   override def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter] = None): Future[List[Deposit]] = {
-    db.run(join(page, sort, filter).result).map( readList( _ ))
+    val query = joined()
+    val fQuery = filtered(query, filter)
+    val sQuery = sorted(fQuery, sort)
+    val pQuery = paged(sQuery, page)
+    db.run(sQuery.result).map(readList( _ )) 
   }
 
   override def count(filter: Option[DepositFilter] = None): Future[Int] = {
@@ -178,8 +218,10 @@ class MariaDBDepositDAO @Inject()
     db.run(query.length.result)
   }
   /**
-   * Transform the Seq[(DepositReader, Option[DepositUnitReader])] to Deposit
-   */
+    * Transform the `Seq[(DepositReader, Option[DepositUnitReader])]` to `Deposit`
+    * @param entries
+    * @return
+    */
   private def read(entries: Seq[(DepositReader, Option[DepositUnitReader], Option[TakingReader])]): Deposit = {
     // group the Seq by DepositUnitReader and map it to List[DepositUnit]
     val amount = entries.groupBy(_._2).toSeq.filter(_._1.isDefined).map(current =>
@@ -193,10 +235,10 @@ class MariaDBDepositDAO @Inject()
   }
   
   /**
-   *  Transform the entries to a list of Deposit
-   *  We group the Seq by the Deposit Models and use the read function for transform
+    *  Transform the entries to a [[scala.collection.immutable.List]] of [[models.frontend.Deposit]]
+    *  We group the [[scala.collection.Seq]] by the [[models.frontend.Deposit]] and use the `read` function for transform
     *  Zipping with index is required to preserve the order
-   */
+    */
   private def readList(entries: Seq[(DepositReader, Option[DepositUnitReader], Option[TakingReader])]): List[Deposit] = {
     entries.zipWithIndex.groupBy(_._1._1).map( grouped =>
       grouped._2.headOption.map(row => (read(grouped._2.map(_._1)), row._2)) // row._2 contains the index that indicates a sort from database

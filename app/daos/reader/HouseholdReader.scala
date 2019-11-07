@@ -5,22 +5,6 @@ import slick.jdbc.GetResult
 import java.util.UUID
 import utils.Validate
 
-/**
- * Implements the Database Reader of Household
- *
- * -------------         --------------------
- * | Household | 1 <-- n | HouseholdVersion |
- * -------------         --------------------
- *        1
- *        ^
- *        |
- *        n
- * ----------------
- * | PlaceMessage |
- * ----------------
- * 
- *
- */
 
 
 case class PlaceMessageReader(
