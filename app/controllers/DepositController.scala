@@ -23,6 +23,9 @@ import utils.permissions.DepositPermission
 import org.vivaconagua.play2OauthClient.silhouette.User
 //import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+
+/** A web-controller class for deposits.
+ */
 @Singleton
 class DepositController @Inject() (
   config: Configuration,
@@ -34,11 +37,11 @@ class DepositController @Inject() (
   implicit val ec: ExecutionContext
 ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
   
-  /* validate a given Json
-   * if the Json is valid, the function return the request
-   * else return BadRequest contains the JsError of the validation process
+  /* validate a given Json type A
+   *
+   *
    */
-
+  
   def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
 
   case class DepositQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter])

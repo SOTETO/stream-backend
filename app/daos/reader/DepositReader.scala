@@ -1,6 +1,6 @@
 package daos.reader
 
-import models.frontend.{Deposit, DepositUnit, FullAmount}
+import models.frontend.{Deposit, DepositUnit, Amount}
 import java.util.UUID
 
 import slick.jdbc.GetResult
@@ -10,10 +10,16 @@ import slick.jdbc.GetResult
 
 
 /**
- * DepositUnit database reader
- *
+ * A database reader for [[models.frontend.DepositUnit]]
+ * @param id internal database id
+ * @param publicId stringified [[java.util.UUID]]
+ * @param confirmed if Deposit is confiremd, it contains a date as long
+ * @param amount amount of [[models.frontend.Amount]]
+ * @param currency currency of [[models.frontend.Amount]]
+ * @param created date as Long
+ * @param depositId foreign key for deposit table
+ * @param takingId foreign key for taking table
  */
-
 case class DepositUnitReader(
   id: Long,
   publicId: String,
@@ -25,9 +31,10 @@ case class DepositUnitReader(
   takingId: Long
   ) {
     /**
-     * map database model to frontend model
+     * map [[DepositUnitReader]] to [[DepositUnit]]
+     * @param takingId
      */
-    def toDepositUnit(takingId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), takingId, this.confirmed, this.amount, this.currency, this.created)
+    def toDepositUnit(takingId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), takingId, this.confirmed, Amount(this.amount, this.currency), this.created)
   }
 
 object DepositUnitReader extends ((Long, String, Option[Long], Double, String, Long, Long, Long) => DepositUnitReader){
@@ -43,8 +50,8 @@ object DepositUnitReader extends ((Long, String, Option[Long], Double, String, L
       id.getOrElse(0L),
       depositUnit.publicId.toString,
       depositUnit.confirmed,
-      depositUnit.amount,
-      depositUnit.currency,
+      depositUnit.amount.amount,
+      depositUnit.amount.currency,
       depositUnit.created,
       depositId,
       takingId
@@ -76,7 +83,7 @@ case class DepositReader(
     def toDeposit(depositUnitList: List[DepositUnit]) = 
       Deposit(
         UUID.fromString(this.publicId),
-        FullAmount(this.fullAmount, this.currency),
+        Amount(this.fullAmount, this.currency),
         depositUnitList,
         this.confirmed,
         UUID.fromString(this.crew),
