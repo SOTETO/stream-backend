@@ -1,6 +1,6 @@
 package daos.reader
 
-import models.frontend.{Taking, Source}
+import models.frontend.{Taking, Source, Amount}
 import slick.jdbc.GetResult
 
 case class SourceReader(
@@ -11,13 +11,13 @@ case class SourceReader(
                        currency: String,
                        type_of_source: String
                        ) {
-  def toSource: Source = Source(category, amount, currency, type_of_source)
+  def toSource: Source = Source(category, Amount(amount, currency), type_of_source)
 }
 
 object SourceReader extends ((Option[Long], Long, String, Double, String, String) => SourceReader) {
 
   def apply(source: Source, taking_id: Long): SourceReader =
-    SourceReader(None, taking_id, source.category, source.amount, source.currency, source.typeOfSource)
+    SourceReader(None, taking_id, source.category, source.amount.amount, source.amount.currency, source.typeOfSource)
 
   def apply(tuple: (Option[Long], Long, String, Double, String, String)): SourceReader =
     SourceReader(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6)

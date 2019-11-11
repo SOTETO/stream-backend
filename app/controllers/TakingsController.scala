@@ -11,28 +11,36 @@ import org.vivaconagua.play2OauthClient.silhouette.UserService
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.libs.json.{JsError, Json, Reads}
 import play.api.Configuration
-import models.frontend.Taking
+import models.frontend.{ Taking, Page, Sort, TakingQueryBody, TakingFilter}
 import responses.WebAppResult
 import service.TakingsService
-import utils.{Ascending, TakingFilter, Page, Sort}
+import utils.permissions.TakingPermission
+//import utils.{Ascending, TakingFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TakingsController @Inject()(
+                                     parser: PlayBodyParsers,
                                      cc: ControllerComponents,
                                      silhouette: Silhouette[CookieEnv],
                                      userService: UserService,
-                                     service: TakingsService
+                                     service: TakingsService,
+                                     permission: TakingPermission
                                    ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
 
   implicit val ec = ExecutionContext.global
 
-  case class TakingQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter])
+  /*case class TakingQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter])
   object TakingQueryBody {
     implicit val takingQueryBodyFormat = Json.format[TakingQueryBody]
-  }
-
+  }*/
+  
+  /** validate a given Json type A
+   * @return
+   */
+  
+  def validateJson[A: Reads] = parser.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
   /**
     * Reads all currently saved takings and returns them.
     *
@@ -41,26 +49,11 @@ class TakingsController @Inject()(
     */
   def get = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
-    val crewFilter : Option[TakingFilter] = request.identity.isOnlyVolunteer match {
-      case true => request.identity.getCrew.map((crewID) => TakingFilter(None, Some(Set(crewID)), None, None))
-      case false => None
-    }
-    request.body.validate[TakingQueryBody].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => {
-        val filter = query.filter match {
-          case Some(f) => Some(f + crewFilter)
-          case None => crewFilter
-        }
-        service.all(query.page, query.sort, filter).map(takings =>
-          WebAppResult.Ok(Json.toJson(takings)).toResult(request)
-        )
-      }
-    )
+  ).async(validateJson[TakingQueryBody]) { implicit request => {
+    service.all(request.body.page, request.body.sort, permission.restrict(request.body.filter, request.identity))
+      .map(takings => Ok(Json.toJson(takings)))
   }}
-
+  
   /**
     * Saves a given taking on the server and returns it after successful saving.
     *
@@ -89,24 +82,8 @@ class TakingsController @Inject()(
     */
   def count = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
-    val crewFilter : Option[TakingFilter] = request.identity.isOnlyVolunteer match {
-      case true => request.identity.getCrew.map(crewId => TakingFilter(None, Some(Set(crewId)), None, None))
-      case false => None
-    }
-    request.body.validate[TakingQueryBody].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => {
-
-        val filter = query.filter match {
-          case Some(f) => Some(f + crewFilter)
-          case None => crewFilter
-        }
-        service.count(filter).map(count =>
-          WebAppResult.Ok(Json.obj("count" -> count )).toResult(request)
-        )
-      }
-    )
-  }}
+  ).async(validateJson[TakingQueryBody]) { implicit request => {
+    service.count(permission.restrict(request.body.filter, request.identity))
+      .map(count => Ok(Json.obj("count" -> count)))
+    }}
 }

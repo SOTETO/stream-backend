@@ -3,10 +3,8 @@ package service
 import daos.exceptions.TakingAddException
 import daos.{TakingsDAO, UserDAO}
 import javax.inject.Inject
-import models.frontend.Taking
+import models.frontend.{Taking, TakingFilter, Page, Sort}
 import play.api.Configuration
-//import testdata.TakingTestData
-import utils.{TakingFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 

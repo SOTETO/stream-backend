@@ -5,8 +5,8 @@ import java.util.UUID
 import slick.jdbc.MySQLProfile.api._
 import daos.reader.TakingReader
 import slick.lifted.{ColumnOrdered, Tag}
-import utils.{Ascending, Descending, Sort}
-import utils.TakingFilter
+//import utils.{Ascending, Descending}
+import models.frontend.{TakingFilter, Sort, Ascending, Descending}
 
 class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -27,19 +27,6 @@ class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
 
   def pk = primaryKey("primaryKey", id)
   
-  def filter(filter: Option[TakingFilter]) = {
-    filter.map(f => {
-        List(
-          f.name.map(name => this.description like "%" + name +"%"),
-          f.publicId.map(ids => this.public_id.inSet(ids.map(_.toString()))),
-         // f.crew.map(table.crew === _.toString())
-          f.norms.map(norms => this.norms === norms)
-        ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
-    }).getOrElse(Nil)
-  }
-  
-
-
   def sortByDir(sort: Sort, field: Rep[_ >: String with Long with Double with Boolean]) = sort.dir match {
     case Descending => field match {
       case l: Rep[Long @unchecked] => Some(l.desc.nullsFirst)

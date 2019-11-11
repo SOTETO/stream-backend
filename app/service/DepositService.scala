@@ -7,11 +7,10 @@ import java.util.UUID
 import daos.exceptions.{DatabaseException, DepositAddException}
 import daos.{DepositDAO, UserDAO}
 import javax.inject.Inject
-import models.frontend.{Deposit}
+import models.frontend.{Deposit, DepositFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import utils.{DepositFilter, Page, Sort}
 
 
 

@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject._
 import org.vivaconagua.play2OauthClient.silhouette.{CookieEnv, UserService}
 import play.api.mvc.{AbstractController, BodyParsers, ControllerComponents}
-import models.frontend.{Deposit , DepositStub}
+import models.frontend.{Deposit , DepositStub, DepositFilter, DepositQueryBody, Page}
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.Configuration
 import play.api.libs.json.{JsError, Json, Reads}
@@ -18,9 +18,10 @@ import responses.WebAppResult
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.DepositService
-import utils.{DepositFilter, Page, Sort}
+import utils.{Sort}
 import utils.permissions.DepositPermission
 import org.vivaconagua.play2OauthClient.silhouette.User
+import play.shaded.ahc.org.asynchttpclient.request.body.Body
 //import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 
@@ -28,6 +29,7 @@ import org.vivaconagua.play2OauthClient.silhouette.User
  */
 @Singleton
 class DepositController @Inject() (
+  parser: PlayBodyParsers,
   config: Configuration,
   cc: ControllerComponents,
   silhouette: Silhouette[CookieEnv],
@@ -37,17 +39,13 @@ class DepositController @Inject() (
   implicit val ec: ExecutionContext
 ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
   
-  /* validate a given Json type A
-   *
-   *
+  /** validate a given Json type A
+   * @return
    */
   
-  def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
+  def validateJson[A: Reads] = parser.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
 
-  case class DepositQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter])
-  object DepositQueryBody {
-    implicit val depositQueryBodyFormat = Json.format[DepositQueryBody]
-  }
+
 
   /**
    * All action controller return the Deposit Model as Json or an simple http error 

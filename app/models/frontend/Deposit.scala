@@ -19,7 +19,7 @@ object Amount {
 
 /**
   * Handles Json for creating [[DepositUnit]].
-  * @param takingId uuid of the [[Takings]]
+  * @param takingId public_id of [[models.frontend.Taking]]
   * @param confirmed date as Long
   * @param amount amount represented by [[Amount]] 
   * @param created date as Long
@@ -146,8 +146,8 @@ object Deposit{
  * @param crew
  */
 case class DepositFilter(
-  publicId: Option[Set[UUID]], 
-  takingsId: Option[Set[UUID]],
+  publicId: Option[UUID], 
+  takingsId: Option[UUID],
   crew: Option[UUID]
 ) 
 {
@@ -166,4 +166,14 @@ object DepositFilter {
    */
   def apply(crewId: UUID) : DepositFilter = DepositFilter(None, None, Some(crewId))
 }
+/** Represents the request query for deposits
+ * @param page 
+ * @param sort
+ * @param filter
+ */
+case class DepositQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter])
 
+/**Factory for [[DepositQueryBody]] instance. Can handle as json.*/
+object DepositQueryBody {
+    implicit val depositQueryBodyFormat = Json.format[DepositQueryBody]
+  }

@@ -1,6 +1,6 @@
 package utils.permissions
 
-import utils.DepositFilter
+import models.frontend.DepositFilter
 import org.vivaconagua.play2OauthClient.silhouette.User
 
 
@@ -40,7 +40,7 @@ class DepositPermission() {
       */
     def create(identity: User): Option[DepositFilter] = {
       identity.isOnlyVolunteer match {
-        case true => identity.getCrew.map(ci => DepositFilter(None, None, Some(Set( ci ))))
+        case true => identity.getCrew.map(ci => DepositFilter(None, None, Some( ci )))
         case false => None
       }
     }

@@ -6,9 +6,8 @@ import daos.exceptions.TakingAddException
 import daos.reader.{DepositUnitReader, TakingReader, InvolvedSupporterReader, SourceReader}
 import daos.schema.{DepositUnitTable, TakingTable, InvolvedSupporterTable, SourceTable}
 import javax.inject.{Inject, Singleton}
-import models.frontend.Taking
+import models.frontend.{Taking, TakingFilter, Page, Sort}
 import play.api.Play
-import utils.{TakingFilter, Page, Sort}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{GetResult, JdbcProfile}
 
@@ -97,10 +96,10 @@ class SQLTakingsDAO @Inject()
     filter.map(f => {
       query.filter(table => {
         List(
-          f.name.map(name => table._1.description like "%" + name +"%"),
+          f.name.map(name => table._1.description.inSet(name.map(_.toString()))),
           f.publicId.map(ids => table._1.public_id.inSet(ids.map(_.toString()))),
           //f.crew.map(table.crew === _.toString())
-          f.norms.map(norms => table._1.norms === norms)
+          f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
     }).getOrElse(query)

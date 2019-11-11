@@ -5,11 +5,11 @@ import java.util.UUID
 import daos.exceptions.{DatabaseException, DepositAddException, DepositUnitAddException, TakingNotFoundException}
 import javax.inject.{Inject, Singleton}
 import play.api.Play
-import models.frontend.{Deposit, DepositUnit}
+import models.frontend.{Deposit, DepositUnit, Page, Sort, DepositFilter}
 import daos.schema.{DepositTable, DepositUnitTable, TakingTable}
 import daos.reader.{DepositReader, DepositUnitReader, TakingReader}
 import play.api.Configuration
-import utils._
+//import utils._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
@@ -109,8 +109,8 @@ class SQLDepositDAO @Inject()
     filter.map(f => {
       query.filter(table => {
         List(
-          f.publicId.map(ids => table._1.publicId.inSet(ids.map(_.toString()))),
-          f.takingsId.map(ids => table._3.filter(_.public_id.inSet(ids.map(_.toString()))).isDefined),
+          f.publicId.map(ids => table._1.publicId === ids.toString()),
+          f.takingsId.map(ids => table._3.filter(_.public_id === ids.toString()).isDefined),
           //f.crew.map(table.crew === _.toString())
           //f.norms.map(norms => table._1.norms === norms)
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])

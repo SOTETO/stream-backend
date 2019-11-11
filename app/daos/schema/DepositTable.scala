@@ -4,8 +4,9 @@ import java.util.UUID
 
 import slick.jdbc.MySQLProfile.api._
 import daos.reader.{DepositReader, DepositUnitReader}
+import models.frontend.{Sort, Ascending, Descending}
 import slick.lifted.Tag
-import utils.{Ascending, Descending, Sort}
+//import utils.{Ascending, Descending, Sort}
 
 
 /**
