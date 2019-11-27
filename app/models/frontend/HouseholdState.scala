@@ -14,7 +14,7 @@ import scala.concurrent.Future
 class TransformationNotAllowed(msg: String) extends Exception(msg)
 
 /**
-  * Represents a households state. It is implemented using the [[PetriNet]] implementation, but holds also a set of actions
+  * Represents a households state. It is implemented using the [[utils.petriNet.PetriNet]] implementation, but holds also a set of actions
   * (groups of transitions that are semantically equivalent).
   *
   * @author Johann Sell

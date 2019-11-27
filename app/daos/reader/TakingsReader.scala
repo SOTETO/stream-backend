@@ -11,7 +11,6 @@ case class TakingReader(
                          received: Long,
                          description: String,
                          category: String,
-                         norms: String,
                          comment: Option[String],
                          reason_for_payment: Option[String],
                          receipt: Option[Boolean],
@@ -33,7 +32,6 @@ case class TakingReader(
         sources.filter(_.taking_id == id).map(_.toSource).toList.distinct
       ),
       Context(description, category),
-      norms,
       comment,
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
       depositUnits.filter(_.takingId == id).map(_.toDepositUnit(publicId)).toList.distinct,
@@ -44,7 +42,7 @@ case class TakingReader(
     )
 }
 
-object TakingReader extends ((Long, UUID, Long, String, String, String, Option[String], Option[String], Option[Boolean], UUID, UUID, Long, Long) => TakingReader ) {
+object TakingReader extends ((Long, UUID, Long, String, String, Option[String], Option[String], Option[Boolean], UUID, UUID, Long, Long) => TakingReader ) {
 
   def apply(taking: Taking, id: Option[Long] = None): TakingReader =
     TakingReader(
@@ -53,7 +51,6 @@ object TakingReader extends ((Long, UUID, Long, String, String, String, Option[S
       taking.amount.received,
       taking.context.description,
       taking.context.category,
-      taking.norms,
       taking.comment,
       taking.details.map(_.reasonForPayment),
       taking.details.map(_.receipt),
@@ -63,13 +60,13 @@ object TakingReader extends ((Long, UUID, Long, String, String, String, Option[S
       taking.updated
     )
 
-  def apply(tuple: (Long, String, Long, String, String, String, Option[String], Option[String], Option[Boolean], String, String, Long, Long)): TakingReader =
-    TakingReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9, UUID.fromString(tuple._10), UUID.fromString(tuple._11), tuple._12, tuple._13)
+  def apply(tuple: (Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, String, Long, Long)): TakingReader =
+    TakingReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, UUID.fromString(tuple._9), UUID.fromString(tuple._10), tuple._11, tuple._12)
 
-  def unapply(arg: TakingReader): Option[(Long, String, Long, String, String, String, Option[String], Option[String], Option[Boolean], String, String, Long, Long)] =
-    Some((arg.id, arg.publicId.toString, arg.received, arg.description, arg.category, arg.norms, arg.comment, arg.reason_for_payment, arg.receipt, arg.author.toString, arg.crew.toString, arg.created, arg.updated))
+  def unapply(arg: TakingReader): Option[(Long, String, Long, String, String, Option[String], Option[String], Option[Boolean], String, String, Long, Long)] =
+    Some((arg.id, arg.publicId.toString, arg.received, arg.description, arg.category, arg.comment, arg.reason_for_payment, arg.receipt, arg.author.toString, arg.crew.toString, arg.created, arg.updated))
 
   implicit val getTakingReader = GetResult(r =>
-    TakingReader(r.nextLong, UUID.fromString(r.nextString), r.nextLong, r.nextString, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, UUID.fromString(r.nextString), UUID.fromString(r.nextString), r.nextLong, r.nextLong)
+    TakingReader(r.nextLong, UUID.fromString(r.nextString), r.nextLong, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, UUID.fromString(r.nextString), UUID.fromString(r.nextString), r.nextLong, r.nextLong)
   )
 }

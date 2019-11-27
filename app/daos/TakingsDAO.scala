@@ -6,20 +6,20 @@ import daos.exceptions.TakingAddException
 import daos.reader.{DepositUnitReader, TakingReader, InvolvedSupporterReader, SourceReader}
 import daos.schema.{DepositUnitTable, TakingTable, InvolvedSupporterTable, SourceTable}
 import javax.inject.{Inject, Singleton}
-import models.frontend.Taking
+import models.frontend.{Taking, Source, TakingFilter, Page, Sort}
 import play.api.Play
-import utils.{TakingFilter, Page, Sort}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.{GetResult, JdbcProfile}
 
 import scala.concurrent.{ExecutionContext, Future}
+import org.bouncycastle.cert.ocsp.Req
 
 trait TakingsDAO {
   def count(filter: Option[TakingFilter]) : Future[Int]
   def all(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter]) : Future[List[Taking]]
   def find(uuid: UUID) : Future[Option[Taking]]
   def save(taking: Taking): Future[Either[TakingAddException, Taking]]
-  def update(taking: Taking): Future[Option[Taking]]
+  def update(taking: Taking): Future[Either[TakingAddException, Taking]]
   def delete(uuid: UUID): Future[Boolean]
 }
 
@@ -97,10 +97,10 @@ class SQLTakingsDAO @Inject()
     filter.map(f => {
       query.filter(table => {
         List(
-          f.name.map(name => table._1.description like "%" + name +"%"),
+          f.name.map(name => table._1.description.inSet(name.map(_.toString()))),
           f.publicId.map(ids => table._1.public_id.inSet(ids.map(_.toString()))),
           //f.crew.map(table.crew === _.toString())
-          f.norms.map(norms => table._1.norms === norms)
+         // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
     }).getOrElse(query)
@@ -169,8 +169,29 @@ class SQLTakingsDAO @Inject()
       case None => Left(TakingAddException(taking))
     }))
   }
-
-  override def update(taking: Taking): Future[Option[Taking]] = ???
+  
+  def updateSources(source: List[Source], taking_id: Long) = {
+    var action: List[Req] = Nil
+    source.foreach { s =>
+      s.publicId match {
+        case Some(publicId) => {
+          db.run(sources.filter(_.public_id === publicId.toString()).map(_.id).result).map(
+            source_id =>  sources.insertOrUpdate(SourceReader(s, source_id.head, taking_id, publicId.toString))
+          )
+        }
+        case None => db.run(sources returning sources.map(_.id) += SourceReader(s, taking_id))
+      }
+    }
+  }
+  override def update(taking: Taking): Future[Either[TakingAddException, Taking]] = {
+    db.run(takings.filter(_.public_id === taking.id.toString).map(_.id).result).map( taking_id => {
+      updateSources(taking.amount.sources, taking_id.head)
+      db.run(takings.insertOrUpdate(TakingReader(taking, Some(taking_id.head))))
+    }).flatMap(t => find(taking.id).map(_ match {
+      case Some(take) => Right(take)
+      case None => Left(TakingAddException(taking)) 
+    }))
+  }
 
   override def delete(uuid: UUID): Future[Boolean] = ???
 }

@@ -19,6 +19,7 @@ GET        /identity                                controllers.DropsController.
 POST       /takings                               controllers.TakingsController.get
 POST       /takings/count                         controllers.TakingsController.count
 POST       /takings/create                        controllers.TakingsController.create
+POST       /takings/update                        controllers.TakingsController.update
 
 # Household
 POST       /household/count                         controllers.HouseholdController.count

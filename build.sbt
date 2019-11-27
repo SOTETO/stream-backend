@@ -7,6 +7,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.8"
 
+autoAPIMappings := true
 //resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 resolvers ++= Seq(
   Resolver.sonatypeRepo("public"),
@@ -42,4 +43,4 @@ libraryDependencies ++= Seq(
 dockerExposedPorts := Seq(9000, 9443)
 dockerRepository := Some("vivaconagua")
 routesGenerator := InjectedRoutesGenerator
-version in Docker := version.value
+version in Docker := "latest"

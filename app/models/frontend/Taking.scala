@@ -10,19 +10,66 @@ import testdata.TestData
 
 import scala.concurrent.Future
 
+
+/** A class for handling details for takings
+ * @param reasonForPayment
+ * @param receipt
+ */
 case class Details(reasonForPayment: String, receipt: Boolean) // Todo: Optional Partner
+/** Factory for [[Details]] instance. Can be handle as a json. */
+object Details {
+  implicit val detailsFormat = Json.format[Details]
+}
 
+/** A class for handling takings context 
+ * @param description 
+ * @param category 
+ */
 case class Context(description: String, category: String)
+/**Factory for [[Context]] instance. Can be handle as a json */
+object Context {
+  implicit val contextFormat = Json.format[Context]
+}
 
-case class Source(category: String, amount: Double, currency: String, typeOfSource: String)
+/** A class for handling takings sources 
+ * @param category
+ * @param amount
+ * @param currency
+ * @param typeOfSource
+ */
+case class Source(publicId: Option[UUID], category: String, amount: Amount, typeOfSource: String, norms: String)
+/**Factory for [[Source]] instance. Can be handle as a json.*/
+object Source {
+  implicit val sourceFormat = Json.format[Source]
+}
 
+/** A class for handling the amount of an taking
+ * @param received UTC date
+ * @param involvedSupporter
+ * @param sources
+ */
 case class TakingAmount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
+/** Factory for [[TakingAmount]] instance. Can be handle as json.*/
+object TakingAmount {
+  implicit val takingAmountFormat = Json.format[TakingAmount]
+}
 
+/** A class for handling takings business model
+ *  @param id 
+ *  @param amount
+ *  @param context
+ *  @param comment
+ *  @param details
+ *  @param depositUnits
+ *  @param author
+ *  @param crew 
+ *  @param created UTC date
+ *  @param updated UTC date
+ */
 case class Taking(
                    id: UUID,
                    amount: TakingAmount,
                    context: Context,
-                   norms: String,
                    comment: Option[String],
                    details: Option[Details],
                    depositUnits: List[DepositUnit],
@@ -32,34 +79,41 @@ case class Taking(
                    updated: Long
                    )
 
-object Details {
-  implicit val detailsFormat = Json.format[Details]
-}
-
-object Context {
-  implicit val contextFormat = Json.format[Context]
-}
-
-object Source {
-  implicit val sourceWrites: Writes[Source] = (
-    (JsPath \ "category").write[String] and
-      (JsPath \ "amount").write[Double] and
-      (JsPath \ "currency").write[String] and
-      (JsPath \ "type").write[String]
-    )(unlift(Source.unapply))
-
-  implicit val sourceReads: Reads[Source] = (
-    (JsPath \ "category").read[String] and
-      (JsPath \ "amount").read[Double] and
-      (JsPath \ "currency").read[String] and
-      (JsPath \ "type").read[String]
-    )(Source.apply _)
-}
-
-object TakingAmount {
-  implicit val takingAmountFormat = Json.format[TakingAmount]
-}
-
+/**Factory for [[Taking]] instance. Can be handle as a json.*/
 object Taking {
   implicit val takingFormat = Json.format[Taking]
+}
+
+/** A class for handling takings filter object
+ * @param publicId
+ * @param crew
+ * @param name
+ * @param norms
+ */
+case class TakingFilter(
+                         publicId: Option[Set[UUID]], // content of the set has to be concatenated by OR
+                         crew: Option[Set[UUID]],
+                         name: Option[Set[String]],
+                         norms: Option[Set[String]]
+                         ) {
+  /** Extend a taking filter with given crew_id
+   * @param crewId public_id of a Crew as UUID
+   * @return with crew extended taking filter
+   */
+  def extend(crewId: UUID): TakingFilter = TakingFilter(this.publicId, Some(Set(crewId)), this.name, this.norms)
+} 
+/**Factory for [[TakingFilter]] instance. Can be handle as a json.*/
+object TakingFilter {
+  implicit val takingFilterFormat = Json.format[TakingFilter]
+}
+
+/** A class for handling takings query object
+ * @param page
+ * @param sort
+ * @param filter
+ */
+case class TakingQueryBody(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter])
+/** Factory for [[TakingQueryBody]] instance. Can be handle as a json.*/  
+object TakingQueryBody {
+  implicit val takingQueryBodyFormat = Json.format[TakingQueryBody]
 }

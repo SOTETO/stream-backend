@@ -18,7 +18,7 @@ package utils.petriNet
 case class Transition(name: String, consumes: Map[Place, Token], produces: Map[Place, Token]) {
 
   /**
-    * Checks if the given [[Transition]] or [[String]] represents the same transition as [[this]].
+    * Checks if the given [[Transition]] or [[java.lang.String]] represents the same transition as this.
     *
     * @author Johann Sell
     * @param other
@@ -57,7 +57,7 @@ case class Transition(name: String, consumes: Map[Place, Token], produces: Map[P
     * Replaces all references to a place by the references to another instance representing the same place that is part
     * of a given transition.
     *
-    * This is required since the [[fire]] methods returns a new instance of [[this]] with also new instances of the
+    * This is required since the `fire` methods returns a new instance of `this` with also new instances of the
     * consumer and producer places.
     *
     * @author Johann Sell

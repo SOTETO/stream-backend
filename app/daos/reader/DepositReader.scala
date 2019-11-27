@@ -1,6 +1,6 @@
 package daos.reader
 
-import models.frontend.{Deposit, DepositUnit, FullAmount}
+import models.frontend.{Deposit, DepositUnit, Amount}
 import java.util.UUID
 
 import slick.jdbc.GetResult
@@ -10,10 +10,16 @@ import slick.jdbc.GetResult
 
 
 /**
- * DepositUnit database reader
- *
+ * A database reader for [[models.frontend.DepositUnit]]
+ * @param id internal database id
+ * @param publicId stringified [[java.util.UUID]]
+ * @param confirmed if Deposit is confiremd, it contains a date as long
+ * @param amount amount of [[models.frontend.Amount]]
+ * @param currency currency of [[models.frontend.Amount]]
+ * @param created date as Long
+ * @param depositId foreign key for deposit table
+ * @param takingId foreign key for taking table
  */
-
 case class DepositUnitReader(
   id: Long,
   publicId: String,
@@ -25,31 +31,30 @@ case class DepositUnitReader(
   takingId: Long
   ) {
     /**
-     * map database model to frontend model
+     * map [[DepositUnitReader]] to [[models.frontend.DepositUnit]]
+     * @param takingId
      */
-    def toDepositUnit(takingId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), takingId, this.confirmed, this.amount, this.currency, this.created)
+    def toDepositUnit(takingId: UUID) : DepositUnit = DepositUnit(UUID.fromString(this.publicId), takingId, this.confirmed, Amount(this.amount, this.currency), this.created)
   }
-
+/** Factory for [[DepositUnitReader]] instance*/
 object DepositUnitReader extends ((Long, String, Option[Long], Double, String, Long, Long, Long) => DepositUnitReader){
-
-//  def apply(tuple: (Long, String, Option[Long], Double, Long, Long, Long)): DepositUnitReader =
-//    DepositUnitReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7)
-//
-//  def unapply(arg: DepositUnitReader): Option[(Long, String, Option[Long], Double, Long, Long, Long)] =
-//    Some((arg.id, arg.publicId.toString, arg.confirmed, arg.amount, arg.created, arg.depositId, arg.takingId))
-
+  /** Creates a [[DepositUnitReader]] with given deposit unit, deposit id, taking id and optional id
+   *  @param depositUnit deposit unit 
+   *  @param depositId foreign key for deposit table
+   *  @param takingId foreign key for taking table
+   *  @param id can be set for update else the database store the model with a new id
+   */
   def apply(depositUnit: DepositUnit, depositId: Long, takingId: Long, id : Option[Long] = None) : DepositUnitReader =
     DepositUnitReader(
       id.getOrElse(0L),
       depositUnit.publicId.toString,
       depositUnit.confirmed,
-      depositUnit.amount,
-      depositUnit.currency,
+      depositUnit.amount.amount,
+      depositUnit.amount.currency,
       depositUnit.created,
       depositId,
       takingId
     )
-
   implicit val getDepositUnitReader = GetResult(r =>
     DepositUnitReader(r.nextLong, r.nextString, r.nextLongOption, r.nextDouble, r.nextString, r.nextLong, r.nextLong, r.nextLong)
   )
@@ -58,7 +63,17 @@ object DepositUnitReader extends ((Long, String, Option[Long], Double, String, L
 
 
 /**
- * Deposit Database representation
+ * A database reader for [[models.frontend.Deposit]]
+ * @param id database id
+ * @param publicId business model id
+ * @param fullAmount amount of deposit 
+ * @param currency euro dollar
+ * @param confirmed can contain a UTC-Date to confirme the deposit
+ * @param crew public_id of a crew as String
+ * @param supporter public_id of a user as String
+ * @param created UTC-Date
+ * @param updated UTC-Date
+ * @param dateOfDeposit UTC-Date
  */
 
 case class DepositReader(
@@ -73,10 +88,14 @@ case class DepositReader(
   updated: Long,
   dateOfDeposit: Long
   ) {
+    /**
+     * map [[DepositReader]] to [[models.frontend.Deposit]]
+     * @param depositUnitList list of deposit units
+     */
     def toDeposit(depositUnitList: List[DepositUnit]) = 
       Deposit(
         UUID.fromString(this.publicId),
-        FullAmount(this.fullAmount, this.currency),
+        Amount(this.fullAmount, this.currency),
         depositUnitList,
         this.confirmed,
         UUID.fromString(this.crew),
@@ -86,15 +105,12 @@ case class DepositReader(
         this.dateOfDeposit
       )
   }
-
+/** Factory for [[DepositReader]] instance.*/
 object DepositReader extends ((Long, String, Double, String, Option[Long], String, String, Long, Long, Long) => DepositReader){
-
-//  def apply(tuple: (Long, String, Option[Long], String, String, Long, Long, Long)): DepositReader =
-//    DepositReader(tuple._1, UUID.fromString(tuple._2), tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8)
-//
-//  def unapply(arg: DepositReader): Option[(Long, String, Option[Long], String, String, Long, Long, Long)] =
-//    Some((arg.id, arg.publicId.toString, arg.confirmed, arg.crew, arg.supporter, arg.created, arg.updated, arg.dateOfDeposit))
-
+  /** Create a [[DepositReader]] with given deposit.
+   *  @param deposit
+   *  @param id can be set for update Deposit, else the database will create a new id
+   */
   def apply(deposit: Deposit, id: Option[Long] = None): DepositReader =
     DepositReader(
       id.getOrElse(0L),

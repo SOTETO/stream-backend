@@ -5,7 +5,7 @@ import play.api.{Configuration, Environment}
 class StreamModule extends play.api.inject.Module {
   def bindings(environment: Environment, configuration: Configuration) = {
     Seq(
-      bind[DepositDAO].to[MariaDBDepositDAO],
+      bind[DepositDAO].to[SQLDepositDAO],
       bind[HouseholdDAO].to[SQLHouseholdDAO],
       bind[TakingsDAO].to[SQLTakingsDAO],
       bind[UserDAO].to[DropsUserDAO]

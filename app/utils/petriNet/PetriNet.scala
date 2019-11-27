@@ -16,7 +16,7 @@ case class PetriNet(transitions: Set[Transition]) {
   }
 
   /**
-    * It fires a transition and updates all references by using [[replace()]].
+    * It fires a transition and updates all references by using `PetriNet.replace`.
     *
     * @author Johann Sell
     * @param name

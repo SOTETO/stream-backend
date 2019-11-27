@@ -31,7 +31,7 @@ object ActionMessage {
 }
 
 /**
-  * Combines [[ActionMessage]] with a set of [[Transition]] instances. Thus, it is possible to execute an action.
+  * Combines [[ActionMessage]] with a set of [[utils.petriNet.Transition]] instances. Thus, it is possible to execute an action.
   *
   * @author Johann Sell
   * @param msg
@@ -71,7 +71,7 @@ case class ActionMessageExecuter(msg: ActionMessage, transitions: Set[Transition
   }
 
   /**
-    * Update [[this]] and replace the set of transitions by new instances from a given Petri Net or use the old instance.
+    * Update `this` and replace the set of transitions by new instances from a given Petri Net or use the old instance.
     *
     * @author Johann Sell
     * @param petriNet

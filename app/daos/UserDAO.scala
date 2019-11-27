@@ -22,7 +22,7 @@ trait UserDAO {
 
   /**
     * Takes the first users from drops and shrink them onto their UUID. The amount of users is limited by the parameter
-    * [[limit]].
+    * `limit`.
     *
     * @author Johann Sell
     * @param limit
