@@ -43,4 +43,4 @@ libraryDependencies ++= Seq(
 dockerExposedPorts := Seq(9000, 9443)
 dockerRepository := Some("vivaconagua")
 routesGenerator := InjectedRoutesGenerator
-version in Docker := version.value
+version in Docker := "latest"
