@@ -7,11 +7,13 @@ import utils.{Ascending, Descending, Sort}
 
 class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  def public_id = column[String]("public_id")
   def taking_id = column[Long]("taking_id")
   def category = column[String]("category")
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def type_of_source = column[String]("type_of_source")
+  def norms = column[String]("norms")
 
   val takingTable = TableQuery[TakingTable]
 
@@ -19,7 +21,7 @@ class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id.?, taking_id, category, amount, currency, type_of_source) <> (SourceReader.apply, SourceReader.unapply)
+  def * = (id.?, public_id, taking_id, category, amount, currency, type_of_source, norms) <> (SourceReader.apply, SourceReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 

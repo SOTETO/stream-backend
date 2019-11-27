@@ -9,7 +9,7 @@ import org.vivaconagua.play2OauthClient.silhouette.User
  */
 class TakingPermission() {
     
-   /** Add restictions to [[frontend.models.TakingFilter]]
+   /** Add restictions to [[models.frontend.TakingFilter]]
     * the function use extend and create
     * @param filter
     * @return

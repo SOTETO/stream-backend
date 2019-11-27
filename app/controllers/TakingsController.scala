@@ -80,6 +80,15 @@ class TakingsController @Inject()(
     * @author Johann Sell
     * @return
     */
+  def update = silhouette.SecuredAction((IsAdmin || IsEmployee)).async(validateJson[Taking]) {
+    implicit request => {
+      service.update(request.body).map(_ match {
+        case Right(databaseTaking) => Ok(Json.toJson(databaseTaking))
+        case Left(exception) => InternalServerError("") 
+      })
+    }
+  }
+
   def count = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(validateJson[TakingQueryBody]) { implicit request => {

@@ -14,7 +14,6 @@ class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
   def received = column[Long]("received")
   def description = column[String]("description")
   def category = column[String]("category")
-  def norms = column[String]("norms")
   def comment = column[String]("comment")
   def reason_for_payment = column[String]("reason_for_payment")
   def receipt = column[Boolean]("receipt")
@@ -23,7 +22,7 @@ class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
   def created = column[Long]("created")
   def updated = column[Long]("updated")
 
-  def * = (id, public_id, received, description, category, norms, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (TakingReader.apply, TakingReader.unapply)
+  def * = (id, public_id, received, description, category, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (TakingReader.apply, TakingReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
   
@@ -61,7 +60,6 @@ class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
       case "received" => Some(this.received)
       case "description" => Some(this.description)
       case "category" => Some(this.category)
-      case "norms" => Some(this.norms)
       case "comment" => Some(this.comment)
       case "reason_for_payment" => Some(this.reason_for_payment)
       case "receipt" => Some(this.receipt)

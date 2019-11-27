@@ -37,7 +37,7 @@ object Context {
  * @param currency
  * @param typeOfSource
  */
-case class Source(category: String, amount: Amount, typeOfSource: String)
+case class Source(publicId: Option[UUID], category: String, amount: Amount, typeOfSource: String, norms: String)
 /**Factory for [[Source]] instance. Can be handle as a json.*/
 object Source {
   implicit val sourceFormat = Json.format[Source]
@@ -58,7 +58,6 @@ object TakingAmount {
  *  @param id 
  *  @param amount
  *  @param context
- *  @param norms
  *  @param comment
  *  @param details
  *  @param depositUnits
@@ -71,7 +70,6 @@ case class Taking(
                    id: UUID,
                    amount: TakingAmount,
                    context: Context,
-                   norms: String,
                    comment: Option[String],
                    details: Option[Details],
                    depositUnits: List[DepositUnit],
