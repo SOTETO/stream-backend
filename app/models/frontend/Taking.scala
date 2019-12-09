@@ -66,6 +66,26 @@ object TakingAmount {
  *  @param created UTC date
  *  @param updated UTC date
  */
+case class TakingStub(
+                   amount: TakingAmount,
+                   context: Context,
+                   comment: Option[String],
+                   details: Option[Details],
+                   depositUnits: List[DepositUnit],
+                   author: UUID,
+                   crew: UUID,
+                   created: Long,
+                   updated: Long
+                   ) {
+  def toTaking(): Taking = 
+    Taking(UUID.randomUUID(), this.amount, this.context, this.comment, this.details, this.depositUnits, this.author, this.crew, this.created, this.updated)
+                   }
+
+/**Factory for [[Taking]] instance. Can be handle as a json.*/
+object TakingStub {
+  implicit val takingFormat = Json.format[TakingStub]
+}
+
 case class Taking(
                    id: UUID,
                    amount: TakingAmount,

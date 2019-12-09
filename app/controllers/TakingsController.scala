@@ -11,7 +11,7 @@ import org.vivaconagua.play2OauthClient.silhouette.UserService
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.libs.json.{JsError, Json, Reads}
 import play.api.Configuration
-import models.frontend.{ Taking, Page, Sort, TakingQueryBody, TakingFilter}
+import models.frontend.{ Taking, TakingStub, Page, Sort, TakingQueryBody, TakingFilter}
 import responses.WebAppResult
 import service.TakingsService
 import utils.permissions.TakingPermission
@@ -62,16 +62,11 @@ class TakingsController @Inject()(
     */
   def create = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    request.body.validate[Taking].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      taking => {
-        service.save(taking).map(_ match {
-          case Right(databaseTaking) => WebAppResult.Ok(Json.toJson(List(databaseTaking))).toResult(request)
-          case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
-        })
-      }
-    )
+  ).async(validateJson[TakingStub]) { implicit request => {
+    service.save(request.body.toTaking).map(_ match {
+      case Right(databaseTaking) => WebAppResult.Ok(Json.toJson(List(databaseTaking))).toResult(request)
+      case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
+    })
   }}
 
   /**
