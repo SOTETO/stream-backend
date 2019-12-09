@@ -16,10 +16,11 @@ POST       /authenticate/:provider                  controllers.DropsController.
 GET        /identity                                controllers.DropsController.frontendLogin
 
 # Takings
-POST       /takings                               controllers.TakingsController.get
-POST       /takings/count                         controllers.TakingsController.count
-POST       /takings/create                        controllers.TakingsController.create
-POST       /takings/update                        controllers.TakingsController.update
+POST       /takings                                controllers.TakingsController.get
+GET        /takings/id/:id                         controllers.TakingsController.getById(id: String)
+POST       /takings/count                          controllers.TakingsController.count
+POST       /takings/create                         controllers.TakingsController.create
+POST       /takings/update                         controllers.TakingsController.update
 
 # Household
 POST       /household/count                         controllers.HouseholdController.count

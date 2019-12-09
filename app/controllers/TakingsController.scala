@@ -40,6 +40,15 @@ class TakingsController @Inject()(
    * @return
    */
   
+  def validateUUID(uuid: String): Option[UUID] = {
+    try{
+      Some(UUID.fromString(uuid))
+    }
+    catch {
+      case error: IllegalArgumentException => None
+    }
+  }
+
   def validateJson[A: Reads] = parser.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
   /**
     * Reads all currently saved takings and returns them.
@@ -47,6 +56,19 @@ class TakingsController @Inject()(
     * @author Johann Sell
     * @return
     */
+
+  def getById(uuid: String) = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async { implicit request => {
+    validateUUID(uuid) match {
+      case Some(id) => { service.getById(UUID.fromString(uuid)).map(taking => taking match {
+        case Some(t) => Ok(Json.toJson(t))
+        case None => NotFound(Json.obj({ "ERROR" -> "Can't find taking with given id" }))
+      })}
+      case None => Future.successful(NotFound(Json.obj({ "ERROR" -> "Can't find taking with given id" })))
+    }
+  }}
+
   def get = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(validateJson[TakingQueryBody]) { implicit request => {
