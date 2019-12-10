@@ -132,3 +132,9 @@ object Sort {
       (JsPath \ "dir").write[SortDir]
   )(unlift(Sort.unapply))
 }
+
+case class InvolvedCrew(uuid: UUID, name: String)
+
+object InvolvedCrew {
+  implicit val involvedCrewFormat = Json.format[InvolvedCrew]
+}
