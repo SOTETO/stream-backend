@@ -11,7 +11,7 @@ import org.vivaconagua.play2OauthClient.silhouette.UserService
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.libs.json.{JsError, Json, Reads}
 import play.api.Configuration
-import models.frontend.{ Taking, Page, Sort, TakingQueryBody, TakingFilter}
+import models.frontend.{ Taking, TakingStub, Page, Sort, TakingQueryBody, TakingFilter}
 import responses.WebAppResult
 import service.TakingsService
 import utils.permissions.TakingPermission
@@ -40,6 +40,15 @@ class TakingsController @Inject()(
    * @return
    */
   
+  def validateUUID(uuid: String): Option[UUID] = {
+    try{
+      Some(UUID.fromString(uuid))
+    }
+    catch {
+      case error: IllegalArgumentException => None
+    }
+  }
+
   def validateJson[A: Reads] = parser.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
   /**
     * Reads all currently saved takings and returns them.
@@ -47,6 +56,19 @@ class TakingsController @Inject()(
     * @author Johann Sell
     * @return
     */
+
+  def getById(uuid: String) = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async { implicit request => {
+    validateUUID(uuid) match {
+      case Some(id) => { service.getById(UUID.fromString(uuid)).map(taking => taking match {
+        case Some(t) => Ok(Json.toJson(t))
+        case None => NotFound(Json.obj({ "ERROR" -> "Can't find taking with given id" }))
+      })}
+      case None => Future.successful(NotFound(Json.obj({ "ERROR" -> "Can't find taking with given id" })))
+    }
+  }}
+
   def get = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(validateJson[TakingQueryBody]) { implicit request => {
@@ -62,16 +84,11 @@ class TakingsController @Inject()(
     */
   def create = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    request.body.validate[Taking].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      taking => {
-        service.save(taking).map(_ match {
-          case Right(databaseTaking) => WebAppResult.Ok(Json.toJson(List(databaseTaking))).toResult(request)
-          case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
-        })
-      }
-    )
+  ).async(validateJson[TakingStub]) { implicit request => {
+    service.save(request.body.toTaking).map(_ match {
+      case Right(databaseTaking) => WebAppResult.Ok(Json.toJson(List(databaseTaking))).toResult(request)
+      case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
+    })
   }}
 
   /**

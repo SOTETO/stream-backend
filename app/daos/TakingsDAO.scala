@@ -31,7 +31,9 @@ class SQLTakingsDAO @Inject()
   import profile.api._
 //  import slick.jdbc.MySQLProfile.api._
   type CustomQuery = slick.lifted.Query[(daos.schema.TakingTable, slick.lifted.Rep[Option[daos.schema.InvolvedSupporterTable]], slick.lifted.Rep[Option[daos.schema.SourceTable]], slick.lifted.Rep[Option[daos.schema.DepositUnitTable]]),(daos.reader.TakingReader, Option[daos.reader.InvolvedSupporterReader], Option[daos.reader.SourceReader], Option[daos.reader.DepositUnitReader]),Seq]
-  
+
+
+  type sourceQuery = slick.lifted.Query[daos.schema.SourceTable,daos.schema.SourceTable#TableElementType,Seq]
   val takings = TableQuery[TakingTable]
   val supporter = TableQuery[InvolvedSupporterTable]
   val sources = TableQuery[SourceTable]
@@ -46,12 +48,12 @@ class SQLTakingsDAO @Inject()
     * @return
     */
 
-    private def joined() = {
+    private def joined(source: sourceQuery = sources) = {
       (for {
         (((don, sup), sou), units) <- (
           takings joinLeft
           supporter on (_.id === _.taking_id)) joinLeft
-          sources on (_._1.id === _.taking_id) joinLeft
+          source on (_._1.id === _.taking_id) joinLeft
           depositUnits on (_._1._1.id === _.takingId)
       } yield (don, sup, sou, units))
     }
@@ -107,6 +109,21 @@ class SQLTakingsDAO @Inject()
   }
 
   /**
+   * add filter to source for prefilter joined sources
+   * @param filter
+   * @return
+   */
+  private def sourcePreFilterd(filter: Option[TakingFilter]) = {
+    filter.map(f => {
+      sources.filter(table => {
+        List(
+          f.norms.map(norms => table.norms.inSet(norms.map(_.toString())))
+        ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
+      })
+    })getOrElse(sources)
+  }
+
+  /**
     * Read a result set of database query.
     *
     * @author Johann Sell
@@ -148,7 +165,8 @@ class SQLTakingsDAO @Inject()
    */
 
   override def all(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter]): Future[List[Taking]] = {
-    val query = joined()
+    val sourceFiltered = sourcePreFilterd(filter)
+    val query = joined(sourceFiltered)
     val fQuery = filtered(query, filter)
     val sQuery = sorted(fQuery, sort)
     val pQuery = paged(sQuery, page)
