@@ -14,11 +14,19 @@ resolvers ++= Seq(
   Resolver.bintrayRepo("scalaz", "releases")
 )
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += Resolver.jcenterRepo
+//resolvers += "Atlassian Maven" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
+resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 
 libraryDependencies += ehcache
 libraryDependencies += guice
 libraryDependencies += ws
 libraryDependencies += evolutions
+
+// https://mvnrepository.com/artifact/com.atlassian.jwt/jwt-api
+// libraryDependencies += "com.atlassian.jwt" % "jwt-api" % "1.6.1" % "provided"
+
+
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick" % "4.0.0",
   "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
@@ -28,6 +36,9 @@ libraryDependencies ++= Seq(
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
 libraryDependencies += "org.vivaconagua" %% "play2-oauth-client" % "0.4.8-play27"
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8.1"
+
+//libraryDependencies += "io.toolsplus" %% "atlassian-jwt" % "1.6.1"
+libraryDependencies += "com.atlassian.jwt" % "jwt-core" % "2.0.5"
 
 // Slick MySql
 libraryDependencies ++= Seq(
