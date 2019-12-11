@@ -8,6 +8,7 @@ class InvolvedSupporterTable(tag: Tag) extends Table[InvolvedSupporterReader](ta
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def taking_id = column[Long]("taking_id")
   def supporter_id = column[String]("supporter_id")
+  def name = column[String]("name")
 
   val takingTable = TableQuery[TakingTable]
 
@@ -15,7 +16,7 @@ class InvolvedSupporterTable(tag: Tag) extends Table[InvolvedSupporterReader](ta
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id.?, taking_id, supporter_id) <> (InvolvedSupporterReader.apply, InvolvedSupporterReader.unapply)
+  def * = (id.?, taking_id, supporter_id, name) <> (InvolvedSupporterReader.apply, InvolvedSupporterReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 }

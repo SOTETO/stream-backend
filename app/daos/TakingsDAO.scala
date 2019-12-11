@@ -3,8 +3,8 @@ package daos
 import java.util.UUID
 
 import daos.exceptions.TakingAddException
-import daos.reader.{DepositUnitReader, TakingReader, InvolvedSupporterReader, SourceReader}
-import daos.schema.{DepositUnitTable, TakingTable, InvolvedSupporterTable, SourceTable}
+import daos.reader.{DepositUnitReader, TakingReader, InvolvedSupporterReader, SourceReader, InvolvedCrewReader}
+import daos.schema.{DepositUnitTable, TakingTable, InvolvedSupporterTable, SourceTable, InvolvedCrewTable}
 import javax.inject.{Inject, Singleton}
 import models.frontend.{Taking, Source, TakingFilter, Page, Sort}
 import play.api.Play
@@ -30,7 +30,7 @@ class SQLTakingsDAO @Inject()
 
   import profile.api._
 //  import slick.jdbc.MySQLProfile.api._
-  type CustomQuery = slick.lifted.Query[(daos.schema.TakingTable, slick.lifted.Rep[Option[daos.schema.InvolvedSupporterTable]], slick.lifted.Rep[Option[daos.schema.SourceTable]], slick.lifted.Rep[Option[daos.schema.DepositUnitTable]]),(daos.reader.TakingReader, Option[daos.reader.InvolvedSupporterReader], Option[daos.reader.SourceReader], Option[daos.reader.DepositUnitReader]),Seq]
+  type CustomQuery = slick.lifted.Query[(daos.schema.TakingTable, slick.lifted.Rep[Option[daos.schema.InvolvedSupporterTable]], slick.lifted.Rep[Option[daos.schema.SourceTable]], slick.lifted.Rep[Option[daos.schema.DepositUnitTable]], slick.lifted.Rep[Option[daos.schema.InvolvedCrewTable]]),(daos.reader.TakingReader, Option[daos.reader.InvolvedSupporterReader], Option[daos.reader.SourceReader], Option[daos.reader.DepositUnitReader], Option[daos.reader.InvolvedCrewReader]),Seq]
 
 
   type sourceQuery = slick.lifted.Query[daos.schema.SourceTable,daos.schema.SourceTable#TableElementType,Seq]
@@ -38,6 +38,7 @@ class SQLTakingsDAO @Inject()
   val supporter = TableQuery[InvolvedSupporterTable]
   val sources = TableQuery[SourceTable]
   val depositUnits = TableQuery[DepositUnitTable]
+  val crews = TableQuery[InvolvedCrewTable]
   import TakingReader._
   import InvolvedSupporterReader._
   import SourceReader._
@@ -50,12 +51,13 @@ class SQLTakingsDAO @Inject()
 
     private def joined(source: sourceQuery = sources) = {
       (for {
-        (((don, sup), sou), units) <- (
+        ((((don, sup), sou), units), cre) <- (
           takings joinLeft
           supporter on (_.id === _.taking_id)) joinLeft
           source on (_._1.id === _.taking_id) joinLeft
-          depositUnits on (_._1._1.id === _.takingId)
-      } yield (don, sup, sou, units))
+          depositUnits on (_._1._1.id === _.takingId) joinLeft
+          crews on (_._1._1._1.id === _.taking_id)
+      } yield (don, sup, sou, units, cre))
     }
 
   /**
@@ -131,15 +133,17 @@ class SQLTakingsDAO @Inject()
     * @return
     */
 
-  private def reader(results : Seq[(TakingReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader])]) : Seq[Taking] = {
+  private def reader(results : Seq[(TakingReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader], Option[InvolvedCrewReader])]) : Seq[Taking] = {
     val supporter = results.map(_._2).filter(_.isDefined).map(_.get)
     val sources = results.map(_._3).filter(_.isDefined).map(_.get)
     val units = results.map(_._4).filter(_.isDefined).map(_.get)
+    val crew = results.map(_._5).filter(_.isDefined).map(_.get)
     results.map(res =>
       res._1.toTaking(
         supporter.filter(_.taking_id == res._1.id), // involved supporter
         sources.filter(_.taking_id == res._1.id), // sources
-        units.filter(_.takingId == res._1.id) // deposit units
+        units.filter(_.takingId == res._1.id), // deposit units
+        crew.filter(_.taking_id == res._1.id)
       )
     ).distinct
   }
@@ -181,6 +185,7 @@ class SQLTakingsDAO @Inject()
       dID <- (takings returning takings.map(_.id)) += TakingReader(taking)
       _ <- supporter ++= taking.amount.involvedSupporter.map(id => InvolvedSupporterReader( id, dID ))
       _ <- sources ++= taking.amount.sources.map(source => SourceReader(source, dID))
+      _ <- crews ++= taking.crew.map(c => InvolvedCrewReader(c, dID))
     } yield dID).transactionally
     db.run(insert).flatMap(id => find(id).map(_ match {
       case Some(don) => Right(don)

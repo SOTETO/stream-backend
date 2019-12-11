@@ -48,7 +48,13 @@ object Source {
  * @param involvedSupporter
  * @param sources
  */
-case class TakingAmount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
+
+case class InvolvedSupporter(uuid: UUID, name: String)
+object InvolvedSupporter {
+  implicit val involvedSupporterFormat = Json.format[InvolvedSupporter]
+}
+
+case class TakingAmount(received: Long, involvedSupporter: List[InvolvedSupporter], sources: List[Source])
 /** Factory for [[TakingAmount]] instance. Can be handle as json.*/
 object TakingAmount {
   implicit val takingAmountFormat = Json.format[TakingAmount]
@@ -73,7 +79,7 @@ case class TakingStub(
                    details: Option[Details],
                    depositUnits: List[DepositUnit],
                    author: UUID,
-                   crew: UUID,
+                   crew: List[InvolvedCrew],
                    created: Long,
                    updated: Long
                    ) {
@@ -94,7 +100,7 @@ case class Taking(
                    details: Option[Details],
                    depositUnits: List[DepositUnit],
                    author: UUID,
-                   crew: UUID,
+                   crew: List[InvolvedCrew],
                    created: Long,
                    updated: Long
                    )
