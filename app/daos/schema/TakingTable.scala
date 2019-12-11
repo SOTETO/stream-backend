@@ -18,11 +18,10 @@ class TakingTable(tag: Tag) extends Table[TakingReader](tag, "Taking") {
   def reason_for_payment = column[String]("reason_for_payment")
   def receipt = column[Boolean]("receipt")
   def author = column[String]("author")
-  def crew = column[String]("crew")
   def created = column[Long]("created")
   def updated = column[Long]("updated")
 
-  def * = (id, public_id, received, description, category, comment.?, reason_for_payment.?, receipt.?, author, crew, updated, created) <> (TakingReader.apply, TakingReader.unapply)
+  def * = (id, public_id, received, description, category, comment.?, reason_for_payment.?, receipt.?, author, updated, created) <> (TakingReader.apply, TakingReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
   

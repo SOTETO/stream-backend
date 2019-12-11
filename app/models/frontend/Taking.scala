@@ -54,7 +54,7 @@ object InvolvedSupporter {
   implicit val involvedSupporterFormat = Json.format[InvolvedSupporter]
 }
 
-case class TakingAmount(received: Long, involvedSupporter: List[UUID], sources: List[Source])
+case class TakingAmount(received: Long, involvedSupporter: List[InvolvedSupporter], sources: List[Source])
 /** Factory for [[TakingAmount]] instance. Can be handle as json.*/
 object TakingAmount {
   implicit val takingAmountFormat = Json.format[TakingAmount]
