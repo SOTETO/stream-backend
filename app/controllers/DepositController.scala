@@ -119,7 +119,7 @@ class DepositController @Inject() (
   
 
 
-  case class ConfirmBody(id: UUID, date: Long)
+  case class ConfirmBody(id: UUID, date: Long, uuid: UUID, name: String)
   object ConfirmBody {
     implicit val confirmBodyFormat = Json.format[ConfirmBody]
   }
@@ -129,7 +129,7 @@ class DepositController @Inject() (
   ).async(parse.json) { implicit request => {
     request.body.validate[ConfirmBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.confirm(query.id, query.date).map(result => WebAppResult.Ok(
+      query => service.confirm(query.id, query.date, query.uuid, query.name).map(result => WebAppResult.Ok(
         Json.obj("state" -> (result match {
           case true => "SUCCESS"
           case false => "FAILURE"

@@ -25,7 +25,7 @@ class DepositService @Inject() (dao: DepositDAO, userDAO: UserDAO) {
 
   def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter]):Future[List[Deposit]] = dao.all(page, sort, filter)
   def count(filter: Option[DepositFilter] = None): Future[Int] = dao.count(filter)
-  def confirm(uuid: UUID, date: Long): Future[Boolean] = dao.confirm(uuid, date)
+  def confirm(uuid: UUID, date: Long, user: UUID, name: String): Future[Boolean] = dao.confirm(uuid, date, user.toString(), name)
 
   def delete(uuid: UUID): Future[Boolean] = ???
 

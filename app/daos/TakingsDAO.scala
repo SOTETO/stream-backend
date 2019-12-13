@@ -101,7 +101,7 @@ class SQLTakingsDAO @Inject()
     filter.map(f => {
       query.filter(table => {
         List(
-          f.name.map(name => table._1.description.inSet(name.map(_.toString()))),
+          f.name.map(name => table._1.description.inSetBind(name.map( _.toString()))),
           f.publicId.map(ids => table._1.public_id.inSet(ids.map(_.toString()))),
           //f.crew.map(table.crew === _.toString())
          // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))

@@ -34,7 +34,7 @@ case class TakingReader(
       Context(description, category),
       comment,
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
-      depositUnits.filter(_.takingId == id).map(_.toDepositUnit(publicId)).toList.distinct,
+      depositUnits.filter(_.takingId == id).map(_.toDepositUnit(publicId, Some(description))).toList.distinct,
       author,
       involvedCrew.filter(_.taking_id == id).map(_.toInvolvedCrew).toList.distinct,
       created,

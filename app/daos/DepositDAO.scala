@@ -29,7 +29,7 @@ trait DepositDAO {
   def delete(uuid: UUID): Future[Boolean]
   def all(page: Option[Page], sort: Option[Sort], filter: Option[DepositFilter] = None): Future[List[Deposit]]
   def count(filter: Option[DepositFilter] = None) : Future[Int]
-  def confirm(uuid: UUID, date: Long) : Future[Boolean]
+  def confirm(uuid: UUID, date: Long, user: String, name: String) : Future[Boolean]
 }
 
 @Singleton
@@ -182,16 +182,24 @@ class SQLDepositDAO @Inject()
     * @param date
     * @return
     */
-  override def confirm(uuid: UUID, date: Long): Future[Boolean] = {
+  override def confirm(uuid: UUID, date: Long, user: String, name: String): Future[Boolean] = {
     db.run(depositTable.filter(_.publicId === uuid.toString).map(_.id).result).flatMap(_.headOption.map(deposit => {
       val qDeposit = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed
+      val dUser = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed_user_uuid
+      val dName = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed_user_name
       val qDepositUnit = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed
+      val duUser = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed_user_uuid
+      val duName = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed_user_name
       val operations = (for {
         countDeposit <- qDeposit.update(date)
+        userCountDeposit <- dUser.update(user)
+        nameCountDeposit <- dName.update(name)
         countDepositUnit <- qDepositUnit.update(date)
-      } yield (countDeposit, countDepositUnit)).transactionally
+        userCountDepositUnit <- duUser.update(user)
+        nameCountDepositUnit <- duName.update(name)
+      } yield (countDeposit, nameCountDeposit, userCountDeposit, countDepositUnit, userCountDepositUnit, nameCountDepositUnit)).transactionally
 
-      db.run(operations).map(res => res._1 > 1 && res._2 > 1)
+    db.run(operations).map(res => res._1 > 1 && res._2 > 1 && res._3 >1 && res._4 > 1 && res._5 > 1 && res._6 > 1)
     }).getOrElse(Future.successful(false)))
   }
   override def update(deposit: Deposit): Future[Option[Deposit]] = ???
@@ -227,7 +235,7 @@ class SQLDepositDAO @Inject()
     val amount = entries.groupBy(_._2).toSeq.filter(_._1.isDefined).map(current =>
       current._2.find(c => c._2.isDefined && c._2.get.publicId == current._1.get.publicId)
         .flatMap(_._3.map(taking =>
-          current._1.head.toDepositUnit(taking.publicId)
+          current._1.head.toDepositUnit(taking.publicId, Some(taking.description))
         ))
     ).filter(_.isDefined).map(_.get).toList
     // use the toDeposit function of DepositReader for transform it to Deposit

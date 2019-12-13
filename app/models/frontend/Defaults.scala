@@ -138,3 +138,9 @@ case class InvolvedCrew(uuid: UUID, name: String)
 object InvolvedCrew {
   implicit val involvedCrewFormat = Json.format[InvolvedCrew]
 }
+
+case class Confirmed(date: Long, user: InvolvedSupporter)
+
+object Confirmed {
+  implicit val confirmedFormat = Json.format[Confirmed]
+}

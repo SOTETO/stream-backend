@@ -6,7 +6,6 @@ import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.ws.WSClient
-import testdata.TestData
 import utils.petriNet._
 
 import scala.concurrent.Future

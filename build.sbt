@@ -28,9 +28,9 @@ libraryDependencies += evolutions
 
 
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play-slick" % "4.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
-  "mysql" % "mysql-connector-java" % "8.0.15",
+  "com.typesafe.play" %% "play-slick" % "3.0.0",
+  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.0",
+  "mysql" % "mysql-connector-java" % "8.0.18",
 
 )
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test

@@ -26,7 +26,7 @@ object Amount {
   */
 case class DepositUnitStub(
   takingId: UUID,
-  confirmed: Option[Long],
+  confirmed: Option[Confirmed],
   amount: Amount,
   created: Long
   ) {
@@ -35,7 +35,7 @@ case class DepositUnitStub(
      * @return
      */
     def toDepositUnit(): DepositUnit =
-      DepositUnit(UUID.randomUUID(), this.takingId, this.confirmed, this.amount, this.created)
+      DepositUnit(UUID.randomUUID(), this.takingId, None, this.confirmed, this.amount, this.created)
   }
 
 /** Factory for [[DepositUnitStub]] instance. Can be handle as Json */
@@ -54,7 +54,8 @@ object DepositUnitStub {
 case class DepositUnit(
   publicId: UUID,
   takingId: UUID,
-  confirmed: Option[Long],
+  description: Option[String],
+  confirmed: Option[Confirmed],
   amount: Amount,
   created: Long
 )
@@ -63,8 +64,6 @@ case class DepositUnit(
 object DepositUnit {
   implicit val depositUnitFormat = Json.format[DepositUnit]
 }
-
-
 
 /**
  * Handle the Json for creating [[Deposit]]
@@ -80,9 +79,9 @@ object DepositUnit {
 case class DepositStub(
   full: Amount,
   amount: List[DepositUnitStub],
-  confirmed: Option[Long],
-  crew: UUID,
-  supporter: UUID,
+  confirmed: Option[Confirmed],
+  crew: InvolvedCrew,
+  supporter: InvolvedSupporter,
   created: Long,
   updated: Long,
   dateOfDeposit: Long
@@ -127,9 +126,9 @@ case class Deposit(
   publicId: UUID,
   full: Amount,
   amount: List[DepositUnit],
-  confirmed: Option[Long],
-  crew: UUID,
-  supporter: UUID,
+  confirmed: Option[Confirmed],
+  crew: InvolvedCrew,
+  supporter: InvolvedSupporter,
   created: Long,
   updated: Long,
   dateOfDeposit: Long
