@@ -13,6 +13,11 @@ class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def type_of_source = column[String]("type_of_source")
+  def type_location = column[String]("type_location")
+  def type_contact_person = column[String]("type_contact_person")
+  def type_email = column[String]("type_email")
+  def type_address = column[String]("type_address")
+  def receipt = column[Boolean]("receipt")
   def norms = column[String]("norms")
 
   val takingTable = TableQuery[TakingTable]
@@ -21,7 +26,7 @@ class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id.?, public_id, taking_id, category, amount, currency, type_of_source, norms) <> (SourceReader.apply, SourceReader.unapply)
+  def * = (id.?, public_id, taking_id, category, amount, currency, type_of_source, type_location.?, type_contact_person.?, type_email.?, type_address.?, receipt.?, norms) <> (SourceReader.apply, SourceReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 

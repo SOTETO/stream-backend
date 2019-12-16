@@ -30,13 +30,34 @@ object Context {
   implicit val contextFormat = Json.format[Context]
 }
 
+case class ExternalTransaction (
+  location: String,
+  contactPerson: String,
+  email: String,
+  address: String,
+  receipt: Boolean
+  )
+
+object ExternalTransaction {
+  implicit val externalTransactionFormat = Json.format[ExternalTransaction]
+}
+
+case class TypeOfSource(
+  category: String,
+  external: Option[ExternalTransaction]
+  )
+
+object TypeOfSource{
+  implicit val TypeOfSource = Json.format[TypeOfSource]
+}
+
 /** A class for handling takings sources 
  * @param category
  * @param amount
  * @param currency
  * @param typeOfSource
  */
-case class Source(publicId: Option[UUID], category: String, amount: Amount, typeOfSource: String, norms: String)
+case class Source(publicId: Option[UUID], category: String, amount: Amount, typeOfSource: TypeOfSource, norms: String)
 /**Factory for [[Source]] instance. Can be handle as a json.*/
 object Source {
   implicit val sourceFormat = Json.format[Source]
