@@ -10,6 +10,7 @@ case class SourceReader(
                        public_id: String,
                        taking_id: Long,
                        category: String,
+                       description: Option[String],
                        amount: Double,
                        currency: String,
                        type_of_source: String,
@@ -28,13 +29,14 @@ case class SourceReader(
     Source(
     Some(UUID.fromString(public_id)), 
     category, 
+    description,
     Amount(amount, currency), 
     TypeOfSource(type_of_source, externalTransaction),
     norms
   )}
 }
 
-object SourceReader extends ((Option[Long], String, Long, String, Double, String, String, Option[String], Option[String], Option[String], Option[String], Option[Boolean], String) => SourceReader) {
+object SourceReader extends ((Option[Long], String, Long, String, Option[String], Double, String, String, Option[String], Option[String], Option[String], Option[String], Option[Boolean], String) => SourceReader) {
   
   def apply(source: Source, id: Long, taking_id: Long, public_id: String): SourceReader = {
     source.typeOfSource.external match {
@@ -42,6 +44,7 @@ object SourceReader extends ((Option[Long], String, Long, String, Double, String
          Some(id), 
          public_id, 
          taking_id, source.category, 
+         source.description,
          source.amount.amount, 
          source.amount.currency, 
          source.typeOfSource.category,
@@ -56,6 +59,7 @@ object SourceReader extends ((Option[Long], String, Long, String, Double, String
          None, 
          UUID.randomUUID().toString, 
          taking_id, source.category, 
+         source.description,
          source.amount.amount, 
          source.amount.currency, 
          source.typeOfSource.category,
@@ -74,6 +78,7 @@ object SourceReader extends ((Option[Long], String, Long, String, Double, String
          None,
          UUID.randomUUID().toString, 
          taking_id, source.category, 
+         source.description,
          source.amount.amount, 
          source.amount.currency, 
          source.typeOfSource.category,
@@ -88,6 +93,7 @@ object SourceReader extends ((Option[Long], String, Long, String, Double, String
          None, 
          UUID.randomUUID().toString, 
          taking_id, source.category, 
+         source.description,
          source.amount.amount, 
          source.amount.currency, 
          source.typeOfSource.category,
@@ -102,10 +108,10 @@ object SourceReader extends ((Option[Long], String, Long, String, Double, String
   }
 
 
-  def apply(tuple: (Option[Long], String, Long, String, Double, String, String, Option[String], Option[String], Option[String], Option[String], Option[Boolean], String)): SourceReader =
-    SourceReader(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9, tuple._10, tuple._11, tuple._12, tuple._13)
+  def apply(tuple: (Option[Long], String, Long, String, Option[String], Double, String, String, Option[String], Option[String], Option[String], Option[String], Option[Boolean], String)): SourceReader =
+    SourceReader(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9, tuple._10, tuple._11, tuple._12, tuple._13, tuple._14)
 
   implicit val getSourceReader = GetResult(r =>
-    SourceReader(r.nextLongOption, r.nextString, r.nextLong, r.nextString, r.nextDouble, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, r.nextString())
+    SourceReader(r.nextLongOption, r.nextString, r.nextLong, r.nextString, r.nextStringOption, r.nextDouble, r.nextString, r.nextString, r.nextStringOption, r.nextStringOption, r.nextStringOption, r.nextStringOption, r.nextBooleanOption, r.nextString())
   )
 }

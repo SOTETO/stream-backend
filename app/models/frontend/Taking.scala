@@ -57,7 +57,7 @@ object TypeOfSource{
  * @param currency
  * @param typeOfSource
  */
-case class Source(publicId: Option[UUID], category: String, amount: Amount, typeOfSource: TypeOfSource, norms: String)
+case class Source(publicId: Option[UUID], category: String, description: Option[String], amount: Amount, typeOfSource: TypeOfSource, norms: String)
 /**Factory for [[Source]] instance. Can be handle as a json.*/
 object Source {
   implicit val sourceFormat = Json.format[Source]

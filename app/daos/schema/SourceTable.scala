@@ -10,6 +10,7 @@ class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
   def public_id = column[String]("public_id")
   def taking_id = column[Long]("taking_id")
   def category = column[String]("category")
+  def description = column[String]("description")
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def type_of_source = column[String]("type_of_source")
@@ -26,7 +27,7 @@ class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id.?, public_id, taking_id, category, amount, currency, type_of_source, type_location.?, type_contact_person.?, type_email.?, type_address.?, receipt.?, norms) <> (SourceReader.apply, SourceReader.unapply)
+  def * = (id.?, public_id, taking_id, category, description.?, amount, currency, type_of_source, type_location.?, type_contact_person.?, type_email.?, type_address.?, receipt.?, norms) <> (SourceReader.apply, SourceReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 
