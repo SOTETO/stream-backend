@@ -199,7 +199,7 @@ class SQLTakingsDAO @Inject()
       s.publicId match {
         case Some(publicId) => {
           db.run(sources.filter(_.public_id === publicId.toString()).map(_.id).result).map(
-            source_id =>  sources.insertOrUpdate(SourceReader(s, source_id.head, taking_id, publicId.toString))
+            source_id =>  db.run(sources.insertOrUpdate(SourceReader(s, source_id.head, taking_id, publicId.toString)))
           )
         }
         case None => db.run(sources returning sources.map(_.id) += SourceReader(s, taking_id))
