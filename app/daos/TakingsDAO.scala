@@ -103,7 +103,7 @@ class SQLTakingsDAO @Inject()
         List(
           f.name.map(name => table._1.description.inSetBind(name.map( _.toString()))),
           f.publicId.map(ids => table._1.public_id.inSet(ids.map(_.toString()))),
-          //f.crew.map(table.crew === _.toString())
+          f.crew.map(crews => table._5.filter(_.crew_id.inSet(crews.map(_.toString()))).isDefined),
          // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
