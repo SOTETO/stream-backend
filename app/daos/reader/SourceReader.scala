@@ -56,8 +56,8 @@ object SourceReader extends ((Option[Long], String, Long, String, Option[String]
          source.norms
        )
        case None => SourceReader(
-         None, 
-         UUID.randomUUID().toString, 
+         Some(id), 
+         public_id, 
          taking_id, source.category, 
          source.description,
          source.amount.amount, 
