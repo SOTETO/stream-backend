@@ -15,6 +15,7 @@ resolvers ++= Seq(
 )
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 resolvers += Resolver.jcenterRepo
+
 //resolvers += "Atlassian Maven" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 
