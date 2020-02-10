@@ -111,8 +111,9 @@ class SQLDepositDAO @Inject()
         List(
           f.publicId.map(ids => table._1.publicId === ids.toString()),
           f.takingsId.map(ids => table._3.filter(_.public_id === ids.toString()).isDefined),
-          f.crew.map(ids => table._1.crew === ids.toString())
-          //f.norms.map(norms => table._1.norms === norms)
+          f.crew.map(ids => table._1.crew === ids.toString()),
+          f.name.map(name => name.map( n => table._3.filter(_.description like n).isDefined).reduceLeft(_ || _)),
+          f.confirmed.map(c => table._1.confirmed like c)
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
     }).getOrElse(query)

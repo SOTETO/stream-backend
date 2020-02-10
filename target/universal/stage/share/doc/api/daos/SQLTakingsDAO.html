@@ -1,0 +1,982 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../lib/jquery.js"></script>
+      <script type="text/javascript" src="../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../lib/index.js"></script>
+      <script type="text/javascript" src="../index.js"></script>
+      <script type="text/javascript" src="../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../lib/template.js"></script>
+      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.daos" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="daos"></a><a id="daos:daos"></a>
+      <span class="permalink">
+      <a href="index.html#daos" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="index.html"><span class="name">daos</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="daos.exceptions" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exceptions"></a><a id="exceptions:exceptions"></a>
+      <span class="permalink">
+      <a href="../daos/index.html#exceptions" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="exceptions/index.html"><span class="name">exceptions</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="daos">daos</a></dd></dl></div>
+    </li><li name="daos.reader" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="reader"></a><a id="reader:reader"></a>
+      <span class="permalink">
+      <a href="../daos/index.html#reader" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="reader/index.html"><span class="name">reader</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="daos">daos</a></dd></dl></div>
+    </li><li name="daos.schema" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="schema"></a><a id="schema:schema"></a>
+      <span class="permalink">
+      <a href="../daos/index.html#schema" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="schema/index.html"><span class="name">schema</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="daos">daos</a></dd></dl></div>
+    </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="DepositDAO.html" title=""></a>
+                        <a href="DepositDAO.html" title="">DepositDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="DropsUserDAO.html" title="Implements the connection to Drops."></a>
+                        <a href="DropsUserDAO.html" title="Implements the connection to Drops.">DropsUserDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="HouseholdDAO.html" title=""></a>
+                        <a href="HouseholdDAO.html" title="">HouseholdDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="SQLDepositDAO.html" title=""></a>
+                        <a href="SQLDepositDAO.html" title="">SQLDepositDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="SQLHouseholdDAO.html" title=""></a>
+                        <a href="SQLHouseholdDAO.html" title="">SQLHouseholdDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="" title=""></a>
+                        <a href="" title="">SQLTakingsDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="TakingsDAO.html" title=""></a>
+                        <a href="TakingsDAO.html" title="">TakingsDAO</a>
+                      </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="trait" href="UserDAO.html" title="Interface for a UserDAO"></a>
+                        <a href="UserDAO.html" title="Interface for a UserDAO">UserDAO</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="class type">
+      <div id="definition">
+        <div class="big-circle class">c</div>
+        <p id="owner"><a href="index.html" class="extype" name="daos">daos</a></p>
+        <h1>SQLTakingsDAO<span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        <h3><span class="morelinks"></span></h3>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SQLTakingsDAO</span><span class="result"> extends <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a> with <a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/HasDatabaseConfigProvider.html#play.api.db.slick.HasDatabaseConfigProvider" class="extype" name="play.api.db.slick.HasDatabaseConfigProvider">HasDatabaseConfigProvider</a>[<a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a>]</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Singleton</span><span class="args">()</span>
+              
+        </dd></dl><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/HasDatabaseConfigProvider.html#play.api.db.slick.HasDatabaseConfigProvider" class="extype" name="play.api.db.slick.HasDatabaseConfigProvider">HasDatabaseConfigProvider</a>[<a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a>], <a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/HasDatabaseConfig.html#play.api.db.slick.HasDatabaseConfig" class="extype" name="play.api.db.slick.HasDatabaseConfig">HasDatabaseConfig</a>[<a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a>], <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
+            </ol>
+          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="daos.SQLTakingsDAO"><span>SQLTakingsDAO</span></li><li class="in" name="play.api.db.slick.HasDatabaseConfigProvider"><span>HasDatabaseConfigProvider</span></li><li class="in" name="play.api.db.slick.HasDatabaseConfig"><span>HasDatabaseConfig</span></li><li class="in" name="daos.TakingsDAO"><span>TakingsDAO</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="daos.SQLTakingsDAO#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(dbConfigProvider:play.api.db.slick.DatabaseConfigProvider)(implicitec:scala.concurrent.ExecutionContext):daos.SQLTakingsDAO"></a><a id="&lt;init&gt;:SQLTakingsDAO"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#&lt;init&gt;(dbConfigProvider:play.api.db.slick.DatabaseConfigProvider)(implicitec:scala.concurrent.ExecutionContext):daos.SQLTakingsDAO" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SQLTakingsDAO</span><span class="params">(<span name="dbConfigProvider">dbConfigProvider: <a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/DatabaseConfigProvider.html#play.api.db.slick.DatabaseConfigProvider" class="extype" name="play.api.db.slick.DatabaseConfigProvider">DatabaseConfigProvider</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/ExecutionContext.html#scala.concurrent.ExecutionContext" class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</a></span>)</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Inject</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="daos.SQLTakingsDAO.CustomQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CustomQuery=slick.lifted.Query[(daos.schema.TakingTable,slick.lifted.Rep[Option[daos.schema.InvolvedSupporterTable]],slick.lifted.Rep[Option[daos.schema.SourceTable]],slick.lifted.Rep[Option[daos.schema.DepositUnitTable]],slick.lifted.Rep[Option[daos.schema.InvolvedCrewTable]]),(daos.reader.TakingReader,Option[daos.reader.InvolvedSupporterReader],Option[daos.reader.SourceReader],Option[daos.reader.DepositUnitReader],Option[daos.reader.InvolvedCrewReader]),Seq]"></a><a id="CustomQuery:CustomQuery"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#CustomQuery=slick.lifted.Query[(daos.schema.TakingTable,slick.lifted.Rep[Option[daos.schema.InvolvedSupporterTable]],slick.lifted.Rep[Option[daos.schema.SourceTable]],slick.lifted.Rep[Option[daos.schema.DepositUnitTable]],slick.lifted.Rep[Option[daos.schema.InvolvedCrewTable]]),(daos.reader.TakingReader,Option[daos.reader.InvolvedSupporterReader],Option[daos.reader.SourceReader],Option[daos.reader.DepositUnitReader],Option[daos.reader.InvolvedCrewReader]),Seq]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">CustomQuery</span><span class="result alias"> = <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/lifted/Query.html#slick.lifted.Query" class="extype" name="slick.lifted.Query">Query</a>[(<a href="schema/TakingTable.html" class="extype" name="daos.schema.TakingTable">TakingTable</a>, <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/lifted/Rep.html#slick.lifted.Rep" class="extype" name="slick.lifted.Rep">Rep</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="schema/InvolvedSupporterTable.html" class="extype" name="daos.schema.InvolvedSupporterTable">InvolvedSupporterTable</a>]], <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/lifted/Rep.html#slick.lifted.Rep" class="extype" name="slick.lifted.Rep">Rep</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="schema/SourceTable.html" class="extype" name="daos.schema.SourceTable">SourceTable</a>]], <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/lifted/Rep.html#slick.lifted.Rep" class="extype" name="slick.lifted.Rep">Rep</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="schema/DepositUnitTable.html" class="extype" name="daos.schema.DepositUnitTable">DepositUnitTable</a>]], <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/lifted/Rep.html#slick.lifted.Rep" class="extype" name="slick.lifted.Rep">Rep</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="schema/InvolvedCrewTable.html" class="extype" name="daos.schema.InvolvedCrewTable">InvolvedCrewTable</a>]]), (<a href="reader/TakingReader.html" class="extype" name="daos.reader.TakingReader">TakingReader</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="reader/InvolvedSupporterReader.html" class="extype" name="daos.reader.InvolvedSupporterReader">InvolvedSupporterReader</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="reader/SourceReader.html" class="extype" name="daos.reader.SourceReader">SourceReader</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="reader/DepositUnitReader.html" class="extype" name="daos.reader.DepositUnitReader">DepositUnitReader</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="reader/InvolvedCrewReader.html" class="extype" name="daos.reader.InvolvedCrewReader">InvolvedCrewReader</a>]), <span class="extype" name="scala.Seq">Seq</span>]</span>
+      </span>
+      
+      
+    </li><li name="daos.SQLTakingsDAO.sourceQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sourceQuery=slick.lifted.Query[daos.schema.SourceTable,daos.reader.SourceReader,Seq]"></a><a id="sourceQuery:sourceQuery"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#sourceQuery=slick.lifted.Query[daos.schema.SourceTable,daos.reader.SourceReader,Seq]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sourceQuery</span><span class="result alias"> = <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/lifted/Query.html#slick.lifted.Query" class="extype" name="slick.lifted.Query">Query</a>[<a href="schema/SourceTable.html" class="extype" name="daos.schema.SourceTable">SourceTable</a>, <a href="reader/SourceReader.html" class="extype" name="daos.reader.SourceReader">SourceReader</a>, <span class="extype" name="scala.Seq">Seq</span>]</span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#!=(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html###():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#==(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#all" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="all(page:Option[models.frontend.Page],sort:Option[models.frontend.Sort],filter:Option[models.frontend.TakingFilter]):scala.concurrent.Future[List[models.frontend.Taking]]"></a><a id="all(Option[Page],Option[Sort],Option[TakingFilter]):Future[List[Taking]]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#all(page:Option[models.frontend.Page],sort:Option[models.frontend.Sort],filter:Option[models.frontend.TakingFilter]):scala.concurrent.Future[List[models.frontend.Taking]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">all</span><span class="params">(<span name="page">page: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../models/frontend/Page.html" class="extype" name="models.frontend.Page">Page</a>]</span>, <span name="sort">sort: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../models/frontend/Sort.html" class="extype" name="models.frontend.Sort">Sort</a>]</span>, <span name="filter">filter: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../models/frontend/TakingFilter.html" class="extype" name="models.frontend.TakingFilter">TakingFilter</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/Future.html#scala.concurrent.Future" class="extype" name="scala.concurrent.Future">Future</a>[<span class="extype" name="scala.List">List</span>[<a href="../models/frontend/Taking.html" class="extype" name="models.frontend.Taking">Taking</a>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">get a list of Takings based on params</p><div class="fullcomment"><div class="comment cmt"><p>get a list of Takings based on params</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#asInstanceOf[T0]:T0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#clone():Object" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#count" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="count(filter:Option[models.frontend.TakingFilter]):scala.concurrent.Future[Int]"></a><a id="count(Option[TakingFilter]):Future[Int]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#count(filter:Option[models.frontend.TakingFilter]):scala.concurrent.Future[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">count</span><span class="params">(<span name="filter">filter: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../models/frontend/TakingFilter.html" class="extype" name="models.frontend.TakingFilter">TakingFilter</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/Future.html#scala.concurrent.Future" class="extype" name="scala.concurrent.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">count takings models</p><div class="fullcomment"><div class="comment cmt"><p>count takings models</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#crews" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="crews:slick.lifted.TableQuery[daos.schema.InvolvedCrewTable]"></a><a id="crews:TableQuery[InvolvedCrewTable]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#crews:slick.lifted.TableQuery[daos.schema.InvolvedCrewTable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">crews</span><span class="result">: <span class="extype" name="slick.lifted.TableQuery">TableQuery</span>[<a href="schema/InvolvedCrewTable.html" class="extype" name="daos.schema.InvolvedCrewTable">InvolvedCrewTable</a>]</span>
+      </span>
+      
+      
+    </li><li name="play.api.db.slick.HasDatabaseConfig#db" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="db:P#Backend#Database"></a><a id="db:Database"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#db:P#Backend#Database" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">db</span><span class="result">: <span class="extype" name="slick.jdbc.JdbcBackend.Database">Database</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>HasDatabaseConfig</dd></dl></div>
+    </li><li name="play.api.db.slick.HasDatabaseConfigProvider#dbConfig" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dbConfig:slick.basic.DatabaseConfig[P]"></a><a id="dbConfig:DatabaseConfig[JdbcProfile]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#dbConfig:slick.basic.DatabaseConfig[P]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dbConfig</span><span class="result">: <span class="extype" name="slick.basic.DatabaseConfig">DatabaseConfig</span>[<a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>HasDatabaseConfigProvider → HasDatabaseConfig</dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#dbConfigProvider" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dbConfigProvider:play.api.db.slick.DatabaseConfigProvider"></a><a id="dbConfigProvider:DatabaseConfigProvider"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#dbConfigProvider:play.api.db.slick.DatabaseConfigProvider" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dbConfigProvider</span><span class="result">: <a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/DatabaseConfigProvider.html#play.api.db.slick.DatabaseConfigProvider" class="extype" name="play.api.db.slick.DatabaseConfigProvider">DatabaseConfigProvider</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → HasDatabaseConfigProvider</dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#delete" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="delete(uuid:java.util.UUID):scala.concurrent.Future[Boolean]"></a><a id="delete(UUID):Future[Boolean]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#delete(uuid:java.util.UUID):scala.concurrent.Future[Boolean]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delete</span><span class="params">(<span name="uuid">uuid: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html#java.util.UUID" class="extype" name="java.util.UUID">UUID</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/Future.html#scala.concurrent.Future" class="extype" name="scala.concurrent.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#depositUnits" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="depositUnits:slick.lifted.TableQuery[daos.schema.DepositUnitTable]"></a><a id="depositUnits:TableQuery[DepositUnitTable]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#depositUnits:slick.lifted.TableQuery[daos.schema.DepositUnitTable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">depositUnits</span><span class="result">: <span class="extype" name="slick.lifted.TableQuery">TableQuery</span>[<a href="schema/DepositUnitTable.html" class="extype" name="daos.schema.DepositUnitTable">DepositUnitTable</a>]</span>
+      </span>
+      
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#find" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="find(uuid:java.util.UUID):scala.concurrent.Future[Option[models.frontend.Taking]]"></a><a id="find(UUID):Future[Option[Taking]]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#find(uuid:java.util.UUID):scala.concurrent.Future[Option[models.frontend.Taking]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">find</span><span class="params">(<span name="uuid">uuid: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html#java.util.UUID" class="extype" name="java.util.UUID">UUID</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/Future.html#scala.concurrent.Future" class="extype" name="scala.concurrent.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../models/frontend/Taking.html" class="extype" name="models.frontend.Taking">Taking</a>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#getClass():Class[_]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#java.lang.Class" class="extype" name="java.lang.Class">Class</a>[_]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#isInstanceOf[T0]:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#notify():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#notifyAll():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="play.api.db.slick.HasDatabaseConfig#profile" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="profile:P"></a><a id="profile:JdbcProfile"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#profile:P" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">profile</span><span class="result">: <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>HasDatabaseConfig</dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#save" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="save(taking:models.frontend.Taking):scala.concurrent.Future[Either[daos.exceptions.TakingAddException,models.frontend.Taking]]"></a><a id="save(Taking):Future[Either[TakingAddException,Taking]]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#save(taking:models.frontend.Taking):scala.concurrent.Future[Either[daos.exceptions.TakingAddException,models.frontend.Taking]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">save</span><span class="params">(<span name="taking">taking: <a href="../models/frontend/Taking.html" class="extype" name="models.frontend.Taking">Taking</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/Future.html#scala.concurrent.Future" class="extype" name="scala.concurrent.Future">Future</a>[<span class="extype" name="scala.Either">Either</span>[<a href="exceptions/TakingAddException.html" class="extype" name="daos.exceptions.TakingAddException">TakingAddException</a>, <a href="../models/frontend/Taking.html" class="extype" name="models.frontend.Taking">Taking</a>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#sources" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sources:slick.lifted.TableQuery[daos.schema.SourceTable]"></a><a id="sources:TableQuery[SourceTable]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#sources:slick.lifted.TableQuery[daos.schema.SourceTable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sources</span><span class="result">: <span class="extype" name="slick.lifted.TableQuery">TableQuery</span>[<a href="schema/SourceTable.html" class="extype" name="daos.schema.SourceTable">SourceTable</a>]</span>
+      </span>
+      
+      
+    </li><li name="daos.SQLTakingsDAO#supporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="supporter:slick.lifted.TableQuery[daos.schema.InvolvedSupporterTable]"></a><a id="supporter:TableQuery[InvolvedSupporterTable]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#supporter:slick.lifted.TableQuery[daos.schema.InvolvedSupporterTable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">supporter</span><span class="result">: <span class="extype" name="slick.lifted.TableQuery">TableQuery</span>[<a href="schema/InvolvedSupporterTable.html" class="extype" name="daos.schema.InvolvedSupporterTable">InvolvedSupporterTable</a>]</span>
+      </span>
+      
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#takings" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="takings:slick.lifted.TableQuery[daos.schema.TakingTable]"></a><a id="takings:TableQuery[TakingTable]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#takings:slick.lifted.TableQuery[daos.schema.TakingTable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">takings</span><span class="result">: <span class="extype" name="slick.lifted.TableQuery">TableQuery</span>[<a href="schema/TakingTable.html" class="extype" name="daos.schema.TakingTable">TakingTable</a>]</span>
+      </span>
+      
+      
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#java.lang.String" class="extype" name="java.lang.String">String</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#update" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update(taking:models.frontend.Taking):scala.concurrent.Future[Either[daos.exceptions.TakingAddException,models.frontend.Taking]]"></a><a id="update(Taking):Future[Either[TakingAddException,Taking]]"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#update(taking:models.frontend.Taking):scala.concurrent.Future[Either[daos.exceptions.TakingAddException,models.frontend.Taking]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="params">(<span name="taking">taking: <a href="../models/frontend/Taking.html" class="extype" name="models.frontend.Taking">Taking</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/concurrent/Future.html#scala.concurrent.Future" class="extype" name="scala.concurrent.Future">Future</a>[<span class="extype" name="scala.Either">Either</span>[<a href="exceptions/TakingAddException.html" class="extype" name="daos.exceptions.TakingAddException">TakingAddException</a>, <a href="../models/frontend/Taking.html" class="extype" name="models.frontend.Taking">Taking</a>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="daos.SQLTakingsDAO">SQLTakingsDAO</a> → <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></dd></dl></div>
+    </li><li name="daos.SQLTakingsDAO#updateSources" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="updateSources(source:List[models.frontend.Source],taking_id:Long):Unit"></a><a id="updateSources(List[Source],Long):Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#updateSources(source:List[models.frontend.Source],taking_id:Long):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">updateSources</span><span class="params">(<span name="source">source: <span class="extype" name="scala.List">List</span>[<a href="../models/frontend/Source.html" class="extype" name="models.frontend.Source">Source</a>]</span>, <span name="taking_id">taking_id: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#wait(x$1:Long):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li>
+              </ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="play.api.db.slick.HasDatabaseConfig#driver" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="driver:P"></a><a id="driver:JdbcProfile"></a>
+      <span class="permalink">
+      <a href="../daos/SQLTakingsDAO.html#driver:P" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2.1) Use profile instead of driver">driver</span><span class="result">: <a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>HasDatabaseConfig</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.1)</i> Use <code>profile</code> instead of <code>driver</code></p></dd></dl></div>
+    </li></ol>
+            </div>
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="play.api.db.slick.HasDatabaseConfigProvider">
+              <h3>Inherited from <a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/HasDatabaseConfigProvider.html#play.api.db.slick.HasDatabaseConfigProvider" class="extype" name="play.api.db.slick.HasDatabaseConfigProvider">HasDatabaseConfigProvider</a>[<a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a>]</h3>
+            </div><div class="parent" name="play.api.db.slick.HasDatabaseConfig">
+              <h3>Inherited from <a href="https://playframework.com/documentation/3.0.x/api/scala/play/api/db/slick/HasDatabaseConfig.html#play.api.db.slick.HasDatabaseConfig" class="extype" name="play.api.db.slick.HasDatabaseConfig">HasDatabaseConfig</a>[<a href="https://javadoc.io/page/com.typesafe.slick/slick_2.12/3.2.0/slick/jdbc/JdbcProfile.html#slick.jdbc.JdbcProfile" class="extype" name="slick.jdbc.JdbcProfile">JdbcProfile</a>]</h3>
+            </div><div class="parent" name="daos.TakingsDAO">
+              <h3>Inherited from <a href="TakingsDAO.html" class="extype" name="daos.TakingsDAO">TakingsDAO</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

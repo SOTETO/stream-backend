@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0m/home/dls/Workspace/VcA/Pool2/stream-backend/app/controllers/DepositController.scala:94:18: value validate is not a member of play.api.mvc.AnyContent[0m
+[0m[[0m[31merror[0m] [0m[0m    request.body.validate[DepositQueryBody].fold([0m
+[0m[[0m[31merror[0m] [0m[0m                 ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
