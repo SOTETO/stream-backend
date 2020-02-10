@@ -1,5 +1,0 @@
-# https://www.playframework.com/documentation/latest/ScalaI18N
-webapp.result.success=Successfully generated response for AJAX request.
-webapp.result.badRequest.jsonError=There is an error in your data! The json we've received can't be parsed.
-webapp.result.badRequest.actionUnknown=The requested transformation of the households state is unknown!
-webapp.result.internalServerError=An internal error occurred!
