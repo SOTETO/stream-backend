@@ -1,6 +1,6 @@
 // @GENERATOR:play-routes-compiler
-// @SOURCE:/home/dls/Workspace/VcA/Pool2/stream-backend/conf/routes
-// @DATE:Wed Jan 29 16:51:59 CET 2020
+// @SOURCE:/home/dls/Workspace/vca/pool/stream-backend/conf/routes
+// @DATE:Mon Feb 10 12:49:23 CET 2020
 
 
 package router {

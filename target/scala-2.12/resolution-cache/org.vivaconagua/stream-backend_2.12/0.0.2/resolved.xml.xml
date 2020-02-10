@@ -4,7 +4,7 @@
 		module="stream-backend_2.12"
 		revision="0.0.2"
 		status="integration"
-		publication="20200129153133"
+		publication="20200210124923"
 	>
 		<description>
 		stream-backend

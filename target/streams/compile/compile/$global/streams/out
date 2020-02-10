@@ -1,4 +1,15 @@
-[0m[[0m[31merror[0m] [0m[0m/home/dls/Workspace/VcA/Pool2/stream-backend/app/controllers/DepositController.scala:94:18: value validate is not a member of play.api.mvc.AnyContent[0m
-[0m[[0m[31merror[0m] [0m[0m    request.body.validate[DepositQueryBody].fold([0m
-[0m[[0m[31merror[0m] [0m[0m                 ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[31merror[0m] [0m[0m/home/dls/Workspace/vca/pool/stream-backend/app/controllers/DepositController.scala:92:75: type mismatch;[0m
+[0m[[0m[31merror[0m] [0m[0m found   : Option[Boolean][0m
+[0m[[0m[31merror[0m] [0m[0m required: Option[String][0m
+[0m[[0m[31merror[0m] [0m[0m    val filter: DepositFilter = DepositFilter(None, None, None, nameList, confirmed)[0m
+[0m[[0m[31merror[0m] [0m[0m                                                                          ^[0m
+[0m[[0m[31merror[0m] [0m[0m/home/dls/Workspace/vca/pool/stream-backend/app/daos/DepositDAO.scala:116:51: value like is not a member of slick.lifted.Rep[Long][0m
+[0m[[0m[31merror[0m] [0m[0m          f.confirmed.map(c => table._1.confirmed like c)[0m
+[0m[[0m[31merror[0m] [0m[0m                                                  ^[0m
+[0m[[0m[31merror[0m] [0m[0m/home/dls/Workspace/vca/pool/stream-backend/app/utils/permissions/DepositPermission.scala:43:49: overloaded method value apply with alternatives:[0m
+[0m[[0m[31merror[0m] [0m[0m  (publicId: Option[java.util.UUID],takingsId: Option[java.util.UUID],crew: Option[java.util.UUID],name: Option[List[String]],confirmed: Option[String])models.frontend.DepositFilter <and>[0m
+[0m[[0m[31merror[0m] [0m[0m  (crewId: java.util.UUID)models.frontend.DepositFilter[0m
+[0m[[0m[31merror[0m] [0m[0m cannot be applied to (None.type, None.type, Some[java.util.UUID], None.type)[0m
+[0m[[0m[31merror[0m] [0m[0m        case true => identity.getCrew.map(ci => DepositFilter(None, None, Some( ci ), None))[0m
+[0m[[0m[31merror[0m] [0m[0m                                                ^[0m
+[0m[[0m[31merror[0m] [0m[0mthree errors found[0m
