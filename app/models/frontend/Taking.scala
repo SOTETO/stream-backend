@@ -121,7 +121,7 @@ case class Taking(
                    depositUnits: List[DepositUnit],
                    author: UUID,
                    crew: List[InvolvedCrew],
-                   created: Long,
+<F2>                   created: Long,
                    updated: Long
                    )
 

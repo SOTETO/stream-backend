@@ -33,7 +33,7 @@ POST       /household/state/action/:uuid/:role      controllers.HouseholdControl
 
 # Deposit
 
-GET      /deposits                                 controllers.DepositController.all(offset: Option[Int], size: Option[Int], name: Option[String], sortby: Option[String], sortdir: Option[String])
+GET      /deposits                                 controllers.DepositController.all(offset: Option[Int], size: Option[Int], publicId: Option[String], takingsId:Option[String], crew:Option[String], name: Option[String], ato: Option[Double], afrom: Option[Double], confirmed: Option[Boolean], cby: Option[String], cfrom: Option[Long], cto: Option[Long], payfrom: Option[Long], payto: Option[Long], sortby: Option[String], sortdir: Option[String])
 POST      /deposits/count                           controllers.DepositController.count
 POST      /deposits/create                          controllers.DepositController.create
 POST      /deposits/confirm                         controllers.DepositController.confirm

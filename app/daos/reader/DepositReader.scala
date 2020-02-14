@@ -24,9 +24,6 @@ import models.frontend.InvolvedCrew
 case class DepositUnitReader(
   id: Long,
   publicId: String,
-  confirmed: Option[Long],
-  confirmed_user_uuid: Option[String],
-  confirmed_user_name: Option[String],
   amount: Double,
   currency: String,
   created: Long,
@@ -37,16 +34,12 @@ case class DepositUnitReader(
      * map [[DepositUnitReader]] to [[models.frontend.DepositUnit]]
      * @param takingId
      */
-    def toDepositUnit(takingId: UUID, description: Option[String]) : DepositUnit = {
-      val conf: Option[Confirmed] = this.confirmed match { 
-        case Some(confirmed) => Some(Confirmed(confirmed, InvolvedSupporter(UUID.fromString(this.confirmed_user_uuid.get), this.confirmed_user_name.get)))
-        case None => None
-      }
-      DepositUnit(UUID.fromString(this.publicId), takingId, description, conf, Amount(this.amount, this.currency), this.created)
+    def toDepositUnit(takingId: UUID, description: Option[String], confirmed: Option[Confirmed]) : DepositUnit = {
+      DepositUnit(UUID.fromString(this.publicId), takingId, description, confirmed, Amount(this.amount, this.currency), this.created)
     }
   }
 /** Factory for [[DepositUnitReader]] instance*/
-object DepositUnitReader extends ((Long, String, Option[Long], Option[String], Option[String], Double, String, Long, Long, Long) => DepositUnitReader){
+object DepositUnitReader extends ((Long, String, Double, String, Long, Long, Long) => DepositUnitReader){
   /** Creates a [[DepositUnitReader]] with given deposit unit, deposit id, taking id and optional id
    *  @param depositUnit deposit unit 
    *  @param depositId foreign key for deposit table
@@ -54,38 +47,18 @@ object DepositUnitReader extends ((Long, String, Option[Long], Option[String], O
    *  @param id can be set for update else the database store the model with a new id
    */
   def apply(depositUnit: DepositUnit, depositId: Long, takingId: Long, id : Option[Long] = None) : DepositUnitReader = {
-    depositUnit.confirmed match {
-      case Some(confirmed) => {
         DepositUnitReader(
           id.getOrElse(0L),
           depositUnit.publicId.toString,
-          Some(confirmed.date),
-          Some(confirmed.user.uuid.toString),
-          Some(confirmed.user.name),
           depositUnit.amount.amount,
           depositUnit.amount.currency,
           depositUnit.created,
           depositId,
           takingId
         )
-      }
-      case None =>         
-        DepositUnitReader(
-          id.getOrElse(0L),
-          depositUnit.publicId.toString,
-          None,
-          None,
-          None,
-          depositUnit.amount.amount,
-          depositUnit.amount.currency,
-          depositUnit.created,
-          depositId,
-          takingId
-        )
-      }
   }
   implicit val getDepositUnitReader = GetResult(r =>
-    DepositUnitReader(r.nextLong, r.nextString, r.nextLongOption, r.nextStringOption, r.nextStringOption, r.nextDouble, r.nextString, r.nextLong, r.nextLong, r.nextLong)
+    DepositUnitReader(r.nextLong, r.nextString, r.nextDouble, r.nextString, r.nextLong, r.nextLong, r.nextLong)
   )
 }
 
@@ -110,32 +83,24 @@ case class DepositReader(
   publicId: String,
   fullAmount: Double,
   currency: String,
-  confirmed: Option[Long],
-  confirmed_user_uuid: Option[String],
-  confirmed_user_name: Option[String],
   crew: String,
   crewName: String,
   supporter: String,
   supporter_name: String,
   created: Long,
   updated: Long,
-  dateOfDeposit: Long
+  dateOfDeposit: Long,
   ) {
     /**
      * map [[DepositReader]] to [[models.frontend.Deposit]]
      * @param depositUnitList list of deposit units
      */
-    def toDeposit(depositUnitList: List[DepositUnit]) = {
-           
-      val conf: Option[Confirmed] = this.confirmed match { 
-        case Some(confirmed) => Some(Confirmed(confirmed, InvolvedSupporter(UUID.fromString(this.confirmed_user_uuid.get), this.confirmed_user_name.get)))
-        case None => None
-      }
+    def toDeposit(depositUnitList: List[DepositUnit], confirmed: Option[Confirmed]) = {
       Deposit(
         UUID.fromString(this.publicId),
         Amount(this.fullAmount, this.currency),
         depositUnitList,
-        conf,
+        confirmed,
         InvolvedCrew(UUID.fromString(this.crew), this.crewName),
         InvolvedSupporter(UUID.fromString(this.supporter), this.supporter_name),
         this.created,
@@ -145,22 +110,17 @@ case class DepositReader(
     }
   }
 /** Factory for [[DepositReader]] instance.*/
-object DepositReader extends ((Long, String, Double, String, Option[Long], Option[String], Option[String], String, String, String, String, Long, Long, Long) => DepositReader){
+object DepositReader extends ((Long, String, Double, String, String, String, String, String, Long, Long, Long) => DepositReader){
   /** Create a [[DepositReader]] with given deposit.
    *  @param deposit
    *  @param id can be set for update Deposit, else the database will create a new id
    */
   def apply(deposit: Deposit, id: Option[Long] = None): DepositReader =
-    deposit.confirmed match {
-      case Some(confirmed) => 
         DepositReader(
           id.getOrElse(0L),
           deposit.publicId.toString,
           deposit.full.amount,
           deposit.full.currency,
-          Some(confirmed.date),
-          Some(confirmed.user.uuid.toString),
-          Some(confirmed.user.name),
           deposit.crew.uuid.toString,
           deposit.crew.name,
           deposit.supporter.uuid.toString,
@@ -169,27 +129,8 @@ object DepositReader extends ((Long, String, Double, String, Option[Long], Optio
           deposit.updated,
           deposit.dateOfDeposit
         )
-      case None => 
-        DepositReader(
-          id.getOrElse(0L),
-          deposit.publicId.toString,
-          deposit.full.amount,
-          deposit.full.currency,
-          None,
-          None,
-          None,
-          deposit.crew.uuid.toString,
-          deposit.crew.name,
-          deposit.supporter.uuid.toString,
-          deposit.supporter.name,
-          deposit.created,
-          deposit.updated,
-          deposit.dateOfDeposit
-        )
-    }
-
   implicit val getDepositReader = GetResult(r =>
-    DepositReader(r.nextLong, r.nextString, r.nextDouble, r.nextString, r.nextLongOption, r.nextStringOption, r.nextStringOption, r.nextString, r.nextString, r.nextString, r.nextString, r.nextLong, r.nextLong, r.nextLong)
+    DepositReader(r.nextLong, r.nextString, r.nextDouble, r.nextString, r.nextString, r.nextString, r.nextString, r.nextString, r.nextLong, r.nextLong, r.nextLong)
   )
 }
 

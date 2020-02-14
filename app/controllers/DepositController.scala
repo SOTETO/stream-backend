@@ -19,6 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.DepositService
 import utils.permissions.DepositPermission
+import utils.Validate
 import org.vivaconagua.play2OauthClient.silhouette.User
 import play.shaded.ahc.org.asynchttpclient.request.body.Body
 //import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -80,7 +81,24 @@ class DepositController @Inject() (
     })
   }}
 
-  def all(offset: Option[Int], size: Option[Int], name: Option[String], confirmed: Option[Boolean], sortby: Option[String], sortdir: Option[String]) = silhouette.SecuredAction(
+  def all(
+    offset: Option[Int], 
+    size: Option[Int],
+    publicId: Option[String],
+    takingsId:Option[String],
+    crew:Option[String],
+    name: Option[String], 
+    ato: Option[Double],
+    afrom: Option[Double],
+    confirmed: Option[Boolean],
+    cby: Option[String],
+    cfrom: Option[Long],
+    cto: Option[Long],
+    payfrom: Option[Long],
+    payto: Option[Long],
+    sortby: Option[String], 
+    sortdir: Option[String]
+    ) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async { implicit request => {
     val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
@@ -89,7 +107,7 @@ class DepositController @Inject() (
       case Some(n) => Some(n.split(" || ").toList)
       case _ => None 
     }
-    val filter: DepositFilter = DepositFilter(None, None, None, nameList, confirmed)
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto)
     service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
   }}
   
