@@ -96,6 +96,8 @@ class DepositController @Inject() (
     cto: Option[Long],
     payfrom: Option[Long],
     payto: Option[Long],
+    crfrom: Option[Long],
+    crto: Option[Long],
     sortby: Option[String], 
     sortdir: Option[String]
     ) = silhouette.SecuredAction(
@@ -104,32 +106,44 @@ class DepositController @Inject() (
     val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
     val page: Page = Page(offset.getOrElse(0), size.getOrElse(20))
     val nameList: Option[List[String]] = name match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+  println(nameList)
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto)
+    service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
+  }}
+
+  def count(
+    offset: Option[Int], 
+    size: Option[Int],
+    publicId: Option[String],
+    takingsId:Option[String],
+    crew:Option[String],
+    name: Option[String], 
+    ato: Option[Double],
+    afrom: Option[Double],
+    confirmed: Option[Boolean],
+    cby: Option[String],
+    cfrom: Option[Long],
+    cto: Option[Long],
+    payfrom: Option[Long],
+    payto: Option[Long],
+    crfrom: Option[Long],
+    crto: Option[Long],
+    sortby: Option[String], 
+    sortdir: Option[String]
+    ) = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async { implicit request => {
+    val nameList: Option[List[String]] = name match {
       case Some(n) => Some(n.split(" || ").toList)
       case _ => None 
     }
-    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto)
-    service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
-  }}
   
-  def count = silhouette.SecuredAction(
-    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    // Prefilter results by the users crew, if the user is a volunteer manager and no employee
-    //val preFilter : Option[DepositFilter] = request.identity.isOnlyVolunteer match {
-    //  case true => request.identity.getCrew.map(DepositFilter( _ ))
-    //  case false => None
-   // }
-    request.body.validate[DepositQueryBody].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => {
-        service.count(
-          permission.restrict(query.filter, request.identity) // add restrictions to filter
-          ).map(result =>
-        WebAppResult.Ok(Json.obj("count" -> result)).toResult(request)
-      )})
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto)
+    service.count(permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
   }}
-  
-
 
   case class ConfirmBody(id: UUID, date: Long, uuid: UUID, name: String)
   object ConfirmBody {

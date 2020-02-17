@@ -156,14 +156,16 @@ case class DepositFilter(
   cfrom: Option[Long],
   cto: Option[Long],
   payfrom: Option[Long],
-  payto:Option[Long]
+  payto:Option[Long],
+  crfrom:Option[Long],
+  crto:Option[Long]
 ) 
 {
   /** Extend a deposit filter with given crew_id
    * @param crewId public_id of a Crew as UUID
    * @return with crew extended deposit filter
    */
-  def extend(crewId: UUID): DepositFilter = DepositFilter(this.publicId, this.takingsId, Some(crewId), this.name, this.afrom, this.ato, this.confirmed, this.cby, this.cfrom, this.cto, this.payfrom, this.payto)
+  def extend(crewId: UUID): DepositFilter = DepositFilter(this.publicId, this.takingsId, Some(crewId), this.name, this.afrom, this.ato, this.confirmed, this.cby, this.cfrom, this.cto, this.payfrom, this.payto, this.crfrom, this.crto)
 }
 
 /** Factory for [[DepositFilter]] instance. Can be handle as Json */
@@ -172,7 +174,8 @@ object DepositFilter {
   /** Creates a DepositFilter with given crewId
    *  @param crewId
    */
-  def apply(crewId: UUID) : DepositFilter = DepositFilter(None, None, Some(crewId), None, None, None, None, None, None, None, None, None)
+  def apply(crewId: UUID) : DepositFilter = DepositFilter(None, None, Some(crewId), None, None, None, None, None, None, None, None, None, None, None)
+  
 }
 /** Represents the request query for deposits
  * @param page 

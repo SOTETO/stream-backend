@@ -114,13 +114,17 @@ class SQLDepositDAO @Inject()
           f.publicId.map(ids => table._1.publicId === ids.toString()),
           f.takingsId.map(ids => table._4.filter(_.public_id === ids.toString()).isDefined),
           f.crew.map(ids => table._1.crew === ids.toString()),
-          f.confirmed.map(c => if (c == true) { table._2.isDefined} else { table._2.isEmpty}),
+          f.name.map(name => name.map( n => table._4.filter(_.description like n).isDefined).reduceLeft(_ || _)),
           f.afrom.map(d => table._1.fullAmount >= d),
           f.ato.map(d=> table._1.fullAmount <= d),
+          f.confirmed.map(c => if (c == true) { table._2.isDefined} else { table._2.isEmpty}),
           f.cby.map(c => table._2.filter(_.userUUID === c.toString()).isDefined),
           f.cfrom.map(c=> table._2.filter(_.dateOfConfirm >= c).isDefined),
           f.cto.map(c => table._2.filter(_.dateOfConfirm <= c).isDefined),
-          f.name.map(name => name.map( n => table._4.filter(_.description like n).isDefined).reduceLeft(_ || _)),
+          f.payfrom.map(c => table._1.dateOfDeposit >= c),
+          f.payto.map(c => table._1.dateOfDeposit <= c),
+          f.crfrom.map(c => table._1.created >= c),
+          f.crto.map(c => table._1.created <= c)
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
     }).getOrElse(query)
