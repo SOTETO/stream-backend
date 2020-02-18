@@ -109,7 +109,6 @@ class DepositController @Inject() (
       case Some(n) => Some(n.split(" ").toList)
       case _ => None 
     }
-  println(nameList)
     val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto)
     service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
   }}
