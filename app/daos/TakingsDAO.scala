@@ -19,6 +19,7 @@ import models.frontend.InvolvedCrew
 import scala.concurrent.Await
 import ch.qos.logback.core.util.Duration._
 import scala.concurrent.duration.Duration
+import daos.reader.ConfirmedReader
 
 trait TakingsDAO {
   def count(filter: Option[TakingFilter]) : Future[Int]
@@ -41,11 +42,13 @@ class SQLTakingsDAO @Inject()
     slick.lifted.Rep[Option[daos.schema.InvolvedSupporterTable]], 
     slick.lifted.Rep[Option[daos.schema.SourceTable]], 
     slick.lifted.Rep[Option[daos.schema.DepositUnitTable]], 
+    slick.lifted.Rep[Option[daos.schema.ConfirmedTable]],
     slick.lifted.Rep[Option[daos.schema.InvolvedCrewTable]]),
   (daos.reader.TakingReader, 
     Option[daos.reader.InvolvedSupporterReader], 
     Option[daos.reader.SourceReader], 
-    Option[daos.reader.DepositUnitReader], 
+    Option[daos.reader.DepositUnitReader],
+    Option[daos.reader.ConfirmedReader],
     Option[daos.reader.InvolvedCrewReader])
   ,Seq]
 
@@ -67,16 +70,16 @@ class SQLTakingsDAO @Inject()
     * @return
     */
 
-    private def joined(source: sourceQuery = sources): CustomQuery = {
+    private def joined(): CustomQuery = {
       (for {
         (((((don, sup), sou), units), conf), cre) <- (
           takings joinLeft
           supporter on (_.id === _.taking_id)) joinLeft
-          source on (_._1.id === _.taking_id) joinLeft
+          sources on (_._1.id === _.taking_id) joinLeft
           depositUnits on (_._1._1.id === _.takingId) joinLeft
           confirms on (_._2.map(_.depositId) ===_.depositId) joinLeft
           crews on (_._1._1._1._1.id === _.taking_id)
-      } yield (don, sup, sou, units, cre))
+      } yield (don, sup, sou, units, conf, cre))
     }
 
   /**
@@ -126,40 +129,24 @@ class SQLTakingsDAO @Inject()
     filter.map(f => {
       query.filter(table => {
         List(
-          f.name.map(name => table._1.description.inSetBind(name.map( _.toString()))),
-          f.publicId.map(ids => table._1.public_id.inSet(ids.map(_.toString()))),
-          f.crew.map(crews => table._5.filter(_.crew_id.inSet(crews.map(_.toString()))).isDefined),
+          f.publicId.map(ids => table._1.public_id === ids.toString()),
+          f.name.map(names => names.map(n => table._1.description like n).reduceLeft(_ || _)),
+          f.crew.map(crews => table._6.filter(_.crew_id === crews.toString()).isDefined),
          // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
     }).getOrElse(query)
   }
 
-  /**
-   * add filter to source for prefilter joined sources
-   * @param filter
-   * @return
-   */
-  private def sourcePreFilterd(filter: Option[TakingFilter]) = {
-    filter.map(f => {
-      sources.filter(table => {
-        List(
-          f.norms.map(norms => table.norms.inSet(norms.map(_.toString())))
-        ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
-      })
-    })getOrElse(sources)
-  }
-  
- 
-  private def read(results: Seq[(TakingReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader], Option[InvolvedCrewReader])]): Taking = {
+  private def read(results: Seq[(TakingReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader], Option[ConfirmedReader], Option[InvolvedCrewReader])]): Taking = {
     val publicId: UUID = results.map(r => r._1.publicId).head
-    val units: List[DepositUnit] = results.map(_._4).filter(_.isDefined).map( unit => {
-        val confirmed:Option[Confirmed] = getConfirmed(unit.get.depositId)
-        unit.get.toDepositUnit(publicId, None, confirmed)
+    val units: List[DepositUnit] = results.filter(_._4.isDefined).map(r => {
+      val confirmed: Option[Confirmed] = r._5.map(_.toConfirmed)
+      r._4.map(_.toDepositUnit(publicId, None, confirmed)).get
     }).toList
     val sources: List[Source] = results.map(_._3).filter(_.isDefined).map(_.get.toSource).toList
     val supporters: List[InvolvedSupporter] = results.map(_._2).filter(_.isDefined).map(_.get.toUUID).toList
-    val crews: List[InvolvedCrew] = results.map(_._5).filter(_.isDefined).map(_.get.toInvolvedCrew).toList
+    val crews: List[InvolvedCrew] = results.map(_._6).filter(_.isDefined).map(_.get.toInvolvedCrew).toList
     
     results.head._1.toTaking(supporters, sources, units, crews)
   }
@@ -169,7 +156,7 @@ class SQLTakingsDAO @Inject()
   * @param results
   * @return
   */
-  private def seqToList(results: Seq[(TakingReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader], Option[InvolvedCrewReader])]) : List[Taking] = {
+  private def seqToList(results: Seq[(TakingReader, Option[InvolvedSupporterReader], Option[SourceReader], Option[DepositUnitReader], Option[ConfirmedReader], Option[InvolvedCrewReader])]) : List[Taking] = {
     results.zipWithIndex.groupBy(_._1._1).map( grouped => 
       grouped._2.headOption.map(row => (read(grouped._2.map(_._1)), row._2))
     ).filter(_.isDefined).map(_.get).toList.sortBy(_._2).map(_._1)
@@ -196,8 +183,7 @@ class SQLTakingsDAO @Inject()
    */
 
   override def all(page: Option[Page], sort: Option[Sort], filter: Option[TakingFilter]): Future[List[Taking]] = {
-    val sourceFiltered = sourcePreFilterd(filter)
-    val query = joined(sourceFiltered)
+    val query = joined()
     val fQuery = filtered(query, filter)
     val sQuery = sorted(fQuery, sort)
     val pQuery = paged(sQuery, page)

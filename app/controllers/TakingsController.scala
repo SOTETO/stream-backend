@@ -11,10 +11,11 @@ import org.vivaconagua.play2OauthClient.silhouette.UserService
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.libs.json.{JsError, Json, Reads}
 import play.api.Configuration
-import models.frontend.{ Taking, TakingStub, Page, Sort, TakingQueryBody, TakingFilter}
+import models.frontend.{ Taking, TakingStub, Page, Sort, TakingQueryBody, TakingFilter, SortDir}
 import responses.WebAppResult
 import service.TakingsService
 import utils.permissions.TakingPermission
+import utils.Validate
 //import utils.{Ascending, TakingFilter, Page, Sort}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -69,10 +70,55 @@ class TakingsController @Inject()(
     }
   }}
 
-  def get = silhouette.SecuredAction(
+  def get( 
+    offset: Option[Int], 
+    size: Option[Int],
+    sortby: Option[String], 
+    sortdir: Option[String],
+    publicId: Option[String],
+    name: Option[String],
+    crew:Option[String],
+    ato: Option[Double],
+    afrom: Option[Double],
+    exto: Option[Double],
+    exfrom: Option[Double],
+    cashto: Option[Double],
+    cashfrom: Option[Double],
+    confirmed: Option[Boolean],
+    unconfirmed: Option[Boolean],
+    open: Option[Boolean],
+    payfrom: Option[Long],
+    payto: Option[Long],
+    crfrom: Option[Long],
+    crto: Option[Long]
+) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(validateJson[TakingQueryBody]) { implicit request => {
-    service.all(request.body.page, request.body.sort, permission.restrict(request.body.filter, request.identity))
+  ).async { implicit request => {
+    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
+    val page: Page = Page(offset.getOrElse(0), size.getOrElse(20))
+    val nameList: Option[List[String]] = name match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val filter: TakingFilter = TakingFilter(
+      Validate.isUUID(publicId), 
+      nameList, 
+      Validate.isUUID(crew), 
+      ato, 
+      afrom, 
+      exto, 
+      exfrom, 
+      cashto, 
+      cashfrom, 
+      confirmed,
+      unconfirmed,
+      open,
+      payfrom,
+      payto,
+      crfrom,
+      crto
+      )
+    service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity))
       .map(takings => Ok(Json.toJson(takings)))
   }}
   
