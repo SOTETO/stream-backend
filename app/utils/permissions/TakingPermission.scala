@@ -40,7 +40,7 @@ class TakingPermission() {
       */
     def create(identity: User): Option[TakingFilter] = {
       identity.isOnlyVolunteer match {
-        case true => identity.getCrew.map(ci => TakingFilter(None, Some(Set(ci)), None, None))
+        case true => identity.getCrew.map(TakingFilter( _ ))
         case false => None
       }
     }

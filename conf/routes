@@ -16,7 +16,7 @@ POST       /authenticate/:provider                  controllers.DropsController.
 GET        /identity                                controllers.DropsController.frontendLogin
 
 # Takings
-POST       /takings                                controllers.TakingsController.get
+GET        /takings                                controllers.TakingsController.get(offset: Option[Int], size: Option[Int], sortby: Option[String],  sortdir: Option[String], publicId: Option[String], name: Option[String], crew:Option[String], ato: Option[Double], afrom: Option[Double], exto: Option[Double], exfrom: Option[Double], cashto: Option[Double], cashfrom: Option[Double], confirmed: Option[Boolean], unconfirmed: Option[Boolean], open: Option[Boolean], payfrom: Option[Long], payto: Option[Long], crfrom: Option[Long], crto: Option[Long])
 GET        /takings/id/:id                         controllers.TakingsController.getById(id: String)
 POST       /takings/count                          controllers.TakingsController.count
 POST       /takings/create                         controllers.TakingsController.create
@@ -33,8 +33,8 @@ POST       /household/state/action/:uuid/:role      controllers.HouseholdControl
 
 # Deposit
 
-POST      /deposits                                 controllers.DepositController.all
-POST      /deposits/count                           controllers.DepositController.count
+GET      /deposits                                 controllers.DepositController.all(offset: Option[Int], size: Option[Int], publicId: Option[String], takingsId:Option[String], crew:Option[String], name: Option[String], afrom: Option[Double], ato: Option[Double], confirmed: Option[Boolean], cby: Option[String], cfrom: Option[Long], cto: Option[Long], payfrom: Option[Long], payto: Option[Long], crfrom: Option[Long], crto: Option[Long], sortby: Option[String], sortdir: Option[String])
+GET      /deposits/count                           controllers.DepositController.count(offset: Option[Int], size: Option[Int], publicId: Option[String], takingsId:Option[String], crew:Option[String], name: Option[String], afrom: Option[Double], ato: Option[Double], confirmed: Option[Boolean], cby: Option[String], cfrom: Option[Long], cto: Option[Long], payfrom: Option[Long], payto: Option[Long], crfrom: Option[Long], crto: Option[Long], sortby: Option[String], sortdir: Option[String])
 POST      /deposits/create                          controllers.DepositController.create
 POST      /deposits/confirm                         controllers.DepositController.confirm
 

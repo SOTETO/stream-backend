@@ -5,9 +5,9 @@ import java.util.UUID
 import daos.exceptions.{DatabaseException, DepositAddException, DepositUnitAddException, TakingNotFoundException}
 import javax.inject.{Inject, Singleton}
 import play.api.Play
-import models.frontend.{Deposit, DepositUnit, Page, Sort, DepositFilter}
-import daos.schema.{DepositTable, DepositUnitTable, TakingTable}
-import daos.reader.{DepositReader, DepositUnitReader, TakingReader}
+import models.frontend.{Deposit, DepositUnit, Page, Sort, DepositFilter, Confirmed}
+import daos.schema.{DepositTable, DepositUnitTable, TakingTable, ConfirmedTable}
+import daos.reader.{DepositReader, DepositUnitReader, TakingReader, ConfirmedReader}
 import play.api.Configuration
 //import utils._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -42,10 +42,12 @@ class SQLDepositDAO @Inject()
 
   
   type DepositQuery = slick.lifted.Query[
-  (daos.schema.DepositTable, 
+  (daos.schema.DepositTable,
+    slick.lifted.Rep[Option[daos.schema.ConfirmedTable]],
     slick.lifted.Rep[Option[daos.schema.DepositUnitTable]], 
     slick.lifted.Rep[Option[daos.schema.TakingTable]]),
   (daos.reader.DepositReader, 
+    Option[daos.reader.ConfirmedReader],
     Option[daos.reader.DepositUnitReader], 
     Option[daos.reader.TakingReader]),
   Seq]  
@@ -53,7 +55,7 @@ class SQLDepositDAO @Inject()
   val takingsTable = TableQuery[TakingTable]
   val depositUnitTable = TableQuery[DepositUnitTable]
   val depositTable = TableQuery[DepositTable]
-
+  val confirmedTable = TableQuery[ConfirmedTable]
   import TakingReader._
   import DepositReader._
   import DepositUnitReader._
@@ -65,11 +67,11 @@ class SQLDepositDAO @Inject()
    */
   private def joined():DepositQuery = {
     (for {
-      ((deposit, depositUnit), taking) <-
-        depositTable joinLeft 
-        depositUnitTable on (_.id === _.depositId) joinLeft
+      (((deposit, confirmed), depositUnit), taking) <-
+        depositTable joinLeft confirmedTable on (_.id === _.depositId) joinLeft 
+        depositUnitTable on (_._1.id === _.depositId) joinLeft
         takingsTable on (_._2.map(_.takingId) === _.id)
-    } yield (deposit, depositUnit, taking))
+    } yield (deposit, confirmed,  depositUnit, taking))
   }
 
   /**
@@ -110,9 +112,19 @@ class SQLDepositDAO @Inject()
       query.filter(table => {
         List(
           f.publicId.map(ids => table._1.publicId === ids.toString()),
-          f.takingsId.map(ids => table._3.filter(_.public_id === ids.toString()).isDefined),
-          f.crew.map(ids => table._1.crew === ids.toString())
-          //f.norms.map(norms => table._1.norms === norms)
+          f.takingsId.map(ids => table._4.filter(_.public_id === ids.toString()).isDefined),
+          f.crew.map(ids => table._1.crew === ids.toString()),
+          f.name.map(name => name.map( n => table._4.filter(_.description like n).isDefined).reduceLeft(_ || _)),
+          f.afrom.map(d => table._1.fullAmount >= d),
+          f.ato.map(d=> table._1.fullAmount <= d),
+          f.confirmed.map(c => if (c == true) { table._2.isDefined} else { table._2.isEmpty}),
+          f.cby.map(c => table._2.filter(_.userUUID === c.toString()).isDefined),
+          f.cfrom.map(c=> table._2.filter(_.dateOfConfirm >= c).isDefined),
+          f.cto.map(c => table._2.filter(_.dateOfConfirm <= c).isDefined),
+          f.payfrom.map(c => table._1.dateOfDeposit >= c),
+          f.payto.map(c => table._1.dateOfDeposit <= c),
+          f.crfrom.map(c => table._1.created >= c),
+          f.crto.map(c => table._1.created <= c)
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
     }).getOrElse(query)
@@ -176,6 +188,13 @@ class SQLDepositDAO @Inject()
     }
   }
   
+
+  private def confirmJoin() = { 
+    (for {
+      (deposit, confirmed) <- depositTable joinLeft confirmedTable on (_.id === _.depositId) 
+    } yield (deposit, confirmed))
+  }
+
   /** 
     * Confirm [[models.frontend.Deposit]] by public_id
     * @param uuid
@@ -183,25 +202,15 @@ class SQLDepositDAO @Inject()
     * @return
     */
   override def confirm(uuid: UUID, date: Long, user: String, name: String): Future[Boolean] = {
-    db.run(depositTable.filter(_.publicId === uuid.toString).map(_.id).result).flatMap(_.headOption.map(deposit => {
-      val qDeposit = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed
-      val dUser = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed_user_uuid
-      val dName = for { dep <- depositTable if dep.id === deposit } yield dep.confirmed_user_name
-      val qDepositUnit = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed
-      val duUser = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed_user_uuid
-      val duName = for { unit <- depositUnitTable.filter(_.depositId === deposit) } yield unit.confirmed_user_name
-      val operations = (for {
-        countDeposit <- qDeposit.update(date)
-        userCountDeposit <- dUser.update(user)
-        nameCountDeposit <- dName.update(name)
-        countDepositUnit <- qDepositUnit.update(date)
-        userCountDepositUnit <- duUser.update(user)
-        nameCountDepositUnit <- duName.update(name)
-      } yield (countDeposit, nameCountDeposit, userCountDeposit, countDepositUnit, userCountDepositUnit, nameCountDepositUnit)).transactionally
-
-    db.run(operations).map(res => res._1 > 1 && res._2 > 1 && res._3 >1 && res._4 > 1 && res._5 > 1 && res._6 > 1)
-    }).getOrElse(Future.successful(false)))
+    db.run(confirmJoin().filter(_._1.publicId === uuid.toString()).result).flatMap(result => result.isEmpty match {
+      case false => result.head._2 match {
+        case Some(confirmed) => Future.successful(true)
+        case None => db.run(confirmedTable returning confirmedTable.map(_.id) += ConfirmedReader(0, user, name, date, result.head._1.id)).map(id => id >0)
+      }
+      case true => Future.successful(false)
+    })
   }
+
   override def update(deposit: Deposit): Future[Option[Deposit]] = ???
   override def delete(uuid: UUID): Future[Boolean] = ???
 
@@ -230,16 +239,22 @@ class SQLDepositDAO @Inject()
     * @param entries
     * @return
     */
-  private def read(entries: Seq[(DepositReader, Option[DepositUnitReader], Option[TakingReader])]): Deposit = {
+  private def read(entries: Seq[(DepositReader, Option[ConfirmedReader], Option[DepositUnitReader], Option[TakingReader])]): Deposit = {
+    
+    val confirmed: Option[Confirmed] = entries.map( c => c._2 match {
+      case Some(co) => Some(co.toConfirmed)
+      case None => None
+    }).head
     // group the Seq by DepositUnitReader and map it to List[DepositUnit]
-    val amount = entries.groupBy(_._2).toSeq.filter(_._1.isDefined).map(current =>
-      current._2.find(c => c._2.isDefined && c._2.get.publicId == current._1.get.publicId)
-        .flatMap(_._3.map(taking =>
-          current._1.head.toDepositUnit(taking.publicId, Some(taking.description))
+    val amount = entries.groupBy(_._3).toSeq.filter(_._1.isDefined).map(current =>
+      current._2.find(c => c._3.isDefined && c._3.get.publicId == current._1.get.publicId)
+        .flatMap(_._4.map(taking =>
+          current._1.head.toDepositUnit(taking.publicId, Some(taking.description), confirmed)
         ))
     ).filter(_.isDefined).map(_.get).toList
+
     // use the toDeposit function of DepositReader for transform it to Deposit
-    entries.groupBy(_._1).toSeq.map(d => d._1.toDeposit(amount)).head
+    entries.groupBy(_._1).toSeq.map(d => d._1.toDeposit(amount, confirmed)).head
   }
   
   /**
@@ -247,7 +262,7 @@ class SQLDepositDAO @Inject()
     *  We group the [[scala.collection.Seq]] by the [[models.frontend.Deposit]] and use the `read` function for transform
     *  Zipping with index is required to preserve the order
     */
-  private def readList(entries: Seq[(DepositReader, Option[DepositUnitReader], Option[TakingReader])]): List[Deposit] = {
+  private def readList(entries: Seq[(DepositReader, Option[ConfirmedReader], Option[DepositUnitReader], Option[TakingReader])]): List[Deposit] = {
     entries.zipWithIndex.groupBy(_._1._1).map( grouped =>
       grouped._2.headOption.map(row => (read(grouped._2.map(_._1)), row._2)) // row._2 contains the index that indicates a sort from database
     ).filter(_.isDefined).map(_.get).toList.sortBy(_._2).map(_._1)

@@ -40,7 +40,7 @@ class DepositPermission() {
       */
     def create(identity: User): Option[DepositFilter] = {
       identity.isOnlyVolunteer match {
-        case true => identity.getCrew.map(ci => DepositFilter(None, None, Some( ci )))
+        case true => identity.getCrew.map(ci => DepositFilter(ci))
         case false => None
       }
     }

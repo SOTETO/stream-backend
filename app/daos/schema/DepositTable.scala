@@ -22,9 +22,6 @@ import slick.lifted.Tag
 class DepositUnitTable(tag: Tag) extends Table[DepositUnitReader](tag, "Deposit_Unit") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def publicId = column[String]("public_id")
-  def confirmed = column[Long]("confirmed")
-  def confirmed_user_uuid = column[String]("confirmed_user_uuid")
-  def confirmed_user_name = column[String]("confirmed_user_name")
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def created = column[Long]("created")
@@ -32,7 +29,7 @@ class DepositUnitTable(tag: Tag) extends Table[DepositUnitReader](tag, "Deposit_
   def takingId = column[Long]("taking_id")
 
   def * =
-    (id, publicId, confirmed.?, confirmed_user_uuid.?, confirmed_user_name.?, amount, currency, created, depositId, takingId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
+    (id, publicId, amount, currency, created, depositId, takingId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
   
@@ -45,9 +42,6 @@ class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
   def publicId = column[String]("public_id")
   def fullAmount = column[Double]("full_amount")
   def currency = column[String]("currency")
-  def confirmed = column[Long]("confirmed")
-  def confirmed_user_uuid = column[String]("confirmed_user_uuid")
-  def confirmed_user_name = column[String]("confirmed_user_name")
   def crew = column[String]("crew")
   def crewName = column[String]("crew_name")
   def supporter = column[String]("supporter")
@@ -57,7 +51,7 @@ class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
   def dateOfDeposit = column[Long]("date_of_deposit")
   
   def * =
-    (id, publicId, fullAmount, currency, confirmed.?, confirmed_user_uuid.?, confirmed_user_name.?, crew, crewName, supporter, supporter_name, created, updated, dateOfDeposit) <> (DepositReader.tupled, DepositReader.unapply)
+    (id, publicId, fullAmount, currency, crew, crewName, supporter, supporter_name, created, updated, dateOfDeposit) <> (DepositReader.tupled, DepositReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 
@@ -77,11 +71,6 @@ class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
         case Descending => this.currency.desc.nullsFirst
         case Ascending => this.currency.asc.nullsFirst
         case _ => this.currency.asc.nullsFirst
-      })
-      case "confirmed" => Some(sort.dir match {
-        case Descending => this.confirmed.desc.nullsFirst
-        case Ascending => this.confirmed.asc.nullsFirst
-        case _ => this.confirmed.asc.nullsFirst
       })
       case "crew" => Some(sort.dir match {
         case Descending => this.crew.desc.nullsFirst

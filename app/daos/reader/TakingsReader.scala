@@ -19,24 +19,24 @@ case class TakingReader(
                          updated: Long
                          ) {
   def toTaking(
-                  supporter: Seq[InvolvedSupporterReader] = Nil,
-                  sources: Seq[SourceReader] = Nil,
-                  depositUnits: Seq[DepositUnitReader] = Nil,
-                  involvedCrew: Seq[InvolvedCrewReader] = Nil
+                  supporter: List[InvolvedSupporter] = Nil,
+                  sources: List[Source] = Nil,
+                  depositUnits: List[DepositUnit] = Nil,
+                  involvedCrew: List[InvolvedCrew] = Nil
                 ) : Taking =
     Taking(
       publicId,
       TakingAmount(
         received,
-        supporter.filter(_.taking_id == id).map(_.toUUID).toList.distinct,
-        sources.filter(_.taking_id == id).map(_.toSource).toList.distinct
+        supporter,
+        sources
       ),
       Context(description, category),
       comment,
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
-      depositUnits.filter(_.takingId == id).map(_.toDepositUnit(publicId, Some(description))).toList.distinct,
+      depositUnits,
       author,
-      involvedCrew.filter(_.taking_id == id).map(_.toInvolvedCrew).toList.distinct,
+      involvedCrew,
       created,
       updated
     )
