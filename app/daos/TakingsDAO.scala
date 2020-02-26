@@ -132,6 +132,11 @@ class SQLTakingsDAO @Inject()
           f.publicId.map(ids => table._1.public_id === ids.toString()),
           f.name.map(names => names.map(n => table._1.description like n).reduceLeft(_ || _)),
           f.crew.map(crews => table._6.filter(_.crew_id === crews.toString()).isDefined),
+          f.payfrom.map(c => table._1.received >= c),
+          f.payto.map(c => table._1.received <= c),
+          f.crfrom.map(c => table._1.created >= c),
+          f.crto.map(c => table._1.created <= c)
+
          // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })
