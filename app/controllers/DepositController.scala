@@ -104,7 +104,7 @@ class DepositController @Inject() (
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async { implicit request => {
     val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
-    val page: Page = Page(offset.getOrElse(0), size.getOrElse(20))
+    val page: Page = Page(size.getOrElse(20), offset.getOrElse(0))
     val nameList: Option[List[String]] = name match {
       case Some(n) => Some(n.split(" ").toList)
       case _ => None 

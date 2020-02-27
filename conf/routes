@@ -16,7 +16,7 @@ POST       /authenticate/:provider                  controllers.DropsController.
 GET        /identity                                controllers.DropsController.frontendLogin
 
 # Takings
-GET        /takings                                controllers.TakingsController.get(offset: Option[Int], size: Option[Int], sortby: Option[String],  sortdir: Option[String], publicId: Option[String], name: Option[String], crew:Option[String], ato: Option[Double], afrom: Option[Double], exto: Option[Double], exfrom: Option[Double], cashto: Option[Double], cashfrom: Option[Double], confirmed: Option[Boolean], unconfirmed: Option[Boolean], open: Option[Boolean], payfrom: Option[Long], payto: Option[Long], crfrom: Option[Long], crto: Option[Long])
+GET        /takings                                controllers.TakingsController.get(offset: Option[Int], size: Option[Int], sortby: Option[String],  sortdir: Option[String], publicId: Option[String], name: Option[String], crew:Option[String], ato: Option[Double], afrom: Option[Double], exto: Option[Double], exfrom: Option[Double], cashto: Option[Double], cashfrom: Option[Double], confirmed: Option[Boolean], unconfirmed: Option[Boolean], open: Option[Boolean], payfrom: Option[Long], payto: Option[Long], crfrom: Option[Long], crto: Option[Long], crewname: Option[String], norms: Option[String], external: Option[Boolean])
 GET        /takings/id/:id                         controllers.TakingsController.getById(id: String)
 POST       /takings/count                          controllers.TakingsController.count
 POST       /takings/create                         controllers.TakingsController.create

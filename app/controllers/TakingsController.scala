@@ -90,13 +90,20 @@ class TakingsController @Inject()(
     payfrom: Option[Long],
     payto: Option[Long],
     crfrom: Option[Long],
-    crto: Option[Long]
+    crto: Option[Long],
+    crewname: Option[String],
+    norms: Option[String],
+    external: Option[Boolean]
 ) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async { implicit request => {
     val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
-    val page: Page = Page(offset.getOrElse(0), size.getOrElse(20))
+    val page: Page = Page(size.getOrElse(20), offset.getOrElse(0))
     val nameList: Option[List[String]] = name match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val crewList:Option[List[String]] = crewname match {
       case Some(n) => Some(n.split(" ").toList)
       case _ => None 
     }
@@ -116,7 +123,10 @@ class TakingsController @Inject()(
       payfrom,
       payto,
       crfrom,
-      crto
+      crto,
+      crewList,
+      norms,
+      external
       )
     service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity))
       .map(takings => Ok(Json.toJson(takings)))

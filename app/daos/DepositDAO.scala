@@ -227,7 +227,7 @@ class SQLDepositDAO @Inject()
     val fQuery = filtered(query, filter)
     val sQuery = sorted(fQuery, sort)
     val pQuery = paged(sQuery, page)
-    db.run(sQuery.result).map(readList( _ )) 
+    db.run(pQuery.result).map(readList( _ )) 
   }
 
   override def count(filter: Option[DepositFilter] = None): Future[Int] = {

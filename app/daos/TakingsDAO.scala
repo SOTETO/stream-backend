@@ -132,10 +132,13 @@ class SQLTakingsDAO @Inject()
           f.publicId.map(ids => table._1.public_id === ids.toString()),
           f.name.map(names => names.map(n => table._1.description like n).reduceLeft(_ || _)),
           f.crew.map(crews => table._6.filter(_.crew_id === crews.toString()).isDefined),
+          f.crewname.map(crews => crews.map(c => table._6.filter(_.name like c).isDefined).reduceLeft(_ || _)),
           f.payfrom.map(c => table._1.received >= c),
           f.payto.map(c => table._1.received <= c),
           f.crfrom.map(c => table._1.created >= c),
-          f.crto.map(c => table._1.created <= c)
+          f.crto.map(c => table._1.created <= c),
+          f.norms.map(n => table._3.filter(_.norms === n).isDefined),
+          f.external.map(e => if (e == true) {table._3.filter(_.type_of_source === "extern").isDefined} else {table._3.filter(_.type_of_source === "cash").isDefined})
 
          // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
@@ -192,7 +195,7 @@ class SQLTakingsDAO @Inject()
     val fQuery = filtered(query, filter)
     val sQuery = sorted(fQuery, sort)
     val pQuery = paged(sQuery, page)
-    db.run(sQuery.result).map(seqToList( _ ))
+    db.run(pQuery.result).map(seqToList( _ ))
   }
 
   override def find(uuid: UUID): Future[Option[Taking]] =

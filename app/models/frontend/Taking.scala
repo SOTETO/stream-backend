@@ -152,17 +152,20 @@ case class TakingFilter(
     payfrom: Option[Long],
     payto: Option[Long],
     crfrom: Option[Long],
-    crto: Option[Long]
+    crto: Option[Long],
+    crewname: Option[List[String]],
+    norms: Option[String],
+    external: Option[Boolean]
   ) {
   /** Extend a taking filter with given crew_id
    * @param crewId public_id of a Crew as UUID
    * @return with crew extended taking filter
    */
-  def extend(crewId: UUID): TakingFilter = TakingFilter(this.publicId, this.name, Some(crewId), this.ato, this.afrom, this.exto, this.exfrom, this.cashto, this.cashfrom, this.confirmed, this.unconfirmed, this.open, this.payfrom, this.payto, this.crfrom, this.crto)
+  def extend(crewId: UUID): TakingFilter = TakingFilter(this.publicId, this.name, Some(crewId), this.ato, this.afrom, this.exto, this.exfrom, this.cashto, this.cashfrom, this.confirmed, this.unconfirmed, this.open, this.payfrom, this.payto, this.crfrom, this.crto, this.crewname, this.norms, this.external)
 } 
 /**Factory for [[TakingFilter]] instance. Can be handle as a json.*/
 object TakingFilter {
-  def apply(crewId: UUID): TakingFilter = TakingFilter(None, None, Some(crewId), None, None, None, None, None, None, None, None, None, None, None, None, None) 
+  def apply(crewId: UUID): TakingFilter = TakingFilter(None, None, Some(crewId), None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None) 
   implicit val takingFilterFormat = Json.format[TakingFilter]
 }
 
