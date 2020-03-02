@@ -63,7 +63,11 @@ class TakingsController @Inject()(
   ).async { implicit request => {
     validateUUID(uuid) match {
       case Some(id) => { service.getById(UUID.fromString(uuid)).map(taking => taking match {
-        case Some(t) => Ok(Json.toJson(t))
+        case Some(t) => if (request.identity.isOnlyVolunteer && request.identity.uuid != t.author) {
+          Unauthorized
+        } else { 
+          Ok(Json.toJson(t))
+        }
         case None => NotFound(Json.obj({ "ERROR" -> "Can't find taking with given id" }))
       })}
       case None => Future.successful(NotFound(Json.obj({ "ERROR" -> "Can't find taking with given id" })))
