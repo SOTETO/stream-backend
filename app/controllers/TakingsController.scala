@@ -97,7 +97,7 @@ class TakingsController @Inject()(
 ) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async { implicit request => {
-    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
+    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("DESC")).get)
     val page: Page = Page(size.getOrElse(20), offset.getOrElse(0))
     val nameList: Option[List[String]] = name match {
       case Some(n) => Some(n.split(" ").toList)
@@ -162,10 +162,65 @@ class TakingsController @Inject()(
     }
   }
 
-  def count = silhouette.SecuredAction(
+ def count( 
+    offset: Option[Int], 
+    size: Option[Int],
+    sortby: Option[String], 
+    sortdir: Option[String],
+    publicId: Option[String],
+    name: Option[String],
+    crew:Option[String],
+    ato: Option[Double],
+    afrom: Option[Double],
+    exto: Option[Double],
+    exfrom: Option[Double],
+    cashto: Option[Double],
+    cashfrom: Option[Double],
+    confirmed: Option[Boolean],
+    unconfirmed: Option[Boolean],
+    open: Option[Boolean],
+    payfrom: Option[Long],
+    payto: Option[Long],
+    crfrom: Option[Long],
+    crto: Option[Long],
+    crewname: Option[String],
+    norms: Option[String],
+    external: Option[Boolean]
+) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(validateJson[TakingQueryBody]) { implicit request => {
-    service.count(permission.restrict(request.body.filter, request.identity))
+  ).async { implicit request => {
+    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
+    val page: Page = Page(size.getOrElse(20), offset.getOrElse(0))
+    val nameList: Option[List[String]] = name match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val crewList:Option[List[String]] = crewname match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val filter: TakingFilter = TakingFilter(
+      Validate.isUUID(publicId), 
+      nameList, 
+      Validate.isUUID(crew), 
+      ato, 
+      afrom, 
+      exto, 
+      exfrom, 
+      cashto, 
+      cashfrom, 
+      confirmed,
+      unconfirmed,
+      open,
+      payfrom,
+      payto,
+      crfrom,
+      crto,
+      crewList,
+      norms,
+      external
+      )
+    service.count(permission.restrict(Some(filter), request.identity))
       .map(count => Ok(Json.obj("count" -> count)))
     }}
 }
