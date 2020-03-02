@@ -99,17 +99,22 @@ class DepositController @Inject() (
     crfrom: Option[Long],
     crto: Option[Long],
     sortby: Option[String], 
-    sortdir: Option[String]
+    sortdir: Option[String],
+    crewname: Option[String]
     ) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async { implicit request => {
-    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("ASC")).get)
+    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("DESC")).get)
     val page: Page = Page(size.getOrElse(20), offset.getOrElse(0))
     val nameList: Option[List[String]] = name match {
       case Some(n) => Some(n.split(" ").toList)
       case _ => None 
     }
-    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto)
+    val crewList:Option[List[String]] = crewname match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto, crewList)
     service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
   }}
 
@@ -130,6 +135,7 @@ class DepositController @Inject() (
     payto: Option[Long],
     crfrom: Option[Long],
     crto: Option[Long],
+    crewname:Option[String],
     sortby: Option[String], 
     sortdir: Option[String]
     ) = silhouette.SecuredAction(
@@ -139,9 +145,13 @@ class DepositController @Inject() (
       case Some(n) => Some(n.split(" || ").toList)
       case _ => None 
     }
+    val crewList:Option[List[String]] = crewname match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
   
-    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto)
-    service.count(permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto, crewList)
+    service.count(permission.restrict(Some(filter), request.identity)).map(count => Ok(Json.obj("count" -> count)))
   }}
 
   case class ConfirmBody(id: UUID, date: Long, uuid: UUID, name: String)
