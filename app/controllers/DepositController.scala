@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.api.Silhouette
 import javax.inject._
 import org.vivaconagua.play2OauthClient.silhouette.{CookieEnv, UserService}
 import play.api.mvc.{AbstractController, BodyParsers, ControllerComponents}
-import models.frontend.Deposit
+import models.frontend.{Deposit , DepositStub, DepositFilter, DepositQueryBody, Page, Sort, SortDir}
 import org.vivaconagua.play2OauthClient.drops.authorization._
 import play.api.Configuration
 import play.api.libs.json.{JsError, Json, Reads}
@@ -18,24 +18,34 @@ import responses.WebAppResult
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.ws._
 import services.DepositService
+import utils.permissions.DepositPermission
+import utils.Validate
+import org.vivaconagua.play2OauthClient.silhouette.User
+import play.shaded.ahc.org.asynchttpclient.request.body.Body
 //import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+
+/** A web-controller class for deposits.
+ */
 @Singleton
 class DepositController @Inject() (
+  parser: PlayBodyParsers,
   config: Configuration,
   cc: ControllerComponents,
   silhouette: Silhouette[CookieEnv],
   userService: UserService,
   service: DepositService,
+  permission: DepositPermission,
   implicit val ec: ExecutionContext
 ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
   
-  /* validate a given Json
-   * if the Json is valid, the function return the request
-   * else return BadRequest contains the JsError of the validation process
+  /** validate a given Json type A
+   * @return
    */
+  
+  def validateJson[A: Reads] = parser.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
 
-  def validateJson[A: Reads] = BodyParsers.parse.json.validate(_.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e))))
+
 
   /**
    * All action controller return the Deposit Model as Json or an simple http error 
@@ -43,9 +53,9 @@ class DepositController @Inject() (
   def create = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
   ).async(parse.json) { implicit request => {
-    request.body.validate[Deposit].fold(
+    request.body.validate[DepositStub].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      deposit => service.create(deposit).map(result => result match {
+      deposit => service.create(deposit.toDeposit()).map(result => result match {
         case Right(deposit) => WebAppResult.Ok(Json.toJson(List(deposit))).toResult(request)
         case Left(exception) => WebAppResult.InternalServerError(exception).toResult(request)
       })
@@ -71,28 +81,80 @@ class DepositController @Inject() (
     })
   }}
 
-  def all = silhouette.SecuredAction(
+  def all(
+    offset: Option[Int], 
+    size: Option[Int],
+    publicId: Option[String],
+    takingsId:Option[String],
+    crew:Option[String],
+    name: Option[String], 
+    ato: Option[Double],
+    afrom: Option[Double],
+    confirmed: Option[Boolean],
+    cby: Option[String],
+    cfrom: Option[Long],
+    cto: Option[Long],
+    payfrom: Option[Long],
+    payto: Option[Long],
+    crfrom: Option[Long],
+    crto: Option[Long],
+    sortby: Option[String], 
+    sortdir: Option[String],
+    crewname: Option[String]
+    ) = silhouette.SecuredAction(
     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    request.body.validate[QueryBody].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.all(Some(query.page), Some(query.sort), None).map(list =>
-        WebAppResult.Ok(Json.toJson(list)).toResult(request)
-      )
-    )
+  ).async { implicit request => {
+    val sort:Sort = Sort(sortby.getOrElse(""), SortDir(sortdir.getOrElse("DESC")).get)
+    val page: Page = Page(size.getOrElse(20), offset.getOrElse(0))
+    val nameList: Option[List[String]] = name match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val crewList:Option[List[String]] = crewname match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto, crewList)
+    service.all(Some(page), Some(sort), permission.restrict(Some(filter), request.identity)).map(list => Ok(Json.toJson(list)))
   }}
+
+  def count(
+    offset: Option[Int], 
+    size: Option[Int],
+    publicId: Option[String],
+    takingsId:Option[String],
+    crew:Option[String],
+    name: Option[String], 
+    ato: Option[Double],
+    afrom: Option[Double],
+    confirmed: Option[Boolean],
+    cby: Option[String],
+    cfrom: Option[Long],
+    cto: Option[Long],
+    payfrom: Option[Long],
+    payto: Option[Long],
+    crfrom: Option[Long],
+    crto: Option[Long],
+    crewname:Option[String],
+    sortby: Option[String], 
+    sortdir: Option[String]
+    ) = silhouette.SecuredAction(
+    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
+  ).async { implicit request => {
+    val nameList: Option[List[String]] = name match {
+      case Some(n) => Some(n.split(" || ").toList)
+      case _ => None 
+    }
+    val crewList:Option[List[String]] = crewname match {
+      case Some(n) => Some(n.split(" ").toList)
+      case _ => None 
+    }
   
-  def count = silhouette.SecuredAction(
-    (IsVolunteerManager() && IsResponsibleFor("finance")) || IsEmployee || IsAdmin
-  ).async(parse.json) { implicit request => {
-    request.body.validate[QueryBody].fold(
-      errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.count.map(result => WebAppResult.Ok(Json.obj("count" -> result)).toResult(request))
-    )
+    val filter: DepositFilter = DepositFilter(Validate.isUUID(publicId), Validate.isUUID(takingsId), Validate.isUUID(crew), nameList, afrom, ato, confirmed, Validate.isUUID(cby), cfrom, cto, payfrom, payto, crfrom, crto, crewList)
+    service.count(permission.restrict(Some(filter), request.identity)).map(count => Ok(Json.obj("count" -> count)))
   }}
 
-
-  case class ConfirmBody(id: UUID, date: Long)
+  case class ConfirmBody(id: UUID, date: Long, uuid: UUID, name: String)
   object ConfirmBody {
     implicit val confirmBodyFormat = Json.format[ConfirmBody]
   }
@@ -102,7 +164,7 @@ class DepositController @Inject() (
   ).async(parse.json) { implicit request => {
     request.body.validate[ConfirmBody].fold(
       errors => Future.successful(WebAppResult.BadRequest(errors).toResult(request)),
-      query => service.confirm(query.id, query.date).map(result => WebAppResult.Ok(
+      query => service.confirm(query.id, query.date, query.uuid, query.name).map(result => WebAppResult.Ok(
         Json.obj("state" -> (result match {
           case true => "SUCCESS"
           case false => "FAILURE"

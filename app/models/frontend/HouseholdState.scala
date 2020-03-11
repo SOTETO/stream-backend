@@ -6,7 +6,6 @@ import play.api.Configuration
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.ws.WSClient
-import testdata.TestData
 import utils.petriNet._
 
 import scala.concurrent.Future
@@ -14,7 +13,7 @@ import scala.concurrent.Future
 class TransformationNotAllowed(msg: String) extends Exception(msg)
 
 /**
-  * Represents a households state. It is implemented using the [[PetriNet]] implementation, but holds also a set of actions
+  * Represents a households state. It is implemented using the [[utils.petriNet.PetriNet]] implementation, but holds also a set of actions
   * (groups of transitions that are semantically equivalent).
   *
   * @author Johann Sell

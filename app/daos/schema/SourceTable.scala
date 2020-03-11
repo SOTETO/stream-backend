@@ -7,28 +7,36 @@ import utils.{Ascending, Descending, Sort}
 
 class SourceTable(tag: Tag) extends Table[SourceReader](tag, "Source") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-  def donation_id = column[Long]("donation_id")
+  def public_id = column[String]("public_id")
+  def taking_id = column[Long]("taking_id")
   def category = column[String]("category")
+  def description = column[String]("description")
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def type_of_source = column[String]("type_of_source")
+  def type_location = column[String]("type_location")
+  def type_contact_person = column[String]("type_contact_person")
+  def type_email = column[String]("type_email")
+  def type_address = column[String]("type_address")
+  def receipt = column[Boolean]("receipt")
+  def norms = column[String]("norms")
 
-  val donationTable = TableQuery[DonationTable]
+  val takingTable = TableQuery[TakingTable]
 
-  def donations = foreignKey("FK_Sou_Donation", donation_id, donationTable)(
+  def takings = foreignKey("FK_Sou_Taking", taking_id, takingTable)(
     _.id, onDelete=ForeignKeyAction.Cascade
   )
 
-  def * = (id.?, donation_id, category, amount, currency, type_of_source) <> (SourceReader.apply, SourceReader.unapply)
+  def * = (id.?, public_id, taking_id, category, description.?, amount, currency, type_of_source, type_location.?, type_contact_person.?, type_email.?, type_address.?, receipt.?, norms) <> (SourceReader.apply, SourceReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 
   def sortBy(sort: Sort) = {
     sort.field match {
-      case "donation_id" => Some(sort.dir match {
-        case Descending => this.donation_id.desc.nullsFirst
-        case Ascending => this.donation_id.asc.nullsFirst
-        case _ => this.donation_id.asc.nullsFirst
+      case "taking_id" => Some(sort.dir match {
+        case Descending => this.taking_id.desc.nullsFirst
+        case Ascending => this.taking_id.asc.nullsFirst
+        case _ => this.taking_id.asc.nullsFirst
       })
       case "category" => Some(sort.dir match {
         case Descending => this.category.desc.nullsFirst

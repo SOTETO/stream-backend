@@ -4,8 +4,9 @@ import java.util.UUID
 
 import slick.jdbc.MySQLProfile.api._
 import daos.reader.{DepositReader, DepositUnitReader}
+import models.frontend.{Sort, Ascending, Descending}
 import slick.lifted.Tag
-import utils.{Ascending, Descending, Sort}
+//import utils.{Ascending, Descending, Sort}
 
 
 /**
@@ -21,20 +22,19 @@ import utils.{Ascending, Descending, Sort}
 class DepositUnitTable(tag: Tag) extends Table[DepositUnitReader](tag, "Deposit_Unit") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def publicId = column[String]("public_id")
-  def confirmed = column[Long]("confirmed")
   def amount = column[Double]("amount")
   def currency = column[String]("currency")
   def created = column[Long]("created")
   def depositId = column[Long]("deposit_id")
-  def donationId = column[Long]("donation_id")
+  def takingId = column[Long]("taking_id")
 
   def * =
-    (id, publicId, confirmed.?, amount, currency, created, depositId, donationId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
+    (id, publicId, amount, currency, created, depositId, takingId) <> (DepositUnitReader.tupled, DepositUnitReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
   
   def depositKey = foreignKey("deposit_id", depositId, TableQuery[DepositTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
-  def donationKey = foreignKey("donation_id", donationId, TableQuery[DonationTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
+  def takingKey = foreignKey("taking_id", takingId, TableQuery[TakingTable])(_.id, onUpdate = ForeignKeyAction.Cascade)
 }
 
 class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
@@ -42,15 +42,16 @@ class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
   def publicId = column[String]("public_id")
   def fullAmount = column[Double]("full_amount")
   def currency = column[String]("currency")
-  def confirmed = column[Long]("confirmed")
   def crew = column[String]("crew")
+  def crewName = column[String]("crew_name")
   def supporter = column[String]("supporter")
+  def supporter_name = column[String]("supporter_name")
   def created = column[Long]("created")
   def updated = column[Long]("updated")
   def dateOfDeposit = column[Long]("date_of_deposit")
   
   def * =
-    (id, publicId, fullAmount, currency, confirmed.?, crew, supporter, created, updated, dateOfDeposit) <> (DepositReader.tupled, DepositReader.unapply)
+    (id, publicId, fullAmount, currency, crew, crewName, supporter, supporter_name, created, updated, dateOfDeposit) <> (DepositReader.tupled, DepositReader.unapply)
 
   def pk = primaryKey("primaryKey", id)
 
@@ -70,11 +71,6 @@ class DepositTable(tag: Tag) extends Table[DepositReader](tag, "Deposit") {
         case Descending => this.currency.desc.nullsFirst
         case Ascending => this.currency.asc.nullsFirst
         case _ => this.currency.asc.nullsFirst
-      })
-      case "confirmed" => Some(sort.dir match {
-        case Descending => this.confirmed.desc.nullsFirst
-        case Ascending => this.confirmed.asc.nullsFirst
-        case _ => this.confirmed.asc.nullsFirst
       })
       case "crew" => Some(sort.dir match {
         case Descending => this.crew.desc.nullsFirst
