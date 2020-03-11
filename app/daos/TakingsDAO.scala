@@ -139,7 +139,6 @@ class SQLTakingsDAO @Inject()
           f.crto.map(c => table._1.created <= c),
           f.norms.map(n => table._3.filter(_.norms === n).isDefined),
           f.external.map(e => if (e == true) {table._3.filter(_.type_of_source === "extern").isDefined} else {table._3.filter(_.type_of_source === "cash").isDefined})
-
          // f.norms.map(norms => table._1.norms.inSet(norms.map(_.toString())))
         ).collect({case Some(criteria) => criteria}).reduceLeftOption(_ && _).getOrElse(true:Rep[Boolean])
       })

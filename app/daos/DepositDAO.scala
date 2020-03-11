@@ -5,9 +5,9 @@ import java.util.UUID
 import daos.exceptions.{DatabaseException, DepositAddException, DepositUnitAddException, TakingNotFoundException}
 import javax.inject.{Inject, Singleton}
 import play.api.Play
-import models.frontend.{Deposit, DepositUnit, Page, Sort, DepositFilter, Confirmed}
-import daos.schema.{DepositTable, DepositUnitTable, TakingTable, ConfirmedTable}
-import daos.reader.{DepositReader, DepositUnitReader, TakingReader, ConfirmedReader}
+import models.frontend.{Deposit, DepositUnit, Page, Sort, DepositFilter, Confirmed, InvolvedCrew}
+import daos.schema.{DepositTable, DepositUnitTable, TakingTable, ConfirmedTable, InvolvedCrewTable}
+import daos.reader.{DepositReader, DepositUnitReader, TakingReader, ConfirmedReader, InvolvedCrewReader}
 import play.api.Configuration
 //import utils._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -18,6 +18,8 @@ import slick.jdbc.MySQLProfile.api._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import models.frontend.InvolvedCrew
+import daos.reader.InvolvedCrewReader
 
 trait DepositDAO {
 //def count (filter: HousholdFilter) : Future[Option[Int]]
@@ -45,17 +47,20 @@ class SQLDepositDAO @Inject()
   (daos.schema.DepositTable,
     slick.lifted.Rep[Option[daos.schema.ConfirmedTable]],
     slick.lifted.Rep[Option[daos.schema.DepositUnitTable]], 
-    slick.lifted.Rep[Option[daos.schema.TakingTable]]),
+    slick.lifted.Rep[Option[daos.schema.TakingTable]],
+    slick.lifted.Rep[Option[daos.schema.InvolvedCrewTable]]),
   (daos.reader.DepositReader, 
     Option[daos.reader.ConfirmedReader],
     Option[daos.reader.DepositUnitReader], 
-    Option[daos.reader.TakingReader]),
+    Option[daos.reader.TakingReader],
+    Option[daos.reader.InvolvedCrewReader]),
   Seq]  
   
   val takingsTable = TableQuery[TakingTable]
   val depositUnitTable = TableQuery[DepositUnitTable]
   val depositTable = TableQuery[DepositTable]
   val confirmedTable = TableQuery[ConfirmedTable]
+  val crews = TableQuery[InvolvedCrewTable]
   import TakingReader._
   import DepositReader._
   import DepositUnitReader._
@@ -67,11 +72,12 @@ class SQLDepositDAO @Inject()
    */
   private def joined():DepositQuery = {
     (for {
-      (((deposit, confirmed), depositUnit), taking) <-
+      ((((deposit, confirmed), depositUnit), taking), crew) <-
         depositTable joinLeft confirmedTable on (_.id === _.depositId) joinLeft 
         depositUnitTable on (_._1.id === _.depositId) joinLeft
-        takingsTable on (_._2.map(_.takingId) === _.id)
-    } yield (deposit, confirmed,  depositUnit, taking))
+        takingsTable on (_._2.map(_.takingId) === _.id) joinLeft
+        crews on (_._2.map(_.id) === _.taking_id)
+    } yield (deposit, confirmed,  depositUnit, taking, crew))
   }
 
   /**
@@ -240,12 +246,14 @@ class SQLDepositDAO @Inject()
     * @param entries
     * @return
     */
-  private def read(entries: Seq[(DepositReader, Option[ConfirmedReader], Option[DepositUnitReader], Option[TakingReader])]): Deposit = {
+  private def read(entries: Seq[(DepositReader, Option[ConfirmedReader], Option[DepositUnitReader], Option[TakingReader], Option[InvolvedCrewReader])]): Deposit = {
     
     val confirmed: Option[Confirmed] = entries.map( c => c._2 match {
       case Some(co) => Some(co.toConfirmed)
       case None => None
     }).head
+    val crews: List[InvolvedCrew] = entries.groupBy(_._5).filter(_._1.isDefined).map(entry => entry._1.map(crew => InvolvedCrew(crew.crew_id, crew.name)).get).toList
+
     // group the Seq by DepositUnitReader and map it to List[DepositUnit]
     val amount = entries.groupBy(_._3).toSeq.filter(_._1.isDefined).map(current =>
       current._2.find(c => c._3.isDefined && c._3.get.publicId == current._1.get.publicId)
@@ -255,7 +263,7 @@ class SQLDepositDAO @Inject()
     ).filter(_.isDefined).map(_.get).toList
 
     // use the toDeposit function of DepositReader for transform it to Deposit
-    entries.groupBy(_._1).toSeq.map(d => d._1.toDeposit(amount, confirmed)).head
+    entries.groupBy(_._1).toSeq.map(d => d._1.toDeposit(amount, confirmed, crews)).head
   }
   
   /**
@@ -263,7 +271,7 @@ class SQLDepositDAO @Inject()
     *  We group the [[scala.collection.Seq]] by the [[models.frontend.Deposit]] and use the `read` function for transform
     *  Zipping with index is required to preserve the order
     */
-  private def readList(entries: Seq[(DepositReader, Option[ConfirmedReader], Option[DepositUnitReader], Option[TakingReader])]): List[Deposit] = {
+  private def readList(entries: Seq[(DepositReader, Option[ConfirmedReader], Option[DepositUnitReader], Option[TakingReader], Option[InvolvedCrewReader])]): List[Deposit] = {
     entries.zipWithIndex.groupBy(_._1._1).map( grouped =>
       grouped._2.headOption.map(row => (read(grouped._2.map(_._1)), row._2)) // row._2 contains the index that indicates a sort from database
     ).filter(_.isDefined).map(_.get).toList.sortBy(_._2).map(_._1)

@@ -95,13 +95,13 @@ case class DepositReader(
      * map [[DepositReader]] to [[models.frontend.Deposit]]
      * @param depositUnitList list of deposit units
      */
-    def toDeposit(depositUnitList: List[DepositUnit], confirmed: Option[Confirmed]) = {
+    def toDeposit(depositUnitList: List[DepositUnit], confirmed: Option[Confirmed], crews: List[InvolvedCrew]) = {
       Deposit(
         UUID.fromString(this.publicId),
         Amount(this.fullAmount, this.currency),
         depositUnitList,
         confirmed,
-        InvolvedCrew(UUID.fromString(this.crew), this.crewName),
+        crews,
         InvolvedSupporter(UUID.fromString(this.supporter), this.supporter_name),
         this.created,
         this.updated,
@@ -121,8 +121,8 @@ object DepositReader extends ((Long, String, Double, String, String, String, Str
           deposit.publicId.toString,
           deposit.full.amount,
           deposit.full.currency,
-          deposit.crew.uuid.toString,
-          deposit.crew.name,
+          "",
+          "",
           deposit.supporter.uuid.toString,
           deposit.supporter.name,
           deposit.created,
