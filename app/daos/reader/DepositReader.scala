@@ -101,7 +101,7 @@ case class DepositReader(
         Amount(this.fullAmount, this.currency),
         depositUnitList,
         confirmed,
-        crews,
+        crews.distinct,
         InvolvedSupporter(UUID.fromString(this.supporter), this.supporter_name),
         this.created,
         this.updated,
