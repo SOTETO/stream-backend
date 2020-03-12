@@ -157,7 +157,9 @@ class TakingsController @Inject()(
     * @author Johann Sell
     * @return
     */
-  def update = silhouette.SecuredAction((IsAdmin || IsEmployee)).async(validateJson[Taking]) {
+   def update = silhouette.SecuredAction(
+     (IsVolunteerManager() && IsResponsibleFor("finance")) || IsAdmin || IsEmployee
+   ).async(validateJson[Taking]) {
     implicit request => {
       service.update(request.body).map(_ match {
         case Right(databaseTaking) => Ok(Json.toJson(databaseTaking))
