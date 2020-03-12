@@ -119,8 +119,8 @@ class SQLDepositDAO @Inject()
         List(
           f.publicId.map(ids => table._1.publicId === ids.toString()),
           f.takingsId.map(ids => table._4.filter(_.public_id === ids.toString()).isDefined),
-          f.crew.map(ids => table._1.crew === ids.toString()),
-          f.crewname.map(crews => crews.map(c => table._1.crewName like c).reduceLeft(_ || _)),
+          f.crew.map(ids => table._5.filter(_.crew_id === ids.toString()).isDefined),
+          f.crewname.map(crews => crews.map(c => table._5.filter(_.name like c).isDefined).reduceLeft(_ || _)),
           f.name.map(name => name.map( n => table._4.filter(_.description like n).isDefined).reduceLeft(_ || _)),
           f.afrom.map(d => table._1.fullAmount >= d),
           f.ato.map(d=> table._1.fullAmount <= d),
