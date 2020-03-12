@@ -28,7 +28,7 @@ case class TakingReader(
       publicId,
       TakingAmount(
         received,
-        supporter,
+        supporter.distinct,
         sources
       ),
       Context(description, category),
@@ -36,7 +36,7 @@ case class TakingReader(
       reason_for_payment.flatMap(rfp => receipt.map(r => Details(rfp, r))),
       depositUnits,
       author,
-      involvedCrew,
+      involvedCrew.distinct,
       created,
       updated
     )
