@@ -156,7 +156,7 @@ class SQLTakingsDAO @Inject()
     val crews: List[InvolvedCrew] = results.map(_._6).filter(_.isDefined).map(_.get.toInvolvedCrew).toList
     
     results.head._1.toTaking(supporters, sources, units, crews)
-  }
+}
 /**
   * 
   *
