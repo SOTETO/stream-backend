@@ -1,7 +1,7 @@
 name := """stream-backend"""
 organization := "org.vivaconagua"
 
-version := "0.0.3"
+version := "0.1.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -55,4 +55,4 @@ libraryDependencies ++= Seq(
 dockerExposedPorts := Seq(9000, 9443)
 dockerRepository := Some("vivaconagua")
 routesGenerator := InjectedRoutesGenerator
-version in Docker := "stage"
+version in Docker := "0.1.1"
