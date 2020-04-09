@@ -63,7 +63,7 @@ class TakingsController @Inject()(
   ).async { implicit request => {
     validateUUID(uuid) match {
       case Some(id) => { service.getById(UUID.fromString(uuid)).map(taking => taking match {
-        case Some(t) => if (request.identity.isOnlyVolunteer && request.identity.uuid != t.author) {
+        case Some(t) => if (request.identity.isOnlyVolunteer && request.identity.getCrew.map( _ != t.crew.head.uuid).getOrElse(false)) {
           Unauthorized
         } else { 
           Ok(Json.toJson(t))
